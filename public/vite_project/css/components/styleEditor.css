@@ -1,0 +1,209 @@
+/* Style Editor Panel */
+.style-editor-container {
+    position: fixed;
+    top: 60px;
+    bottom: 30px;
+    right: -320px;
+    width: 320px;
+    background: var(--bg-color);
+    border-left: 1px solid var(--panel-border);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.style-editor-container.active {
+    transform: translateX(-320px);
+}
+
+.style-editor-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-color);
+}
+
+.style-editor-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color);
+}
+
+.style-editor-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.style-section {
+    margin-bottom: 24px;
+}
+
+.style-section h4 {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin: 0 0 12px 0;
+    opacity: 0.7;
+}
+
+/* Selection Info */
+.selection-info {
+    background: rgba(0, 166, 80, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: none;
+}
+
+.selection-info.active {
+    display: block;
+}
+
+.selection-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.selection-info .feature-name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Style Controls */
+.style-control {
+    margin-bottom: 16px;
+}
+
+.style-control label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: var(--text-color);
+}
+
+.style-control select,
+.style-control input[type="color"],
+.style-control input[type="number"],
+.style-control input[type="range"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.style-control select {
+    cursor: pointer;
+}
+
+.style-control input[type="color"] {
+    height: 40px;
+    padding: 4px;
+}
+
+.style-control input[type="range"] {
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
+    outline: none;
+}
+
+.style-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.style-control input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Style Presets */
+.style-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.style-preset {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.style-preset:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.style-preset.active {
+    border: 2px solid var(--primary-color);
+}
+
+/* Action Buttons */
+.style-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.style-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.style-btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.style-btn-primary:hover {
+    background: var(--secondary-color);
+}
+
+.style-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--panel-border);
+    color: var(--text-color);
+}
+
+.style-btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .style-editor-container {
+        width: 280px;
+        right: -280px;
+    }
+    
+    .style-editor-container.active {
+        transform: translateX(-280px);
+    }
+}

@@ -1,0 +1,215 @@
+/* Points List Styles */
+.points-list-container {
+    padding: 12px;
+    height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+}
+
+.points-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.points-list-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    letter-spacing: -0.2px;
+}
+
+.points-count {
+    font-size: 13px;
+    color: #8e8e93;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+}
+
+.points-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar */
+.points-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.points-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.points-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.points-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.point-item {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.point-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.point-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.point-icon.open {
+    background: #fff8e1;
+    color: #ff9500;
+}
+
+.point-icon.in-progress {
+    background: #e3f2fd;
+    color: #007aff;
+}
+
+.point-icon.closed {
+    background: #e8f5e9;
+    color: #34c759;
+}
+
+.point-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.point-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.point-description {
+    font-size: 12px;
+    color: #8e8e93;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+    letter-spacing: -0.1px;
+}
+
+.point-preview {
+    padding: 6px 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+.point-preview:hover {
+    background: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .point-item {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .points-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .points-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Empty state */
+.points-empty {
+    text-align: center;
+    padding: 24px 16px;
+    color: #8e8e93;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+}
+
+/* Loading state */
+.points-loading {
+    text-align: center;
+    padding: 24px 16px;
+    color: #8e8e93;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+}
+
+.points-loading i {
+    animation: spin 1s linear infinite;
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Table Button Styles */
+.table-button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.table-button:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 166, 80, 0.2);
+}
+
+.table-button i {
+    font-size: 16px;
+}

@@ -1,0 +1,239 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vanilla:hover {
+  filter: drop-shadow(0 0 2em #f7df1eaa);
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.custom-marker {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  z-index: 10;
+}
+
+
+/* Shape Styles */
+
+.circle {
+  border-radius: 50%;
+  background-color: gray;
+}
+
+.square {
+  background-color: gray;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid gray;
+  background: none;
+}
+
+.diamond {
+  transform: rotate(45deg);
+  background-color: gray;
+  width: 14px;
+  height: 14px;
+  margin: 3px;
+}
+
+.star {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+.star::before,
+.star::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+}
+.star::before {
+  border-bottom: 20px solid gray;
+}
+.star::after {
+  top: 6px;
+  border-top: 20px solid gray;
+}
+
+.hexagon {
+  width: 20px;
+  height: 11.5px;
+  background-color: gray;
+}
+.hexagon::before,
+.hexagon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+}
+.hexagon::before {
+  bottom: 100%;
+  border-bottom: 5.75px solid gray;
+}
+.hexagon::after {
+  top: 100%;
+  border-top: 5.75px solid gray;
+}
+
+/* Color Overrides */
+.red.circle,
+.red.square,
+.red.diamond {
+  background-color: red;
+}
+.yellow.circle,
+.yellow.square,
+.yellow.diamond {
+  background-color: yellow;
+}
+.green.circle,
+.green.square,
+.green.diamond {
+  background-color: green;
+}
+.gray.circle,
+.gray.square,
+.gray.diamond {
+  background-color: gray;
+}
+
+.triangle.red {
+  border-bottom-color: red;
+}
+.triangle.yellow {
+  border-bottom-color: yellow;
+}
+.triangle.green {
+  border-bottom-color: green;
+}
+.triangle.gray {
+  border-bottom-color: gray;
+}
+
+.star.red::before { border-bottom-color: red; }
+.star.red::after  { border-top-color: red; }
+.star.yellow::before { border-bottom-color: yellow; }
+.star.yellow::after  { border-top-color: yellow; }
+.star.green::before { border-bottom-color: green; }
+.star.green::after  { border-top-color: green; }
+.star.gray::before { border-bottom-color: gray; }
+.star.gray::after  { border-top-color: gray; }
+
+.hexagon.red { background-color: red; }
+.hexagon.yellow { background-color: yellow; }
+.hexagon.green { background-color: green; }
+.hexagon.gray { background-color: gray; }
+.hexagon.red::before { border-bottom-color: red; }
+.hexagon.red::after  { border-top-color: red; }
+.hexagon.yellow::before { border-bottom-color: yellow; }
+.hexagon.yellow::after  { border-top-color: yellow; }
+.hexagon.green::before { border-bottom-color: green; }
+.hexagon.green::after  { border-top-color: green; }
+.hexagon.gray::before { border-bottom-color: gray; }
+.hexagon.gray::after  { border-top-color: gray; }

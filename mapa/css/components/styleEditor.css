@@ -1,0 +1,277 @@
+/* Style Editor Panel */
+.style-editor-container {
+    position: fixed;
+    top: 60px;
+    bottom: 30px;
+    right: -320px;
+    width: 320px;
+    border-radius: 20px 0 0 20px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    background: var(--bg-color);
+    border-left: 1px solid var(--panel-border);
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.style-editor-container.active {
+    transform: translateX(-320px);
+}
+
+.style-editor-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    backdrop-filter: blur(10px);
+}
+
+.style-editor-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.style-editor-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.style-section {
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.style-section h4 {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Selection Info */
+.selection-info {
+    background: rgba(0, 166, 80, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 166, 80, 0.2);
+}
+
+.selection-info.active {
+    display: block;
+}
+
+.selection-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.selection-info .feature-name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Style Controls */
+.style-control {
+    margin-bottom: 16px;
+}
+
+.style-control:last-child {
+    margin-bottom: 0;
+}
+
+.style-control label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.style-control select,
+.style-control input[type="number"],
+.style-control input[type="color"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+}
+
+.style-control select {
+    padding-right: 35px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23666' d='M8 10.5l-4-4h8l-4 4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    appearance: none;
+}
+
+.style-control input[type="color"] {
+    height: 45px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.style-control input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--primary-color);
+    border-radius: 3px;
+    outline: none;
+}
+
+.style-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.style-control input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    background: var(--primary-color);
+}
+
+/* Style Presets */
+.style-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.style-preset {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+}
+
+.style-preset:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.style-preset.active {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 166, 80, 0.2);
+}
+
+/* Action Buttons */
+.style-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 20px;
+    border-top: 1px solid var(--panel-border);
+}
+
+.style-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.style-btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 166, 80, 0.25);
+}
+
+.style-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 166, 80, 0.3);
+}
+
+.style-btn-secondary {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    border: none;
+    color: var(--text-color);
+}
+
+.style-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .style-section {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .selection-info {
+    background: rgba(0, 166, 80, 0.15);
+}
+
+[data-theme="dark"] .style-control select,
+[data-theme="dark"] .style-control input[type="number"],
+[data-theme="dark"] .style-control input[type="color"] {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .style-preset {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .style-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .style-editor-container {
+        width: 280px;
+        right: -280px;
+    }
+    
+    .style-editor-container.active {
+        transform: translateX(-280px);
+    }
+
+    .style-control select,
+    .style-control input[type="number"] {
+        padding: 10px;
+    }
+
+    .style-btn {
+        padding: 10px;
+    }
+}

@@ -1,0 +1,27 @@
+# Ignorar logs
+writable/logs/*
+!writable/logs/index.html
+
+# Ignorar cache y sesiones
+writable/cache/*
+writable/session/*
+
+# Ignorar debugbar y otros directorios de writable (si los usas)
+writable/debugbar/
+writable/uploads/
+writable/temp/
+
+# Ignorar archivos temporales y de sistema
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos del editor
+.vscode/
+.idea/
+
+# Ignorar entorno
+.env
+.env.*

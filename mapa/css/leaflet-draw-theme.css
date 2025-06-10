@@ -1,0 +1,117 @@
+/* Leaflet Draw Theme Styles */
+:root {
+    --draw-control-bg: var(--bg-color);
+    --draw-control-border: var(--panel-border);
+    --draw-control-hover: var(--primary-color);
+    --draw-control-active: var(--modal-success);
+    --draw-control-text: var(--text-color);
+}
+
+/* Draw Control Container */
+.leaflet-draw.leaflet-control {
+    margin-right: 12px !important;
+}
+
+/* Draw Control Buttons */
+.leaflet-draw-toolbar a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    background-color: var(--draw-control-bg) !important;
+    border: 1px solid var(--draw-control-border) !important;
+    border-radius: 4px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Reset all default Leaflet Draw icons */
+.leaflet-draw-toolbar a {
+    background-image: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Draw Control Icons */
+.leaflet-draw-toolbar .leaflet-draw-draw-polyline::before,
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon::before,
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle::before,
+.leaflet-draw-toolbar .leaflet-draw-edit-edit::before,
+.leaflet-draw-toolbar .leaflet-draw-edit-remove::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: var(--icon-filter, none);
+}
+
+/* Rectangle tool */
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='4' y='4' width='16' height='16' rx='0'/%3E%3C/svg%3E");
+}
+
+/* Polygon tool */
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2L3 10l3 12h12l3-12z'/%3E%3C/svg%3E");
+}
+
+/* Edit tool */
+.leaflet-draw-toolbar .leaflet-draw-edit-edit::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z'/%3E%3C/svg%3E");
+}
+
+/* Delete tool */
+.leaflet-draw-toolbar .leaflet-draw-edit-remove::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpolyline points='3 6 5 6 21 6'/%3E%3Cpath d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+}
+
+/* Hover States */
+.leaflet-draw-toolbar a:hover {
+    background-color: var(--draw-control-hover) !important;
+    border-color: var(--draw-control-hover) !important;
+    color: white !important;
+    --icon-filter: brightness(0) invert(1);
+}
+
+/* Active States */
+.leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
+    background-color: var(--draw-control-active) !important;
+    border-color: var(--draw-control-active) !important;
+    color: white !important;
+    --icon-filter: brightness(0) invert(1);
+}
+
+/* Drawing Guide Styles */
+.leaflet-draw-guide-dash {
+    background-color: var(--draw-control-active) !important;
+}
+
+/* Shape Styles */
+.leaflet-draw-tooltip {
+    background: var(--draw-control-bg);
+    border: 1px solid var(--draw-control-border);
+    color: var(--draw-control-text);
+}
+
+.leaflet-draw-tooltip:before {
+    border-right-color: var(--draw-control-border);
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .leaflet-draw-toolbar a {
+    background-color: var(--bg-color) !important;
+    --icon-filter: invert(1);
+}
+
+[data-theme="dark"] .leaflet-draw-tooltip {
+    background: var(--bg-color);
+    border-color: var(--panel-border);
+}
+
+/* Drawn Shape Styles */
+.leaflet-draw-stroke-style,
+.leaflet-draw-fill-style {
+    background-color: var(--draw-control-active);
+    opacity: 0.8;
+}

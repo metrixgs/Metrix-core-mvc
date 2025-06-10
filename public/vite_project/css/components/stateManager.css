@@ -1,0 +1,125 @@
+/* State Manager Styles */
+.state-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.state-toggle:hover {
+    color: var(--primary-color);
+}
+
+.state-toggle i {
+    font-size: 1.1rem;
+}
+
+/* States List Styles */
+.states-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.state-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+}
+
+.state-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.state-id {
+    font-family: monospace;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.state-time {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.state-points {
+    font-size: 0.8rem;
+    color: var(--text-color);
+}
+
+.state-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Loading Indicator */
+.state-loading-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-color);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    animation: slideIn 0.3s ease;
+}
+
+.state-loading-indicator span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.state-loading-indicator span::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-color);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .state-item {
+    background: var(--bg-color);
+    border-color: var(--panel-border);
+}
+
+[data-theme="dark"] .state-loading-indicator {
+    background: var(--bg-color);
+    border-color: var(--panel-border);
+}

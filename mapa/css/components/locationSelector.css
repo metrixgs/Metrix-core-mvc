@@ -1,0 +1,96 @@
+/* Location Selector Styles */
+.location-selector .select-section {
+    margin-bottom: 24px;
+}
+
+.location-selector .select-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.location-selector .select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.location-selector .select-wrapper i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-color);
+    opacity: 0.5;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.location-selector .select-wrapper:hover i {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+/* Modern Select Styles */
+.modern-select {
+    width: 100%;
+    padding: 12px 35px 12px 15px;
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modern-select:not(:disabled):hover {
+    border-color: var(--primary-color);
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 166, 80, 0.1);
+}
+
+.modern-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.modern-select option {
+    padding: 12px;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .modern-select {
+    background: var(--bg-color);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modern-select:disabled {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .modern-select option {
+    background: var(--bg-color);
+}
+
+/* Animation for select focus */
+.modern-select:focus + i {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--primary-color);
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modern-select {
+        padding: 10px 30px 10px 12px;
+        font-size: 0.9rem;
+    }
+}

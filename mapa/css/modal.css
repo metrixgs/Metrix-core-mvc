@@ -1,0 +1,247 @@
+/* Modal Base Styles */
+:root {
+    --modal-overlay-bg: rgba(0, 0, 0, 0.3);
+    --modal-success: #34c759;
+    --modal-border-radius: 13px;
+    --modal-padding: 20px;
+    --modal-header-height: 60px;
+    --modal-footer-height: 60px;
+    --modal-green: #34c759;
+    --modal-light-green: #30b955;
+    --modal-border-color: rgba(0, 0, 0, 0.1);
+    --modal-text-gray: #8e8e93;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--modal-overlay-bg);
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.active {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 50px;
+}
+
+/* Modal Container */
+.modal-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--modal-border-radius);
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    min-width: 400px;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 20px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 0.5px solid var(--modal-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.modal-header .subtitle {
+    color: var(--modal-text-gray);
+    font-size: 15px;
+    margin-top: 4px;
+    letter-spacing: -0.2px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(0, 0, 0, 0.15);
+    color: #333;
+}
+
+/* Modal Content */
+.modal-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Incident Details Styles */
+.incident-header {
+    margin-bottom: 24px;
+}
+
+.incident-badges {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.incident-badge {
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+}
+
+.incident-badge.priority {
+    background-color: #fff8e1;
+    color: #ff9500;
+    border: none;
+}
+
+.incident-badge.status {
+    background-color: #e8f5e9;
+    color: #34c759;
+    border: none;
+}
+
+.incident-badge.status.open {
+    background-color: #fff8e1;
+    color: #ff9500;
+    border: none;
+}
+
+.incident-badge.status.in-progress {
+    background-color: #e3f2fd;
+    color: #007aff;
+    border: none;
+}
+
+.incident-section {
+    margin-bottom: 24px;
+}
+
+.incident-section h3 {
+    font-size: 17px;
+    color: var(--modal-green);
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.3px;
+}
+
+.incident-section h3 i {
+    font-size: 20px;
+}
+
+.incident-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.incident-info-item {
+    margin-bottom: 12px;
+}
+
+.incident-info-label {
+    font-size: 15px;
+    color: var(--modal-text-gray);
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+}
+
+.incident-info-value {
+    font-size: 15px;
+    color: #1d1d1f;
+    letter-spacing: -0.2px;
+}
+
+.incident-description {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 8px;
+    color: #1d1d1f;
+    font-size: 15px;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .modal-container {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modal-header {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: #999;
+}
+
+[data-theme="dark"] .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+[data-theme="dark"] .incident-description {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f1f1f1;
+}
+
+[data-theme="dark"] .incident-info-value {
+    color: #f1f1f1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .modal-container {
+        margin: 0 16px;
+        min-width: auto;
+    }
+
+    .incident-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        padding: 16px;
+    }
+}

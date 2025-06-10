@@ -1,0 +1,61 @@
+/* Location Selector Styles */
+.location-container {
+    padding: 16px;
+    background: var(--bg-color);
+    border-bottom: 1px solid var(--panel-border);
+}
+
+.sidebar-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+}
+
+.location-section {
+    margin-bottom: 16px;
+}
+
+.location-section:last-child {
+    margin-bottom: 0;
+}
+
+.location-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.location-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.location-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.location-select:not(:disabled):hover {
+    border-color: var(--primary-color);
+}
+
+.location-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 166, 80, 0.1);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .location-select {
+    background: var(--bg-color);
+    color: var(--text-color);
+}

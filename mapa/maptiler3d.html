@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrix 3D View</title>
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js"></script>
+    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
+    <script src="https://cdn.maptiler.com/maptiler-ar-control/v1.1.0/maptilerarcontrol.min.js"></script>
+    <style>
+        body { margin: 0; }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            z-index: 1000;
+        }
+        #overlay div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .blink_me {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div class="blink_me">Procesando modelo 3D...</div>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // Configuración de MapTiler
+        maptilersdk.config.apiKey = 'D68hDBC2451j7YaitEqO';
+
+        let map;
+        let points;
+
+        // Cargar puntos desde sessionStorage
+        const pointsData = sessionStorage.getItem('metrix3DPoints');
+        if (pointsData) {
+            try {
+                points = JSON.parse(pointsData);
+                console.log('Puntos cargados:', points);
+                
+                if (!points.features || points.features.length === 0) {
+                    console.warn('No hay puntos para mostrar');
+                }
+            } catch (error) {
+                console.error('Error al parsear puntos:', error);
+            }
+        }
+
+        // Calcular centro inicial basado en los puntos
+        let initialCenter = [-87.2054, 14.0906]; // Default: Tegucigalpa
+        let initialZoom = 12;
+
+        if (points && points.features && points.features.length > 0) {
+            const bounds = new maptilersdk.LngLatBounds();
+            points.features.forEach(feature => {
+                bounds.extend(feature.geometry.coordinates);
+            });
+            initialCenter = [
+                (bounds.getWest() + bounds.getEast()) / 2,
+                (bounds.getNorth() + bounds.getSouth()) / 2
+            ];
+            // Calcular zoom aproximado basado en la distancia entre puntos
+            const dist = Math.max(
+                Math.abs(bounds.getEast() - bounds.getWest()),
+                Math.abs(bounds.getNorth() - bounds.getSouth())
+            );
+            initialZoom = Math.min(15, Math.max(5, Math.floor(1 / dist * 50)));
+        }
+
+        // Crear mapa con centro calculado
+        map = new maptilersdk.Map({
+            container: 'map',
+            style: 'a48d66a5-1545-4241-872e-f24039f08822',
+            center: initialCenter,
+            zoom: initialZoom,
+            pitch: 45,
+            bearing: 0,
+            terrain: true,
+            interactive: true
+        });
+
+        // Esperar a que el mapa esté listo
+        map.on('load', async () => {
+            // Agregar control AR
+            const arControl = new maptilerarcontrol.MaptilerARControl({
+                activateAR: true
+            });
+
+            arControl.on("computeStart", () => {
+                document.getElementById('overlay').style.display = "block";
+            });
+
+            arControl.on("computeEnd", () => {
+                document.getElementById('overlay').style.display = "none";
+            });
+
+            map.addControl(arControl, "top-right");
+
+            // Agregar puntos si existen
+            if (points && points.features && points.features.length > 0) {
+                // Agregar source
+                map.addSource('points', {
+                    type: 'geojson',
+                    data: points
+                });
+
+                // Agregar capa de puntos
+                map.addLayer({
+                    id: 'points',
+                    type: 'circle',
+                    source: 'points',
+                    paint: {
+                        'circle-radius': 8,
+                        'circle-color': [
+                            'match',
+                            ['get', 'estado'],
+                            'Abierto', '#FFA500',
+                            'En Proceso', '#3B82F6',
+                            'Cerrado', '#10B981',
+                            '#FFA500'
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff'
+                    }
+                });
+
+                // Agregar popups
+                map.on('click', 'points', (e) => {
+                    const properties = e.features[0].properties;
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    
+                    const content = `
+                        <div style="padding: 10px;">
+                            <h3 style="margin: 0 0 10px 0;">${properties.titulo}</h3>
+                            <p style="margin: 0 0 5px 0;"><strong>Estado:</strong> ${properties.estado}</p>
+                            <p style="margin: 0 0 5px 0;"><strong>Cliente:</strong> ${properties.nombre_cliente}</p>
+                            <p style="margin: 0;"><strong>Dirección:</strong> ${properties.direccion_completa}</p>
+                        </div>
+                    `;
+
+                    new maptilersdk.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(content)
+                        .addTo(map);
+                });
+
+                // Cambiar cursor al pasar sobre los puntos
+                map.on('mouseenter', 'points', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'points', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+
+                // Ajustar vista a los puntos con un pequeño retraso
+                setTimeout(() => {
+                    const bounds = new maptilersdk.LngLatBounds();
+                    points.features.forEach(feature => {
+                        bounds.extend(feature.geometry.coordinates);
+                    });
+                    map.fitBounds(bounds, {
+                        padding: 50,
+                        maxZoom: 15
+                    });
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

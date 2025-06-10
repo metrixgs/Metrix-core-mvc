@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrix 3D View</title>
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js"></script>
+    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
+    <script src="https://cdn.maptiler.com/maptiler-ar-control/v1.1.0/maptilerarcontrol.min.js"></script>
+    <style>
+        body { margin: 0; }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            z-index: 1000;
+        }
+        #overlay div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .blink_me {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div class="blink_me">Procesando modelo 3D...</div>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // Configuración de MapTiler
+        maptilersdk.config.apiKey = 'D68hDBC2451j7YaitEqO';
+
+        // Crear mapa
+        const map = new maptilersdk.Map({
+            container: 'map',
+            style: maptilersdk.MapStyle.STREETS,
+            center: [-87.2054, 14.0906],
+            zoom: 12,
+            pitch: 45,
+            bearing: 0,
+            terrain: true
+        });
+
+        // Inicializar AR Control
+        map.on("load", async () => {
+            const arControl = new maptilerarcontrol.MaptilerARControl({
+                activateAR: true
+            });
+
+            arControl.on("computeStart", () => {
+                document.getElementById('overlay').style.display = "block";
+            });
+
+            arControl.on("computeEnd", () => {
+                document.getElementById('overlay').style.display = "none";
+            });
+
+            map.addControl(arControl, "top-right");
+
+            // Cargar puntos desde sessionStorage
+            const pointsData = sessionStorage.getItem('metrix3DPoints');
+            if (pointsData) {
+                try {
+                    const points = JSON.parse(pointsData);
+                    console.log('Puntos cargados:', points);
+                    
+                    map.addSource('points', {
+                        type: 'geojson',
+                        data: points
+                    });
+
+                    map.addLayer({
+                        id: 'points',
+                        type: 'circle',
+                        source: 'points',
+                        paint: {
+                            'circle-radius': 6,
+                            'circle-color': [
+                                'match',
+                                ['get', 'estado'],
+                                'Abierto', '#FFA500',
+                                'En Proceso', '#3B82F6',
+                                'Cerrado', '#10B981',
+                                '#FFA500'
+                            ],
+                            'circle-stroke-width': 1,
+                            'circle-stroke-color': '#ffffff'
+                        }
+                    });
+
+                    // Ajustar vista a los puntos
+                    const bounds = new maptilersdk.LngLatBounds();
+                    points.features.forEach(feature => {
+                        bounds.extend(feature.geometry.coordinates);
+                    });
+                    map.fitBounds(bounds, { padding: 50 });
+                } catch (error) {
+                    console.error('Error al cargar puntos:', error);
+                }
+            } else {
+                console.log('No hay puntos para mostrar');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+/* Manzanas Layer Styles */
+.manzana-layer {
+    transition: all 0.3s ease;
+}
+
+.manzana-layer:hover {
+    filter: brightness(1.1);
+}
+
+/* Pulse animation for selected manzana */
+.manzana-selected {
+    animation: manzana-pulse 2s infinite;
+}
+
+@keyframes manzana-pulse {
+    0% {
+        stroke-width: 1.5;
+        stroke-opacity: 0.9;
+    }
+    50% {
+        stroke-width: 2;
+        stroke-opacity: 1;
+    }
+    100% {
+        stroke-width: 1.5;
+        stroke-opacity: 0.9;
+    }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .manzana-layer {
+    filter: brightness(1.1);
+}
+
+[data-theme="dark"] .manzana-layer:hover {
+    filter: brightness(1.2);
+}

@@ -1,0 +1,276 @@
+/* Layer Control Styles */
+.leaflet-control-layers-toggle {
+    background-image: none !important;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease;
+}
+
+.leaflet-control-layers-toggle::before {
+    content: "\F229" !important; /* bi-layers */
+    font-family: "bootstrap-icons" !important;
+    font-size: 18px !important;
+    color: var(--text-color) !important;
+}
+
+.leaflet-touch .leaflet-control-layers-toggle {
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+}
+
+.leaflet-control-layers-expanded {
+    padding: 12px !important;
+    border-radius: 8px !important;
+    background: var(--bg-color) !important;
+    border: 1px solid var(--panel-border) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    max-height: 70vh;
+    overflow-y: auto;
+    min-width: 250px;
+}
+
+/* Checkbox Styles */
+.leaflet-control-layers-selector {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--modal-success);
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    margin-right: 8px;
+    position: relative;
+    background-color: var(--bg-color);
+}
+
+.leaflet-control-layers-selector:checked {
+    background-color: var(--modal-success);
+    border-color: var(--modal-success);
+}
+
+.leaflet-control-layers-selector:checked:after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Layer Labels */
+.leaflet-control-layers label {
+    padding: 8px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    color: var(--text-color) !important;
+    font-size: 0.9rem;
+}
+
+.leaflet-control-layers label:hover {
+    background: rgba(0, 166, 80, 0.08);
+}
+
+/* Layer Groups */
+.leaflet-control-layers-list {
+    margin: 0;
+    padding: 4px 0;
+}
+
+.leaflet-control-layers-base label {
+    font-weight: 500;
+}
+
+.leaflet-control-layers-separator {
+    margin: 8px 0;
+    border-top: 1px solid var(--panel-border);
+}
+
+/* Scrollbar Styles */
+.leaflet-control-layers-expanded::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leaflet-control-layers-expanded::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.leaflet-control-layers-expanded::-webkit-scrollbar-thumb {
+    background: var(--modal-success);
+    border-radius: 3px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .leaflet-control-layers-expanded {
+        max-height: 60vh;
+        min-width: 200px;
+    }
+    
+    .leaflet-control-layers label {
+        font-size: 0.8rem;
+        padding: 6px !important;
+    }
+}
+
+/* --- Custom Marker Wrapper --- */
+.custom-marker {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000 !important;
+  pointer-events: auto;
+}
+
+/* --- Common Style for All Shapes --- */
+.custom-marker > div {
+  opacity: 0.8;
+  box-sizing: border-box;
+}
+
+/* --- Circle --- */
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: gray;
+}
+
+/* --- Square --- */
+.square {
+  width: 20px;
+  height: 20px;
+  background-color: gray;
+}
+
+/* --- Triangle --- */
+.triangle {
+  width: 0;
+  height: 0;
+  display: block;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid gray;
+  opacity: 0.8;
+}
+
+/* --- Diamond --- */
+.diamond {
+  width: 20px;
+  height: 20px;
+  background-color: gray;
+  transform: rotate(45deg);
+}
+
+/* --- Star --- */
+.star {
+  font-size: 20px;
+  line-height: 20px;
+  color: gray;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-family: Arial, sans-serif;
+  /* No border */
+}
+
+.star::before {
+  content: '★';
+}
+
+/* --- Hexagon --- */
+.hexagon {
+  width: 20px;
+  height: 11.5px;
+  background-color: gray;
+  position: relative;
+}
+.hexagon::before,
+.hexagon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+}
+.hexagon::before {
+  bottom: 100%;
+  border-bottom: 5.75px solid gray;
+}
+.hexagon::after {
+  top: 100%;
+  border-top: 5.75px solid gray;
+}
+
+/* --- Priority Color Overrides --- */
+
+/* Triangle Colors */
+.triangle.red       { border-bottom-color: red !important; }
+.triangle.yellow    { border-bottom-color: yellow !important; }
+.triangle.green     { border-bottom-color: green !important; }
+.triangle.gray      { border-bottom-color: gray !important; }
+
+/* Diamond Colors */
+.diamond.red        { background-color: red !important; }
+.diamond.yellow     { background-color: yellow !important; }
+.diamond.green      { background-color: green !important; }
+.diamond.gray       { background-color: gray !important; }
+
+/* Star Colors */
+.star.red    { color: red !important; }
+.star.yellow { color: yellow !important; }
+.star.green  { color: green !important; }
+.star.gray   { color: gray !important; }
+
+/* Hexagon Colors */
+.hexagon.red,
+.hexagon.red::before,
+.hexagon.red::after {
+  background-color: red !important;
+  border-color: red !important;
+}
+.hexagon.yellow,
+.hexagon.yellow::before,
+.hexagon.yellow::after {
+  background-color: yellow !important;
+  border-color: yellow !important;
+}
+.hexagon.green,
+.hexagon.green::before,
+.hexagon.green::after {
+  background-color: green !important;
+  border-color: green !important;
+}
+.hexagon.gray,
+.hexagon.gray::before,
+.hexagon.gray::after {
+  background-color: gray !important;
+  border-color: gray !important;
+}
+
+/* Circle and Square Colors */
+.circle.red, .square.red       { background-color: red !important; }
+.circle.yellow, .square.yellow { background-color: yellow !important; }
+.circle.green, .square.green   { background-color: green !important; }
+.circle.gray, .square.gray     { background-color: gray !important; }
