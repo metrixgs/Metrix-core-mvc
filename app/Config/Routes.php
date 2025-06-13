@@ -178,3 +178,11 @@ $routes->get('/directorio/ver/(:num)', 'Directorio::ver/$1');
 //pagina para el Qr 
 $routes->get('tickets/listadosQr', 'TiketListaController::index');
 $routes->get('/tickets/ver/(:num)', 'TiketListaController::verTicket/$1'); // <-- esta es nueva
+
+
+
+// Exportaciones del directorio
+$routes->get('export/excel', 'ExportController::excel');
+$routes->get('export/pdf', 'ExportController::pdf');
+$routes->get('export/csv', 'ExportController::csv');
+$routes->post('export/enviar-correo', 'ExportController::enviarCorreo');

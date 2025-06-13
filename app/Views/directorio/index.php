@@ -52,14 +52,14 @@
                             </div>
                             <div class="vr d-none d-md-block"></div>
                            <!-- Botón Exportar con Dropdown -->
-<div class="dropdown">
+ <div class="dropdown">
     <button class="btn btn-success dropdown-toggle fw-bold d-flex align-items-center gap-2 px-3 py-2" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-box-arrow-down"></i> EXPORTAR
     </button>
     <ul class="dropdown-menu shadow-sm" aria-labelledby="exportDropdown">
-        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/excel') ?>">EXCEL</a></li>
-        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/pdf') ?>">PDF</a></li>
-        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/csv') ?>">CSV</a></li>
+        <li><a class="dropdown-item fw-semibold" href="#" onclick="abrirModalExport('excel')">EXCEL</a></li>
+        <li><a class="dropdown-item fw-semibold" href="#" onclick="abrirModalExport('pdf')">PDF</a></li>
+        <li><a class="dropdown-item fw-semibold" href="#" onclick="abrirModalExport('csv')">CSV</a></li>
     </ul>
 </div>
 
@@ -221,4 +221,79 @@
             }
         });
     </script>
+</div>
+
+<script>
+  let tipoArchivo = '';
+
+  function abrirModalExport(tipo) {
+    tipoArchivo = tipo;
+    document.getElementById('tipoArchivoSeleccionado').value = tipo;
+    document.getElementById('formCorreo').classList.add('d-none');
+    const modal = new bootstrap.Modal(document.getElementById('modalExportar'));
+    modal.show();
+  }
+
+  function descargarArchivo() {
+    const tipo = document.getElementById('tipoArchivoSeleccionado').value;
+    window.location.href = `<?= base_url('export') ?>/${tipo}`;
+  }
+
+  function mostrarFormularioCorreo() {
+    document.getElementById('formCorreo').classList.remove('d-none');
+  }
+
+  function enviarPorCorreo() {
+    const tipo = document.getElementById('tipoArchivoSeleccionado').value;
+    const email = document.getElementById('correoDestino').value;
+
+    if (!email || !email.includes('@')) {
+      alert("Ingresa un correo válido.");
+      return;
+    }
+
+    fetch("<?= base_url('export/enviar-correo') ?>", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": "<?= csrf_hash() ?>"
+      },
+      body: JSON.stringify({ tipo: tipo, email: email })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || 'Correo enviado');
+      bootstrap.Modal.getInstance(document.getElementById('modalExportar')).hide();
+      document.getElementById('correoDestino').value = '';
+    })
+    .catch(err => {
+      alert('Ocurrió un error al enviar el correo.');
+    });
+  }
+</script>
+
+
+
+<!-- Modal de exportación -->
+<div class="modal fade" id="modalExportar" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Qué deseas hacer con el archivo?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="tipoArchivoSeleccionado">
+        <p>Selecciona si deseas descargar el archivo o enviarlo por correo electrónico.</p>
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" onclick="descargarArchivo()">📥 Descargar</button>
+          <button class="btn btn-outline-success" onclick="mostrarFormularioCorreo()">✉️ Enviar por correo</button>
+        </div>
+        <div class="mt-4 d-none" id="formCorreo">
+          <input type="email" id="correoDestino" class="form-control mb-2" placeholder="Correo electrónico">
+          <button class="btn btn-success w-100" onclick="enviarPorCorreo()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
