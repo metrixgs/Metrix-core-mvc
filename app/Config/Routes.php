@@ -41,6 +41,8 @@ $routes->match(['get', 'post'], 'rondas/crear', 'Rondas::crear');
 $routes->match(['get', 'post'], 'rondas/editar/(:num)', 'Rondas::editar/$1');
 $routes->get('rondas/eliminar/(:num)', 'Rondas::eliminar/$1');
 $routes->get('rondas/cambiar_estado/(:num)/(:any)', 'Rondas::cambiar_estado/$1/$2');
+ $routes->get('rondas/puntos', 'Rondas::puntos');
+$routes->get('rondas/zonas', 'Rondas::zonas');
 
 #Rutas de Rondas por Segmentación...
 $routes->get('rondas/por_segmentacion', 'Rondas::por_segmentacion');

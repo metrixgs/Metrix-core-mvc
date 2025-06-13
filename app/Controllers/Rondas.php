@@ -403,4 +403,37 @@ class Rondas extends BaseController {
 
         return redirect()->to('/segmentaciones')->with('success', 'Segmentación eliminada correctamente');
     }
+
+
+
+public function puntos()
+{
+    $data = [
+        'titulo_pagina' => 'Gestión de Puntos de Ronda',
+        // Puedes agregar más variables si necesitas
+    ];
+
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('rondas/puntos', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
+public function zonas()
+{
+    $data = [
+        'titulo_pagina' => 'Gestión de Zonas de Ronda',
+    ];
+
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('rondas/zonas', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
+
 }
