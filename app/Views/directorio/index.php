@@ -1,4 +1,7 @@
- <!-- resources/views/directorio/index.php -->
+<!-- resources/views/directorio/index.php -->
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
 <div class="container-fluid px-0">
     <div class="px-3 py-4">
         <!-- Header -->
@@ -48,9 +51,18 @@
                                 </select>
                             </div>
                             <div class="vr d-none d-md-block"></div>
-                            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 px-3">
-                                <i class="bi bi-download"></i><span class="d-none d-sm-inline">Exportar</span>
-                            </button>
+                           <!-- Botón Exportar con Dropdown -->
+<div class="dropdown">
+    <button class="btn btn-success dropdown-toggle fw-bold d-flex align-items-center gap-2 px-3 py-2" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-box-arrow-down"></i> EXPORTAR
+    </button>
+    <ul class="dropdown-menu shadow-sm" aria-labelledby="exportDropdown">
+        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/excel') ?>">EXCEL</a></li>
+        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/pdf') ?>">PDF</a></li>
+        <li><a class="dropdown-item fw-semibold" href="<?= base_url('export/csv') ?>">CSV</a></li>
+    </ul>
+</div>
+
                             <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 px-3">
                                 <i class="bi bi-lightning-fill text-warning"></i><span class="d-none d-sm-inline">Acciones masivas</span>
                             </button>
@@ -76,137 +88,106 @@
         </div>
 
         <!-- Botón Agregar -->
-        <div class="mb-4">
-            <a href="<?= base_url('directorio/crear'); ?>" class="btn btn-success btn-lg d-inline-flex align-items-center gap-3 px-4 py-3 shadow-sm">
-                <i class="bi bi-plus-circle-fill fs-4"></i>Agregar Nuevo Contacto
-            </a>
-        </div>
-
-        <!-- Tabla -->
-<!-- Tabla -->
- <div class="card border-0 shadow-sm">
-    <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-dark fw-semibold"><i class="bi bi-table me-2"></i>Lista de Ciudadanos</h5>
-        <span class="badge bg-primary rounded-pill px-3 py-2"><?= isset($contactos) ? count($contactos) : 0 ?> contactos</span>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th><input type="checkbox" id="selectAllCheckbox" /></th>
-                        <th>#</th>
-                        <th>Nombre(s) de Pila</th>
-                        <th>Apellido Paterno</th>
-                        <th>Apellido Materno</th>
-                        <th>Código Ciudadano</th>
-                        <th>Residencia</th>
-                        <th>Estado</th>
-                        <th>Expediente digital</th>
-                        <th class="text-center"><i class="bi bi-gear me-1"></i> Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="contactsTable">
-                    <?php if (!empty($contactos)): ?>
-                        <?php $i = 1; foreach ($contactos as $c): ?>
-                            <tr>
-                                <td class="text-center">
-                                    <input type="checkbox" class="selectCheckbox" value="<?= esc($c['id']) ?>">
-                                </td>
-                                <td class="fw-bold"><?= $i++ ?></td>
-                                <td><?= esc($c['nombre']) ?></td>
-                                <td><?= esc($c['primer_apellido'] ?? '—') ?></td>
-                                <td><?= esc($c['segundo_apellido'] ?? '—') ?></td>
-                                <td><?= esc($c['codigo_ciudadano'] ?? '—') ?></td>
-                                <td><?= esc($c['residencia'] ?? '—') ?></td>
-                                <!-- Columna Estado con switch -->
-                                <td>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input estado-switch" type="checkbox"
-                                               role="switch"
-                                               data-id="<?= esc($c['id']) ?>"
-                                               <?= !empty($c['activo']) ? 'checked' : '' ?>
-                                               disabled>
-                                        <label class="form-check-label">
-                                            <?= !empty($c['activo']) ? 'Activo' : 'Inactivo' ?>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php
-                                        $nivel = rand(1, 5); // reemplaza si usas campo real
-                                        for ($j = 1; $j <= 5; $j++) {
-                                            $color = $j <= $nivel ? '#198754' : '#ccc';
-                                            echo "<span style='display:inline-block;width:12px;height:12px;margin:2px;background:$color;border-radius:2px;'></span>";
-                                        }
-                                    ?>
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group" aria-label="Acciones">
-                                        <a href="<?= base_url('directorio/ver/' . $c['id']) ?>" class="btn btn-info">
-                                            <i class="bi bi-eye-fill me-1"></i> Ver más
-                                        </a>
-                                        <a href="<?= base_url('directorio/editar/' . $c['id']) ?>" class="btn btn-primary">
-                                            <i class="bi bi-pencil-fill me-1"></i> Editar
-                                        </a>
-                                        <a href="<?= base_url('directorio/eliminar/' . $c['id']) ?>" class="btn btn-danger" onclick="return confirm('¿Deseas eliminar este contacto?')">
-                                            <i class="bi bi-trash-fill me-1"></i> Eliminar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="10" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+       <!-- Botón Agregar estilo dividido, tamaño ajustado al contenido -->
+<div class="mb-4">
+    <a href="<?= base_url('directorio/crear'); ?>" class="btn btn-lg d-inline-flex align-items-stretch p-0 shadow-sm rounded overflow-hidden" style="background-color: #4CAF87;">
+        <span class="d-flex align-items-center justify-content-center px-3" style="background-color: #2E7D62;">
+            <i class="bi bi-plus-lg text-white fs-5"></i>
+        </span>
+        <span class="d-flex align-items-center justify-content-center px-4 fw-semibold text-white">
+            ADD
+        </span>
+    </a>
 </div>
 
-<script>
-    // Select all checkboxes (mantengo el original)
-    document.getElementById('selectAllCheckbox').addEventListener('change', function(e) {
-        const check = e.target.checked;
-        document.querySelectorAll('.selectCheckbox').forEach(cb => cb.checked = check);
-    });
 
-    // Listener para switch de estado (requiere método AJAX en controlador)
-    document.querySelectorAll('.estado-switch').forEach(sw => {
-        sw.addEventListener('change', function() {
-            const id = this.dataset.id;
-            const activo = this.checked ? 1 : 0;
-
-            fetch("<?= base_url('directorio/toggle-estado') ?>", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
-                },
-                body: JSON.stringify({ id, activo })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    this.nextElementSibling.textContent = activo ? 'Activo' : 'Inactivo';
-                } else {
-                    alert('No se pudo actualizar el estado');
-                    this.checked = !activo;
-                }
-            })
-            .catch(() => {
-                alert('Error de red');
-                this.checked = !activo;
-            });
-        });
-    });
-</script>
-
-
+        <!-- Tabla -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-semibold"><i class="bi bi-table me-2"></i>Lista de Ciudadanos</h5>
+                <span class="badge bg-primary rounded-pill px-3 py-2"><?= isset($contactos) ? count($contactos) : 0 ?> contactos</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px; text-align: center;">#</th>
+                                <th style="width: 60px; text-align: center;">Tipo</th>
+                                <th style="width: 120px;">Nombre(s)</th>
+                                <th style="width: 140px;">Apellido Paterno</th>
+                                <th style="width: 140px;">Apellido Materno</th>
+                                <th style="width: 120px;">ID Ciudadano</th>
+                                <th style="width: 150px;">Residencia</th>
+                                <th style="width: 100px;">Líder</th>
+                                <th style="width: 100px;">Enlace</th>
+                                <th style="width: 120px; text-align: center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTable">
+                            <?php if (!empty($contactos)): ?>
+                                <?php $i = 1; foreach ($contactos as $c): ?>
+                                    <tr>
+                                        <td class="text-center fw-bold"><?= $i ?></td>
+                                        <td class="text-center">
+                                            <?php 
+                                                // Determinar tipo basado en algún criterio de tu base de datos
+                                                // Por ejemplo, si tienes campo tipo_cliente o puedes usar otro criterio
+                                                $tipo = !empty($c['tipo_cliente']) && $c['tipo_cliente'] == 'Comprador' ? 'BNF' : 'RED';
+                                                $colorClass = $tipo == 'RED' ? 'bg-danger' : 'bg-primary';
+                                            ?>
+                                            <span class="badge <?= $colorClass ?> px-2 py-1" style="font-size: 0.7rem;">
+                                                <?= $tipo ?>
+                                            </span>
+                                        </td>
+                                        <td style="font-weight: 500;"><?= esc($c['nombre']) ?></td>
+                                        <td><?= esc($c['primer_apellido'] ?? '—') ?></td>
+                                        <td><?= esc($c['segundo_apellido'] ?? '—') ?></td>
+                                        <td>
+                                            <span class="text-primary fw-medium"><?= esc($c['codigo_ciudadano'] ?? '—') ?></span>
+                                        </td>
+                                        <td><?= esc($c['residencia'] ?? '—') ?></td>
+                                        <td>
+                                            <small class="text-muted"><?= esc($c['empresa'] ?? '—') ?></small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted"><?= esc($c['cargo'] ?? '—') ?></small>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center align-items-center gap-3">
+                                               
+                                                
+                                                <!-- Ver perfil -->
+                                                <a href="<?= base_url('directorio/ver/' . $c['id']) ?>" class="btn p-0 border-0 bg-transparent" title="Ver perfil" style="color: #6c757d;">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <circle cx="12" cy="8" r="4"/>
+                                                        <path d="M12 14c-6 0-8 3-8 6v2h16v-2c0-3-2-6-8-6z"/>
+                                                    </svg>
+                                                </a>
+                                                
+                                                <!-- Ubicación -->
+                                                <button type="button" class="btn p-0 border-0 bg-transparent" title="Ubicación" style="color: #6c757d;" disabled>
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                                    </svg>
+                                                </button>
+                                                
+                                            
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php $i++; ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="10" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <!-- Paginación -->
         <div class="d-flex justify-content-center mt-4">
@@ -238,12 +219,6 @@
                 e.preventDefault();
                 document.getElementById('searchInput').focus();
             }
-        });
-
-        // Select all
-        document.getElementById('selectAllCheckbox').addEventListener('change', function(e) {
-            const check = e.target.checked;
-            document.querySelectorAll('.selectCheckbox').forEach(cb => cb.checked = check);
         });
     </script>
 </div>
