@@ -265,6 +265,17 @@
             from { transform: scale(0.9); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+
+        .estado-indicador {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: red;
+    margin-left: 8px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+
     </style>
 </head></body>
 <body>
@@ -278,11 +289,13 @@
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <div>
-                    <h2 class="mb-1 fw-bold">
-                        <?= esc($contacto['nombre'] ?? 'Sin nombre') ?> 
-                        <?= esc($contacto['primer_apellido'] ?? '') ?> 
-                        <?= esc($contacto['segundo_apellido'] ?? '') ?>
-                    </h2>
+                  <h2 class="mb-1 fw-bold d-flex align-items-center gap-2">
+    <?= esc($contacto['nombre'] ?? 'Sin nombre') ?> 
+    <?= esc($contacto['primer_apellido'] ?? '') ?> 
+    <?= esc($contacto['segundo_apellido'] ?? '') ?>
+    <span class="estado-indicador" title="Usuario desconectado"></span>
+</h2>
+
                     <small class="opacity-75">Última conexión: <?= esc($contacto['fecha_actualizacion'] ?? 'N/D') ?></small>
                 </div>
             </div>
@@ -613,12 +626,26 @@
             </div>
         </div>
 
-        <!-- Botón de regreso -->
-        <div class="text-center" style="margin-top: 3.5rem; margin-bottom: 2.5rem;">
-            <a href="<?= base_url('directorio') ?>" class="btn btn-outline-primary btn-lg">
-            <i class="bi bi-arrow-left me-2"></i>Volver al listado
-            </a>
-        </div>
+       <div class="text-center" style="margin-top: 3.5rem; margin-bottom: 2.5rem;">
+    <!-- Botón de regresar -->
+    <a href="<?= base_url('directorio') ?>" class="btn btn-outline-primary btn-lg">
+        <i class="bi bi-arrow-left me-2"></i>Volver al listado
+    </a>
+
+    <!-- Botón de editar -->
+    <a href="<?= base_url('directorio/editar/' . $contacto['id']) ?>" class="btn btn-outline-warning btn-lg ms-2">
+        <i class="bi bi-pencil-square me-2"></i>Editar información
+    </a>
+
+    <!-- Botón de eliminar -->
+    <form action="<?= base_url('directorio/eliminar/' . $contacto['id']) ?>" method="post" class="d-inline-block" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-outline-danger btn-lg ms-2">
+            <i class="bi bi-trash me-2"></i>Eliminar usuario
+        </button>
+    </form>
+</div>
+
 
 <!-- Floating Action Button -->
 <div class="floating-action">

@@ -15,7 +15,7 @@ class DirectorioModel extends Model
         'calle', 'numero_exterior', 'numero_interior', 'codigo_postal',
         'empresa', 'cargo', 'nivel_estudios', 'ocupacion',
         'tipo_discapacidad', 'grupo_etnico', 'acepta_avisos', 'acepta_terminos',
-        'activo', 'tipo_cliente','codigo_ciudadano', 'foto_perfil', 
+        'activo', 'tipo_cliente','codigo_ciudadano', 'foto_perfil', 'id_lider','tipo_red'
     ];
     protected $useTimestamps = true;
     protected $createdField = 'fecha_creacion';

@@ -130,15 +130,20 @@
                                     <tr>
                                         <td class="text-center fw-bold"><?= $i ?></td>
                                         <td class="text-center">
-                                            <?php 
-                                                // Determinar tipo basado en algún criterio de tu base de datos
-                                                // Por ejemplo, si tienes campo tipo_cliente o puedes usar otro criterio
-                                                $tipo = !empty($c['tipo_cliente']) && $c['tipo_cliente'] == 'Comprador' ? 'BNF' : 'RED';
-                                                $colorClass = $tipo == 'RED' ? 'bg-danger' : 'bg-primary';
-                                            ?>
-                                            <span class="badge <?= $colorClass ?> px-2 py-1" style="font-size: 0.7rem;">
-                                                <?= $tipo ?>
-                                            </span>
+                                      <?php 
+    $tipo = $c['tipo_red'] ?? '—';
+    switch ($tipo) {
+        case 'CDN': $colorClass = 'bg-success'; break;
+        case 'BNF': $colorClass = 'bg-primary'; break;
+        case 'RED': $colorClass = 'bg-danger'; break;
+        case 'EMP': $colorClass = 'bg-warning text-dark'; break;
+        default: $colorClass = 'bg-secondary';
+    }
+?>
+<span class="badge <?= $colorClass ?> px-2 py-1" style="font-size: 0.7rem;">
+    <?= esc($tipo) ?>
+</span>
+
                                         </td>
                                         <td style="font-weight: 500;"><?= esc($c['nombre']) ?></td>
                                         <td><?= esc($c['primer_apellido'] ?? '—') ?></td>
@@ -147,9 +152,16 @@
                                             <span class="text-primary fw-medium"><?= esc($c['codigo_ciudadano'] ?? '—') ?></span>
                                         </td>
                                         <td><?= esc($c['residencia'] ?? '—') ?></td>
-                                        <td>
-                                            <small class="text-muted"><?= esc($c['empresa'] ?? '—') ?></small>
-                                        </td>
+                                       <td>
+    <?php if (!empty($c['lider_nombre'])): ?>
+        <small class="text-muted">
+            <?= esc($c['lider_nombre'] . ' ' . $c['lider_apellido'] . ' ' . $c['lider_segundo']) ?>
+        </small>
+    <?php else: ?>
+        <small class="text-muted">—</small>
+    <?php endif; ?>
+</td>
+
                                         <td>
                                             <small class="text-muted"><?= esc($c['cargo'] ?? '—') ?></small>
                                         </td>

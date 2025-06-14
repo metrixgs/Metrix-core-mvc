@@ -1,4 +1,4 @@
-<div class="card shadow-sm border-0" style="margin-top: 2cm;"></div>
+<div class="card shadow-sm border-0" style="margin-top: 2cm;">
     <div class="card-header bg-light border-bottom py-3">
         <h5 class="mb-0 text-dark fw-semibold"><i class="bi bi-person-plus-fill me-2"></i>Registrar nuevo ciudadano</h5>
     </div>
@@ -31,12 +31,13 @@
                     <small class="text-muted">Escriba N/D si no aplica</small>
                 </div>
             </div>
-<div class="row mb-3">
-    <div class="col-md-12">
-        <label for="residencia" class="form-label">Residencia</label>
-        <input type="text" name="residencia" class="form-control" value="<?= old('residencia') ?>" placeholder="Ciudad o localidad donde reside">
-    </div>
-</div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="residencia" class="form-label">Residencia</label>
+                    <input type="text" name="residencia" class="form-control" value="<?= old('residencia') ?>" placeholder="Ciudad o localidad donde reside">
+                </div>
+            </div>
 
             <div class="row mb-3">
                 <div class="col-md-4">
@@ -100,6 +101,32 @@
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="id_lider" class="form-label">Selecciona el líder</label>
+                    <select name="id_lider" class="form-select">
+                        <option value="">Sin líder asignado</option>
+                        <?php foreach ($lideres as $lider): ?>
+                            <option value="<?= $lider['id'] ?>" <?= old('id_lider') == $lider['id'] ? 'selected' : '' ?>>
+                                <?= esc($lider['nombre'] . ' ' . $lider['primer_apellido'] . ' ' . $lider['segundo_apellido']) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+            </div>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="tipo_red" class="form-label">Tipo de Red / Usuario</label>
+        <select name="tipo_red" class="form-select" required>
+            <option value="">Selecciona una red...</option>
+            <option value="CDN" <?= old('tipo_red') == 'CDN' ? 'selected' : '' ?>>CDN - Ciudadano</option>
+            <option value="BNF" <?= old('tipo_red') == 'BNF' ? 'selected' : '' ?>>BNF - Beneficiario</option>
+            <option value="RED" <?= old('tipo_red') == 'RED' ? 'selected' : '' ?>>RED - Red de Apoyo</option>
+            <option value="EMP" <?= old('tipo_red') == 'EMP' ? 'selected' : '' ?>>EMP - Empresa</option>
+        </select>
+    </div>
+</div>
+
             <div class="d-flex justify-content-between">
                 <a href="<?= base_url('directorio') ?>" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary">Guardar ciudadano</button>
@@ -107,3 +134,25 @@
         </form>
     </div>
 </div>
+
+<!-- Script para capitalizar automáticamente -->
+<script>
+function capitalizarPrimeraLetra(texto) {
+    return texto
+        .toLowerCase()
+        .replace(/\b\w/g, letra => letra.toUpperCase());
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const campos = ['nombre', 'primer_apellido', 'segundo_apellido'];
+
+    campos.forEach(nombreCampo => {
+        const input = document.querySelector(`input[name="${nombreCampo}"]`);
+        if (input) {
+            input.addEventListener('blur', () => {
+                input.value = capitalizarPrimeraLetra(input.value.trim());
+            });
+        }
+    });
+});
+</script>

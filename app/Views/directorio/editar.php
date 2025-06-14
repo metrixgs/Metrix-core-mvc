@@ -576,6 +576,37 @@
                         </div>
                     </div>
                 </div>
+                <!-- Sección:editar lider-->
+
+
+                <div class="col-md-6">
+    <div class="form-floating">
+        <select class="form-select border-2 shadow-sm" name="id_lider" id="id_lider">
+            <option value="">Sin líder asignado</option>
+            <?php foreach ($lideres as $lider): ?>
+                <option value="<?= $lider['id'] ?>"
+                    <?= set_value('id_lider', $contacto['id_lider'] ?? '') == $lider['id'] ? 'selected' : '' ?>>
+                    <?= esc($lider['nombre'] . ' ' . $lider['primer_apellido'] . ' ' . $lider['segundo_apellido']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <label for="id_lider">
+            <i class="bi bi-person-bounding-box me-1"></i>
+            Selecciona un líder
+        </label>
+    </div>
+</div>
+ <!-- #red select
+  -->
+
+  <select name="tipo_red" class="form-select" required>
+    <option value="">Selecciona una  red ...</option>
+    <option value="CDN" <?= set_value('tipo_red', $contacto['tipo_red'] ?? '') == 'CDN' ? 'selected' : '' ?>>CDN - Ciudadano</option>
+    <option value="BNF" <?= set_value('tipo_red', $contacto['tipo_red'] ?? '') == 'BNF' ? 'selected' : '' ?>>BNF - Beneficiario</option>
+    <option value="RED" <?= set_value('tipo_red', $contacto['tipo_red'] ?? '') == 'RED' ? 'selected' : '' ?>>RED - Red de Apoyo</option>
+    <option value="EMP" <?= set_value('tipo_red', $contacto['tipo_red'] ?? '') == 'EMP' ? 'selected' : '' ?>>EMP - Empresa</option>
+</select>
+
 
                 <!-- Sección: Configuración y Términos -->
                 <div class="mb-4">
