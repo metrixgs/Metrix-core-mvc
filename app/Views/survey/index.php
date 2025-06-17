@@ -296,7 +296,7 @@
                     <button class="btn btn-outline" id="sortButton">
                         <i class="fas fa-sort"></i> Ordenar
                     </button>
-                    <button class="btn btn-primary" onclick="window.location.href='/encuestas/public/survey/create'">
+                    <button class="btn btn-primary" onclick="window.location.href=' <?= base_url('survey/create') ?>'">
                         <i class="fas fa-plus"></i> Nueva Encuesta
                     </button>
                 </div>
@@ -316,7 +316,7 @@
                     <i class="fas fa-clipboard-list"></i>
                     <h3>No hay encuestas disponibles</h3>
                     <p>Crea tu primera encuesta para comenzar</p>
-                    <button class="btn btn-primary" style="margin-top: 15px" onclick="window.location.href='/encuestas/public/survey/create'">
+                    <button class="btn btn-primary" style="margin-top: 15px" onclick="window.location.href='<?= base_url('survey/create') ?>'">
                         <i class="fas fa-plus"></i> Crear Encuesta
                     </button>
                 </div>
@@ -338,17 +338,18 @@
                                     <i class="fas fa-external-link-alt"></i> Abrir Encuesta
                                 </button>
                             </div>
-                            <div class="card-footer">
-                                <button class="btn btn-outline" onclick="copyLink('/survey/<?= $survey['id'] ?>')">
-                                    <i class="fas fa-share-alt"></i> Compartir
-                                </button>
-                                <button class="btn btn-success" onclick="window.location.href='/encuestas/public/survey/<?= $survey['id'] ?>/responses'">
-                                    <i class="fas fa-chart-bar"></i> Respuestas
-                                </button>
-                                <button class="btn btn-success" onclick="window.location.href='/encuestas/public/survey/exportResponses/<?= $survey['id'] ?>'">
-                                    <i class="fas fa-file-excel"></i> Exportar Respuestas
-                                </button>
-                            </div>
+                            
+<div class="card-footer">
+    <button class="btn btn-outline" onclick="copyLink('/survey/<?= $survey['id'] ?>')">
+        <i class="fas fa-share-alt"></i> Compartir
+    </button>
+    <button class="btn btn-success" onclick="window.location.href='<?= base_url('survey/' . $survey['id'] . '/responses') ?>'">
+        <i class="fas fa-chart-bar"></i> Respuestas
+    </button>
+    <button class="btn btn-success" onclick="window.location.href='<?= base_url('survey/exportResponses/' . $survey['id']) ?>'">
+        <i class="fas fa-file-excel"></i> Exportar Respuestas
+    </button>
+</div>
                         </div>
                     <?php endforeach; ?>
                 </div>

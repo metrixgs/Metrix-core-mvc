@@ -13,7 +13,7 @@ class SurveyController extends BaseController {
     public function index()
     {
         $surveyModel = new SurveyModel();
-        $surveys = $surveyModel->findAll();
+        $surveys = $surveyModel->paginate(10);
         return view('survey/index', ['surveys' => $surveys]);
     }
     

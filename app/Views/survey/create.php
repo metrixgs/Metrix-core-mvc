@@ -63,7 +63,7 @@
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center">
-                        <a href="/" class="flex items-center">
+                        <a href=" <?= base_url('/surveys') ?>" class="flex items-center">
                             <span class="text-3xl font-bold text-green-500">METRIX</span>
                         </a>
                     </div>
@@ -73,15 +73,16 @@
                         </button>
                     </div>
                     <div class="hidden lg:flex lg:items-center lg:space-x-8">
-                        <a href="/encuestas/public/" class="text-gray-900 hover:text-green-500 px-3 py-2 text-sm font-medium">Home</a>
-                        <a href="/encuestas/public/survey/create" class="text-green-500 border-b-2 border-green-500 px-3 py-2 text-sm font-medium">Crear Encuesta</a>
-                        <a href="/encuestas/public/surveys" class="text-gray-900 hover:text-green-500 px-3 py-2 text-sm font-medium">Listar Encuestas</a>
+                        <a href="<?= base_url('/surveys') ?>" class="text-gray-900 hover:text-green-500 px-3 py-2 text-sm font-medium">Home</a>
+                        <a href="<?= base_url('/survey/create') ?>" class="text-green-500 border-b-2 border-green-500 px-3 py-2 text-sm font-medium">Crear Encuesta</a>
+                        <a href="<?= base_url('/surveys') ?>" class="text-gray-900 hover:text-green-500 px-3 py-2 text-sm font-medium">Listar Encuestas</a>
                         <a href="#" class="text-gray-900 hover:text-green-500 px-3 py-2 text-sm font-medium">Control de Incidencias</a>
                     </div>
                 </div>
                 <div id="mobileMenu" class="hidden lg:hidden py-2">
-                    <a href="/encuestas/public/" class="block text-gray-900 hover:text-green-500 px-4 py-2 text-sm font-medium">Home</a>
-                    <a href="/encuestas/public/encuestas/public/survey/create" class="block text-green-500 font-medium px-4 py-2 text-sm">Crear Encuesta</a>
+                    <a href="<?= base_url('surveys') ?>" class="block text-gray-900 hover:text-green-500 px-4 py-2 text-sm font-medium">Home</a>
+
+                    <a href="<?= base_url('survey/create') ?>" class="block text-green-500 font-medium px-4 py-2 text-sm">Crear Encuesta</a>
                     <a href="/encuestas/public/surveys" class="block text-gray-900 hover:text-green-500 px-4 py-2 text-sm font-medium">Listar Encuestas</a>
                     <a href="#" class="block text-gray-900 hover:text-green-500 px-4 py-2 text-sm font-medium">Control de Incidencias</a>
                 </div>
