@@ -12,6 +12,8 @@ use App\Models\CampanasModel;
 use App\Models\TiposCampanasModel;
 use App\Models\SubtiposCampanasModel;
 use App\Models\SegmentacionesModel;
+use App\Models\SurveyModel;
+ 
 
 class Campanas extends BaseController {
 
@@ -24,6 +26,7 @@ class Campanas extends BaseController {
     protected $tiposCampanas;
     protected $subtiposCampanas;
     protected $segmentaciones;
+    protected $survey;
 
     public function __construct() {
         // Instanciar los modelos
@@ -36,6 +39,7 @@ class Campanas extends BaseController {
         $this->tiposCampanas = new TiposCampanasModel();
         $this->subtiposCampanas = new SubtiposCampanasModel();
         $this->segmentaciones = new SegmentacionesModel();
+        $this->survey = new SurveyModel();
 
 
         # Cargar los Helpers
@@ -61,6 +65,7 @@ class Campanas extends BaseController {
         // Assuming $this->campanas->obtenerCampanas() returns an array of campaigns
         $campanas = $this->campanas->obtenerCampanas();
         $data['campanas'] = $campanas;
+          $data['surveys'] = $this->survey->findAll();
 
         // Initialize the new ID
         $new_id = 1; // Default to 1 if no campaigns exist
@@ -193,79 +198,90 @@ class Campanas extends BaseController {
                 . view('incl/scripts-application', $data);
     }
 
-    public function crear() {
-        # Obtenemos los datos del formulario...
-        $nombre = $this->request->getPost('nombre');
-        $coordinador = $this->request->getPost('coordinador');
-        $tipo_id = $this->request->getPost('tipo_id');
-        $subtipo_id = $this->request->getPost('subtipo_id');
-        $area_id = $this->request->getPost('area_id');
-        $estado = $this->request->getPost('estado');
-        $descripcion = $this->request->getPost('descripcion');
-        $fecha_inicio = $this->request->getPost('fecha_inicio');
-        $fecha_fin = $this->request->getPost('fecha_fin');
+   public function crear() {
+    // 1️⃣ Obtenemos los datos del formulario
+    $nombre = $this->request->getPost('nombre');
+    $coordinador = $this->request->getPost('coordinador');
+    $tipo_id = $this->request->getPost('tipo_id');
+    $subtipo_id = $this->request->getPost('subtipo_id');
+    $area_id = $this->request->getPost('area_id');
+    $estado = $this->request->getPost('estado');
+    $descripcion = $this->request->getPost('descripcion');
+    $fecha_inicio = $this->request->getPost('fecha_inicio');
+    $fecha_fin = $this->request->getPost('fecha_fin');
+    $encuesta = $this->request->getPost('encuesta');           // ✅ Ahora sí capturas encuesta
+    $entregables = $this->request->getPost('entregables');     // ✅ Ahora sí capturas entregables
+    $universo = $this->request->getPost('universo');           // ✅ Ahora sí capturas universo
+    $territorio = $this->request->getPost('territorio');       // ✅ Ahora sí capturas territorio
+    $sectorizacion = $this->request->getPost('sectorizacion'); // ✅ Ahora sí capturas sectorizacion
 
-        # Definimos las reglas de validación para los campos...
-        $validationRules = [
-            'nombre' => 'required|max_length[100]',
-            'coordinador' => 'required|max_length[100]',
-            'tipo_id' => 'required|numeric',
-            'area_id' => 'required|numeric',
-            'estado' => 'required|in_list[Programada,Activa,Finalizada,Propuesta]',
-            'descripcion' => 'required',
-            'fecha_inicio' => 'required|valid_date',
-            'fecha_fin' => 'required|valid_date',
-        ];
+    // 2️⃣ Definimos reglas de validación para todos los campos
+    $validationRules = [
+        'nombre' => 'required|max_length[100]',
+        'coordinador' => 'required|max_length[100]',
+        'tipo_id' => 'required|numeric',
+        'area_id' => 'required|numeric',
+        'estado' => 'required|in_list[Programada,Activa,Finalizada,Propuesta]',
+        'descripcion' => 'required',
+        'fecha_inicio' => 'required|valid_date',
+        'fecha_fin' => 'required|valid_date',
+        // Validaciones opcionales para campos adicionales:
+        'encuesta' => 'permit_empty|numeric',
+        'entregables' => 'permit_empty|string',
+        'universo' => 'permit_empty|string',
+        'territorio' => 'permit_empty|in_list[electorales,geograficos]',
+        'sectorizacion' => 'permit_empty',
+    ];
 
-        # El subtipo es opcional, solo lo validamos si se proporciona
-        if (!empty($subtipo_id)) {
-            $validationRules['subtipo_id'] = 'numeric';
-        }
-
-        # Validamos los datos del formulario...
-        if (!$this->validate($validationRules)) {
-            # Guardamos los errores de la validación
-            session()->setFlashdata('validation', $this->validator->getErrors());
-            # Si la validación falla, almacenamos los errores y los datos en la sesión...
-            return redirect()->to("campanas/")->withInput();
-        }
-
-        # Creamos el arreglo para crear la campaña...
-        $infoCampana = [
-            'nombre' => $nombre,
-            'coordinador' => $coordinador,
-            'tipo_id' => $tipo_id,
-            'area_id' => $area_id,
-            'estado' => $estado,
-            'descripcion' => $descripcion,
-            'fecha_inicio' => $fecha_inicio,
-            'fecha_fin' => $fecha_fin,
-        ];
-
-        # Añadimos el subtipo solo si se proporciona
-        if (!empty($subtipo_id)) {
-            $infoCampana['subtipo_id'] = $subtipo_id;
-        }
-
-        # Creamos la nueva campaña...
-        if ($this->campanas->crearCampana($infoCampana)) {
-            # Se creó la campaña
-            $this->session->setFlashdata([
-                'titulo' => "¡Éxito!",
-                'mensaje' => "Se ha creado la campaña de forma exitosa.",
-                'tipo' => "success"
-            ]);
-            return redirect()->to("campanas/");
-        } else {
-            # No se pudo crear la campaña
-            $this->session->setFlashdata([
-                'titulo' => "¡Error!",
-                'mensaje' => "No se pudo crear la campaña, inténtalo nuevamente o contacta con soporte técnico.",
-                'tipo' => "danger"
-            ]);
-            return redirect()->to("campanas/")->withInput();
-        }
+    if (!empty($subtipo_id)) {
+        $validationRules['subtipo_id'] = 'numeric';
     }
+
+    // 3️⃣ Validamos los datos
+    if (!$this->validate($validationRules)) {
+        session()->setFlashdata('validation', $this->validator->getErrors());
+        return redirect()->to("campanas/")->withInput();
+    }
+
+    // 4️⃣ Creamos el array para guardar en la base de datos
+    $infoCampana = [
+        'nombre' => $nombre,
+        'coordinador' => $coordinador,
+        'tipo_id' => $tipo_id,
+        'area_id' => $area_id,
+        'estado' => $estado,
+        'descripcion' => $descripcion,
+        'fecha_inicio' => $fecha_inicio,
+        'fecha_fin' => $fecha_fin,
+        'encuesta' => $encuesta ?? null,
+        'entregables' => $entregables ?? null,
+        'universo' => $universo ?? null,
+        'territorio' => $territorio ?? null,
+        'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
+    ];
+
+    if (!empty($subtipo_id)) {
+        $infoCampana['subtipo_id'] = $subtipo_id;
+    }
+
+    // 5️⃣ Guardamos en la base de datos
+    if ($this->campanas->crearCampana($infoCampana)) {
+        $this->session->setFlashdata([
+            'titulo' => "¡Éxito!",
+            'mensaje' => "Se ha creado la campaña de forma exitosa.",
+            'tipo' => "success"
+        ]);
+        return redirect()->to("campanas/");
+    } else {
+        $this->session->setFlashdata([
+            'titulo' => "¡Error!",
+            'mensaje' => "No se pudo crear la campaña, inténtalo nuevamente o contacta con soporte técnico.",
+            'tipo' => "danger"
+        ]);
+        return redirect()->to("campanas/")->withInput();
+    }
+}
+
 
     public function crear_tipo() {
         # Obtenemos los datos del formulario...

@@ -45,9 +45,10 @@ class UsuariosModel extends Model {
         return $this->where('correo', $correo)->first();
     }
 
-    public function obtenerUsuariosPorRol($rol) {
-        return $this->where('rol', $rol)->findAll();
-    }
+     public function obtenerUsuariosPorRol($rol_id) {
+    return $this->where('rol_id', $rol_id)->findAll();
+}
+
 
     public function obtenerUsuariosPorArea($area_id) {
         return $this->where('area_id', $area_id)->findAll();

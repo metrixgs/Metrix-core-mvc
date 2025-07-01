@@ -9,7 +9,8 @@
 
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="<?= base_url() . obtener_rol() . "panel/" ?>">Inicio</a></li>
+                            <li class="breadcrumb-item"><a
+                                    href="<?= base_url() . obtener_rol() . "panel/" ?>">Inicio</a></li>
                             <li class="breadcrumb-item active">Campañas</li>
                         </ol>
                     </div>
@@ -36,7 +37,8 @@
                                 <div class="d-flex justify-content-sm-end">
                                     <!-- Botón para abrir el modal -->
                                     <div class="search-box ms-2">
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaCampana">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#modalNuevaCampana">
                                             Nueva
                                         </button>
                                     </div>
@@ -62,32 +64,32 @@
                                 </thead>
                                 <tbody>
                                     <?php if (isset($campanas) && !empty($campanas)) { ?>
-                                        <?php $contador = 1; ?>
-                                        <?php foreach ($campanas as $index => $campana): ?>
-                                            <tr>
-                                                <!-- Número de fila -->
-                                                <td class="text-center">
-                                                    <?= $contador; ?>
-                                                </td>
+                                    <?php $contador = 1; ?>
+                                    <?php foreach ($campanas as $index => $campana): ?>
+                                    <tr>
+                                        <!-- Número de fila -->
+                                        <td class="text-center">
+                                            <?= $contador; ?>
+                                        </td>
 
-                                                <!-- Nombre de la campaña -->
-                                                <td><?= htmlspecialchars($campana['nombre']); ?></td>
+                                        <!-- Nombre de la campaña -->
+                                        <td><?= htmlspecialchars($campana['nombre']); ?></td>
 
-                                                <!-- Tipo de Campaña -->
-                                                <td>
-                                                    <?php if (!empty($campana['nombre_tipo_campana']) && !empty($campana['nombre_subtipo_campana'])): ?>
-                                                        <?= htmlspecialchars($campana['nombre_tipo_campana']); ?> / 
-                                                        <?= htmlspecialchars($campana['nombre_subtipo_campana']); ?>
-                                                    <?php elseif (!empty($campana['nombre_tipo_campana'])): ?>
-                                                        <?= htmlspecialchars($campana['nombre_tipo_campana']); ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">No especificado</span>
-                                                    <?php endif; ?>
-                                                </td>
+                                        <!-- Tipo de Campaña -->
+                                        <td>
+                                            <?php if (!empty($campana['nombre_tipo_campana']) && !empty($campana['nombre_subtipo_campana'])): ?>
+                                            <?= htmlspecialchars($campana['nombre_tipo_campana']); ?> /
+                                            <?= htmlspecialchars($campana['nombre_subtipo_campana']); ?>
+                                            <?php elseif (!empty($campana['nombre_tipo_campana'])): ?>
+                                            <?= htmlspecialchars($campana['nombre_tipo_campana']); ?>
+                                            <?php else: ?>
+                                            <span class="text-muted">No especificado</span>
+                                            <?php endif; ?>
+                                        </td>
 
-                                                <!-- Estatus -->
-                                                <td>
-                                                    <?php
+                                        <!-- Estatus -->
+                                        <td>
+                                            <?php
                                                     $badgeClass = '';
                                                     switch ($campana['estado']) {
                                                         case 'Programada':
@@ -106,189 +108,289 @@
                                                             $badgeClass = 'bg-secondary';
                                                     }
                                                     ?>
-                                                    <span class="badge <?= $badgeClass; ?> rounded-pill">
-                                                        <?= htmlspecialchars($campana['estado']); ?>
-                                                    </span>
-                                                </td>
+                                            <span class="badge <?= $badgeClass; ?> rounded-pill">
+                                                <?= htmlspecialchars($campana['estado']); ?>
+                                            </span>
+                                        </td>
 
-                                                <!-- Área Responsable -->
-                                                <td>
-                                                    <?php if (!empty($campana['nombre_area'])): ?>
-                                                        <?= htmlspecialchars($campana['nombre_area']); ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">No especificada</span>
-                                                    <?php endif; ?>
-                                                </td>
+                                        <!-- Área Responsable -->
+                                        <td>
+                                            <?php if (!empty($campana['nombre_area'])): ?>
+                                            <?= htmlspecialchars($campana['nombre_area']); ?>
+                                            <?php else: ?>
+                                            <span class="text-muted">No especificada</span>
+                                            <?php endif; ?>
+                                        </td>
 
-                                                <!-- Coordinador -->
-                                                <td><?= htmlspecialchars($campana['coordinador']); ?></td>
+                                        <!-- Coordinador -->
+                                        <td><?= htmlspecialchars($campana['coordinador']); ?></td>
 
-                                                <!-- Fecha de inicio -->
-                                                <td><?= date('d/M/Y', strtotime($campana['fecha_inicio'])); ?></td>
+                                        <!-- Fecha de inicio -->
+                                        <td><?= date('d/M/Y', strtotime($campana['fecha_inicio'])); ?></td>
 
-                                                <!-- Fecha de fin -->
-                                                <td><?= date('d/M/Y', strtotime($campana['fecha_fin'])); ?></td>
+                                        <!-- Fecha de fin -->
+                                        <td><?= date('d/M/Y', strtotime($campana['fecha_fin'])); ?></td>
 
-                                                <!-- Detalles -->
-                                                <td class="text-center">
-                                                    <a href="<?= base_url() . "campanas/detalle/{$campana['id']}"; ?>" class="btn btn-success btn-sm">
-                                                        Más Información
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <?php $contador++; ?>
-                                        <?php endforeach; ?>
+                                        <!-- Detalles -->
+                                        <td class="text-center">
+                                            <a href="<?= base_url() . "campanas/detalle/{$campana['id']}"; ?>"
+                                                class="btn btn-primary btn-sm">
+                                                Más Información
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <?php $contador++; ?>
+                                    <?php endforeach; ?>
                                     <?php } else { ?>
-                                        <tr>
-                                            <td colspan="9" class="text-center">No hay campañas disponibles.</td>
-                                        </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center">No hay campañas disponibles.</td>
+                                    </tr>
                                     <?php } ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div><!--end col-->
-        </div><!--end row-->
+            </div>
+            <!--end col-->
+        </div>
+        <!--end row-->
     </div>
 </div>
 
 <!-- Modal para crear una nueva campaña -->
-<div class="modal fade" id="modalNuevaCampana" tabindex="-1" aria-labelledby="modalNuevaCampanaLabel" aria-hidden="true">
+ 
+  <div class="modal fade" id="modalNuevaCampana" tabindex="-1" aria-labelledby="modalNuevaCampanaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalNuevaCampanaLabel">Nueva Campaña</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header text-white" style="background-color: #8bc34a;">
+                <h5 class="modal-title fw-bold" id="modalNuevaCampanaLabel">Nueva Campaña</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form method="post" action="<?= base_url() . "campanas/crear"; ?>">
+            <div class="modal-body bg-light">
+                <form method="post" action="<?= base_url() . "campanas/crear"; ?>" id="formNuevaCampana">
+                    <?= csrf_field(); ?>
                     <div class="row">
-                        <!-- Primera Columna -->
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">ID de Campaña</label>
-                                <p><?= $new_campana_id; ?></p>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre de Campaña *</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tipo_id" class="form-label">Tipos de Campaña *</label>
-                                <select class="form-select" id="tipo_id" name="tipo_id" required>
-                                    <option value="">Seleccione un tipo</option>
-                                    <?php if (isset($tipos_campanas)) { ?>
-                                        <?php foreach ($tipos_campanas as $tipo): ?>
-                                            <option value="<?= $tipo['id']; ?>"><?= htmlspecialchars($tipo['nombre']); ?></option>
-                                        <?php endforeach; ?>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="territorio" class="form-label">Territorio *</label>
-                                <div class="custom-multiselect">
-                                    <div class="selected-tags" id="territorio-tags"></div>
-                                    <select class="form-select" id="territorio" name="territorio[]" multiple required style="display: none;">
-                                        <option value="106">106</option>
-                                        <option value="113">113</option>
-                                        <option value="124">124</option>
-                                    </select>
-                                    <div class="dropdown">
-                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="territorioDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Seleccione
-                                        </button>
-                                        <ul class="dropdown-menu w-100" aria-labelledby="territorioDropdown" id="territorio-options">
-                                            <li><a class="dropdown-item" href="#" data-value="106">106</a></li>
-                                            <li><a class="dropdown-item" href="#" data-value="113">113</a></li>
-                                            <li><a class="dropdown-item" href="#" data-value="124">124</a></li>
-                                        </ul>
+                        <!-- Columna con todos los campos organizados -->
+                        <div class="col-md-12">
+                            <!-- Información Básica -->
+                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
+                                <div class="card-header text-white" style="background-color: #8bc34a;">
+                                    <h6 class="mb-0 fw-semibold">📋 Información Básica</h6>
+                                </div>
+                                <div class="card-body bg-white">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold" style="color: #8bc34a;">ID de Campaña</label>
+                                                <div class="alert py-2 mb-0" style="background-color: #f1f8e9; border-color: #8bc34a; color: #33691e;">
+                                                    <strong><?= $new_campana_id; ?></strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="nombre" class="form-label fw-semibold" style="color: #8bc34a;">Nombre de Campaña <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" style="border-color: #8bc34a;" id="nombre" name="nombre" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="tipo_id" class="form-label fw-semibold" style="color: #8bc34a;">Tipos de Campaña <span class="text-danger">*</span></label>
+                                                <select class="form-select" style="border-color: #8bc34a;" id="tipo_id" name="tipo_id" required>
+                                                    <?php if (isset($tipos_campanas)) { ?>
+                                                    <?php foreach ($tipos_campanas as $tipo): ?>
+                                                    <option value="<?= $tipo['id']; ?>"><?= htmlspecialchars($tipo['nombre']); ?></option>
+                                                    <?php endforeach; ?>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="universo" class="form-label fw-semibold" style="color: #8bc34a;">Universo (144)</label>
+                                                <input type="text" class="form-control" style="border-color: #8bc34a;" id="universo" name="universo" value="Deportistas" list="universo-options">
+                                                <datalist id="universo-options">
+                                                    <option value="Deportistas">
+                                                    <option value="Estudiantes">
+                                                    <option value="Profesionales">
+                                                </datalist>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="segmentacion" class="form-label">Segmentación *</label>
-                                <div class="custom-multiselect">
-                                    <div class="selected-tags" id="segmentacion-tags"></div>
-                                    <select class="form-select" id="segmentacion" name="segmentacion[]" multiple required style="display: none;">
-                                        <?php if (isset($todas_segmentaciones)) { ?>
-                                            <?php foreach ($todas_segmentaciones as $segmentacion): ?>
-                                                <option value="<?= htmlspecialchars($segmentacion['id']); ?>"><?= htmlspecialchars($segmentacion['descripcion']); ?></option>
-                                            <?php endforeach; ?>
-                                        <?php } ?>
-                                    </select>
-                                    <div class="dropdown">
-                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="segmentacionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Seleccione
-                                        </button>
-                                        <ul class="dropdown-menu w-100" aria-labelledby="segmentacionDropdown" id="segmentacion-options">
-                                            <?php if (isset($todas_segmentaciones)) { ?>
-                                                <?php foreach ($todas_segmentaciones as $segmentacion): ?>
-                                                    <li><a class="dropdown-item" href="#" data-value="<?= htmlspecialchars($segmentacion['id']); ?>"><?= htmlspecialchars($segmentacion['descripcion']); ?></a></li>
-                                                <?php endforeach; ?>
-                                            <?php } ?>
-                                        </ul>
+
+                            <!-- Territorio -->
+                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
+                                <div class="card-header text-white" style="background-color: #8bc34a;">
+                                    <h6 class="mb-0 fw-semibold">🗺️ Configuración de Territorio</h6>
+                                </div>
+                                <div class="card-body bg-white">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold" style="color: #8bc34a;">Territorio <span class="text-danger">*</span></label>
+                                        <input type="hidden" id="territorio" name="territorio" required>
+                                        <div class="d-flex gap-4 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="territorio-type" id="territorio-electorales" value="electorales" required>
+                                                <label class="form-check-label fw-semibold" style="color: #8bc34a;" for="territorio-electorales">Electorales</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="territorio-type" id="territorio-geograficos" value="geograficos">
+                                                <label class="form-check-label fw-semibold" style="color: #8bc34a;" for="territorio-geograficos">Geográficos</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="territorio-electorales-options" class="border rounded p-3 bg-light" style="border-color: #8bc34a !important; display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold" style="color: #8bc34a;">Sectorización <span class="text-danger">*</span></label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="dropdown">
+                                                    <button class="btn btn-outline dropdown-toggle w-100 text-start" style="border-color: #8bc34a; color: #8bc34a;" type="button" id="territorioElectoralesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Seleccione Sectorización
+                                                    </button>
+                                                    <ul class="dropdown-menu w-100" aria-labelledby="territorioElectoralesDropdown" id="territorio-electorales-suboptions-list">
+                                                        <li><a class="dropdown-item" href="#" data-value="1.1">Distrito Federal</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-value="1.2">Distrito Local</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-value="1.3">Sección Electoral</a></li>
+                                                    </ul>
+                                                    <input type="hidden" id="territorio-electorales-subtype" name="territorio-electorales-subtype">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="territorio-geograficos-options" class="border rounded p-3 bg-light" style="border-color: #8bc34a !important; display: none;">
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold" style="color: #8bc34a;">Nivel Territorial <span class="text-danger">*</span></label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <select class="form-select" style="border-color: #8bc34a;" id="territorio-geograficos-level" name="territorio-geograficos-level">
+                                                    <option value="">Seleccione nivel</option>
+                                                    <option value="01">País</option>
+                                                    <option value="02">Estados</option>
+                                                    <option value="03">Municipios</option>
+                                                    <option value="04">Delegaciones</option>
+                                                    <option value="05">Localidades</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold" style="color: #8bc34a;">Sectorización <span class="text-danger">*</span></label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="dropdown">
+                                                    <button class="btn btn-outline dropdown-toggle w-100 text-start" style="border-color: #8bc34a; color: #8bc34a;" type="button" id="territorioGeograficosDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Seleccione Sectorización
+                                                    </button>
+                                                    <ul class="dropdown-menu w-100" aria-labelledby="territorioGeograficosDropdown" id="territorio-geograficos-suboptions-list"></ul>
+                                                    <input type="hidden" id="territorio-geograficos-subtype" name="territorio-geograficos-subtype">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="universo" class="form-label">Universo Detectado</label>
-                                <input type="text" class="form-control" id="universo" name="universo" value="Deportistas (144)" readonly list="universo-options">
-                                <datalist id="universo-options">
-                                    <option value="Deportistas (144)">
-                                    <option value="Estudiantes (200)">
-                                    <option value="Profesionales (300)">
-                                </datalist>
+
+                            <!-- Configuración y Responsables -->
+                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
+                                <div class="card-header text-white" style="background-color: #8bc34a;">
+                                    <h6 class="mb-0 fw-semibold">⚙️ Configuración y Responsables</h6>
+                                </div>
+                                <div class="card-body bg-white">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="encuesta" class="form-label fw-semibold" style="color: #8bc34a;">Encuesta <span class="text-danger">*</span></label>
+                                                <select class="form-select" style="border-color: #8bc34a;" id="encuesta" name="encuesta" >
+                                                    <?php if (isset($surveys) && !empty($surveys)) { ?>
+                                                    <?php foreach ($surveys as $survey): ?>
+                                                    <option value="<?= htmlspecialchars($survey['id']); ?>"><?= htmlspecialchars($survey['title']); ?></option>
+                                                    <?php endforeach; ?>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="entregables" class="form-label fw-semibold" style="color: #8bc34a;">Entregables <span class="text-danger">*</span></label>
+                                                <select class="form-select" style="border-color: #8bc34a;" id="entregables" name="entregables" required>
+                                                    <option value="00001">Orden # 00001</option>
+                                                    <option value="00002">Orden # 00002</option>
+                                                    <option value="00003">Orden # 00003</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="area_id" class="form-label fw-semibold" style="color: #8bc34a;">Área Responsable <span class="text-danger">*</span></label>
+                                                <select class="form-select" style="border-color: #8bc34a;" id="area_id" name="area_id" required>
+                                                    <?php if (isset($areas)) { ?>
+                                                    <?php foreach ($areas as $area): ?>
+                                                    <option value="<?= $area['id']; ?>"><?= htmlspecialchars($area['nombre']); ?></option>
+                                                    <?php endforeach; ?>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="encargado" class="form-label fw-semibold" style="color: #8bc34a;">Encargado(a) <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" style="border-color: #8bc34a;" id="encargado" name="encargado" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="encuesta" class="form-label">Encuesta *</label>
-                                <input type="text" class="form-control" id="encuesta" name="encuesta" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="entregables" class="form-label">Entregables *</label>
-                                <input type="text" class="form-control" id="entregables" name="entregables" required>
+
+                            <!-- Fechas -->
+                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
+                                <div class="card-header text-white" style="background-color: #8bc34a;">
+                                    <h6 class="mb-0 fw-semibold">📅 Programación</h6>
+                                </div>
+                                <div class="card-body bg-white">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fecha_inicio" class="form-label fw-semibold" style="color: #8bc34a;">Fecha de Inicio <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control" style="border-color: #8bc34a;" id="fecha_inicio" name="fecha_inicio" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fecha_fin" class="form-label fw-semibold" style="color: #8bc34a;">Fecha de Término <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control" style="border-color: #8bc34a;" id="fecha_fin" name="fecha_fin" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Segunda Columna -->
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="area_id" class="form-label">Área Responsable *</label>
-                                <select class="form-select" id="area_id" name="area_id" required>
-                                    <option value="">Seleccione un área</option>
-                                    <?php if (isset($areas)) { ?>
-                                        <?php foreach ($areas as $area): ?>
-                                            <option value="<?= $area['id']; ?>"><?= htmlspecialchars($area['nombre']); ?></option>
-                                        <?php endforeach; ?>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
-                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_fin" class="form-label">Fecha de Término *</label>
-                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Campaña</button>
+                        <!-- Columna derecha con el mapa más amplio -->
+                   
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline me-2" style="border-color: #8bc34a; color: #8bc34a;" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <button type="submit" form="formNuevaCampana" class="btn text-white" style="background-color: #8bc34a; border-color: #8bc34a;">
+                    <i class="fas fa-plus me-1"></i>Crear Campaña
+                </button>
             </div>
         </div>
     </div>
 </div>
-
 <style>
 .custom-multiselect .selected-tags {
     border: 1px solid #ced4da;
@@ -301,132 +403,372 @@
     gap: 0.5rem;
 }
 
-.custom-multiselect .tag {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
+#territorio-electorales-options .dropdown-toggle,
+#territorio-geograficos-options .dropdown-toggle {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
 }
 
-.custom-multiselect .tag .remove-tag {
-    cursor: pointer;
-    font-weight: bold;
+#territorio-electorales-options .dropdown-menu,
+#territorio-geograficos-options .dropdown-menu {
+    max-height: 200px;
+    overflow-y: auto;
 }
+
+.modal-dialog.modal-lg {
+    max-width: 1200px;
+    width: 90%;
+}
+
+ 
+
+ 
+
+ 
+
+a.page-link {
+    color: #000000 !important;
+}
+
+ 
 </style>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    function setupMultiselect(selectId, tagsId, optionsId) {
-        const select = document.getElementById(selectId);
-        const tagsContainer = document.getElementById(tagsId);
-        const options = document.querySelectorAll(`#${optionsId} .dropdown-item`);
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formNuevaCampana');
+    const territorioInput = document.getElementById('territorio');
+    const territorioElectoralesRadio = document.getElementById('territorio-electorales');
+    const territorioGeograficosRadio = document.getElementById('territorio-geograficos');
+    const territorioElectoralesOptions = document.getElementById('territorio-electorales-options');
+    const territorioGeograficosOptions = document.getElementById('territorio-geograficos-options');
+    const territorioElectoralesSubSelect = document.getElementById('territorio-electorales-subtype');
+    const territorioGeograficosLevelSelect = document.getElementById('territorio-geograficos-level');
+    const territorioGeograficosSubSelect = document.getElementById('territorio-geograficos-subtype');
+    const territorioElectoralesSubOptionsList = document.getElementById('territorio-electorales-suboptions-list');
+    const territorioGeograficosSubOptionsList = document.getElementById('territorio-geograficos-suboptions-list');
+    const territorioElectoralesDropdown = document.getElementById('territorioElectoralesDropdown');
+    const territorioGeograficosDropdown = document.getElementById('territorioGeograficosDropdown');
+    const mapLoading = document.getElementById('map-loading');
+    let map;
 
-        // Function to update tags
-        function updateTags() {
-            tagsContainer.innerHTML = '';
-            Array.from(select.selectedOptions).forEach(option => {
-                const tag = document.createElement('span');
-                tag.className = 'tag';
-                tag.innerHTML = `${option.text} <span class="remove-tag" data-value="${option.value}">x</span>`;
-                tagsContainer.appendChild(tag);
-            });
+    const geographicLevels = {
+        '01': { label: 'País', subOptions: ['Estados', 'Municipios', 'Delegaciones', 'Localidades'] },
+        '02': { label: 'Estados', subOptions: ['Municipios', 'Delegaciones', 'Localidades'] },
+        '03': { label: 'Municipios', subOptions: ['Delegaciones', 'Localidades'] },
+        '04': { label: 'Delegaciones', subOptions: ['Localidades'] },
+        '05': { label: 'Localidades', subOptions: [] }
+    };
 
-            // Add remove functionality
-            tagsContainer.querySelectorAll('.remove-tag').forEach(button => {
-                button.addEventListener('click', function () {
-                    const value = this.getAttribute('data-value');
-                    const option = Array.from(select.options).find(opt => opt.value === value);
-                    if (option) {
-                        option.selected = false;
-                        updateTags();
-                    }
-                });
-            });
+    function updateTerritorioSelection() {
+        const selectedValue = territorioInput.value;
+        console.log('Territorio seleccionado:', selectedValue);
+
+        territorioElectoralesOptions.style.display = 'none';
+        territorioGeograficosOptions.style.display = 'none';
+
+        territorioElectoralesSubSelect.removeAttribute('required');
+        territorioGeograficosSubSelect.removeAttribute('required');
+        territorioGeograficosLevelSelect.removeAttribute('required');
+
+        territorioElectoralesSubSelect.value = '';
+        territorioGeograficosLevelSelect.value = '';
+        territorioGeograficosSubSelect.value = '';
+
+        if (selectedValue === 'electorales') {
+            console.log('Mostrando opciones electorales');
+            territorioElectoralesOptions.style.display = 'block';
+            territorioElectoralesSubSelect.setAttribute('required', 'required');
+            loadElectoralesSubOptions();
+        } else if (selectedValue === 'geograficos') {
+            console.log('Mostrando opciones geográficas');
+            territorioGeograficosOptions.style.display = 'block';
+            territorioGeograficosLevelSelect.setAttribute('required', 'required');
+            territorioGeograficosSubSelect.setAttribute('required', 'required');
+            loadGeograficosLevelOptions();
         }
-
-        // Add click event to dropdown items
-        options.forEach(option => {
-            option.addEventListener('click', function (e) {
-                e.preventDefault();
-                const value = this.getAttribute('data-value');
-                const selectOption = Array.from(select.options).find(opt => opt.value === value);
-                if (selectOption) {
-                    selectOption.selected = !selectOption.selected;
-                    updateTags();
-                }
-            });
-        });
-
-        // Initialize tags
-        updateTags();
     }
 
-    // Setup for Territorio
-    setupMultiselect('territorio', 'territorio-tags', 'territorio-options');
+    function loadElectoralesSubOptions() {
+        console.log('Cargando opciones electorales');
+        territorioElectoralesSubOptionsList.innerHTML = '';
+        const subOptions = [
+            { value: '1.1', text: 'Distrito Federal' },
+            { value: '1.2', text: 'Distrito Local' },
+            { value: '1.3', text: 'Sección Electoral' }
+        ];
 
-    // Setup for Segmentación
-    setupMultiselect('segmentacion', 'segmentacion-tags', 'segmentacion-options');
+        subOptions.forEach(opt => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.className = 'dropdown-item';
+            a.href = '#';
+            a.setAttribute('data-value', opt.value);
+            a.textContent = opt.text;
+            li.appendChild(a);
+            territorioElectoralesSubOptionsList.appendChild(li);
+        });
+
+        const selectedOption = territorioElectoralesSubSelect.value || '';
+        territorioElectoralesDropdown.textContent = selectedOption 
+            ? subOptions.find(opt => opt.value === selectedOption)?.text || 'Seleccione Sectorización'
+            : 'Seleccione Sectorización';
+
+        territorioElectoralesSubOptionsList.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const value = this.getAttribute('data-value');
+                console.log('Sectorización electoral seleccionada:', value);
+                territorioElectoralesSubSelect.value = value;
+                territorioElectoralesDropdown.textContent = this.textContent;
+                updateMapLayer(value);
+            });
+        });
+    }
+
+    function loadGeograficosLevelOptions() {
+        console.log('Cargando opciones geográficas');
+        loadGeograficosSubOptions(territorioGeograficosLevelSelect.value || '01');
+    }
+
+    function loadGeograficosSubOptions(level) {
+        console.log('Cargando subopciones geográficas para nivel:', level);
+        territorioGeograficosSubOptionsList.innerHTML = '';
+
+        if (level && geographicLevels[level]) {
+            const subOptions = geographicLevels[level].subOptions;
+            subOptions.forEach(opt => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.className = 'dropdown-item';
+                a.href = '#';
+                a.setAttribute('data-value', opt);
+                a.textContent = opt;
+                li.appendChild(a);
+                territorioGeograficosSubOptionsList.appendChild(li);
+            });
+
+            const selectedOption = territorioGeograficosSubSelect.value || '';
+            territorioGeograficosDropdown.textContent = selectedOption 
+                ? subOptions.find(opt => opt === selectedOption) || 'Seleccione Sectorización'
+                : 'Seleccione Sectorización';
+
+            territorioGeograficosSubOptionsList.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.getAttribute('data-value');
+                    console.log('Sectorización geográfica seleccionada:', value);
+                    territorioGeograficosSubSelect.value = value;
+                    territorioGeograficosDropdown.textContent = this.textContent;
+                    updateMapLayer(value);
+                });
+            });
+        } else {
+            territorioGeograficosDropdown.textContent = 'Seleccione Sectorización';
+        }
+    }
+
+    territorioElectoralesRadio.addEventListener('change', function() {
+        if (this.checked) {
+            console.log('Radio electoral seleccionado');
+            territorioInput.value = 'electorales';
+            updateTerritorioSelection();
+        }
+    });
+
+    territorioGeograficosRadio.addEventListener('change', function() {
+        if (this.checked) {
+            console.log('Radio geográfico seleccionado');
+            territorioInput.value = 'geograficos';
+            updateTerritorioSelection();
+        }
+    });
+
+    territorioGeograficosLevelSelect.addEventListener('change', function() {
+        console.log('Cambio en nivel territorial:', this.value);
+        loadGeograficosSubOptions(this.value);
+    });
+
+    form.addEventListener('submit', function(e) {
+        const territorioValue = territorioInput.value;
+        console.log('Validando formulario, territorio:', territorioValue);
+
+        if (!territorioValue) {
+            e.preventDefault();
+            alert('Por favor, seleccione un tipo de territorio (Electorales o Geográficos).');
+            return;
+        }
+
+        if (territorioValue === 'electorales' && !territorioElectoralesSubSelect.value) {
+            e.preventDefault();
+            alert('Por favor, seleccione una sectorización para Electorales.');
+            return;
+        }
+
+        if (territorioValue === 'geograficos' && (!territorioGeograficosLevelSelect.value || !territorioGeograficosSubSelect.value)) {
+            e.preventDefault();
+            alert('Por favor, seleccione un nivel territorial y una sectorización para Geográficos.');
+            return;
+        }
+    });
+
+    updateTerritorioSelection();
+
+    function initializeMap() {
+        if (!map) {
+            mapLoading.style.display = 'flex';
+            map = L.map('map').setView([23.6345, -102.5528], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            console.log('Mapa inicializado');
+            mapLoading.style.display = 'none';
+        }
+    }
+
+    $('#modalNuevaCampana').on('shown.bs.modal', function () {
+        initializeMap();
+    });
+
+    const layerGroups = {
+        'Estados': L.layerGroup(),
+        'Municipios': L.layerGroup(),
+        'Delegaciones': L.layerGroup(),
+        'Localidades': L.layerGroup(),
+        '1.1': L.layerGroup(),
+        '1.2': L.layerGroup(),
+        '1.3': L.layerGroup()
+    };
+
+    function loadGeoJSON(layerName, url, callback) {
+        mapLoading.style.display = 'flex';
+        console.log('Cargando GeoJSON desde:', url);
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al cargar GeoJSON para ${layerName}: ${response.status} - ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`GeoJSON cargado para ${layerName}`);
+                L.geoJSON(data, {
+                    style: function(feature) {
+                        return { color: '#3388ff', weight: 1, fillOpacity: 0.1 };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        layer.bindPopup(layerName + ': ' + (feature.properties.name || feature.properties.nombre || 'Sin nombre'));
+                    }
+                }).addTo(layerGroups[layerName]);
+                if (callback) callback();
+            })
+            .catch(error => console.error('Error al cargar GeoJSON:', error))
+            .finally(() => {
+                mapLoading.style.display = 'none';
+            });
+    }
+
+    const geoJSONUrls = {
+        'Estados': 'https://cors-anywhere.herokuapp.com/https://softteca.com/geojson/estados.geojson',
+        'Municipios': 'https://cors-anywhere.herokuapp.com/https://softteca.com/geojson/municipios.geojson',
+        'Delegaciones': 'https://cors-anywhere.herokuapp.com/https://softteca.com/geojson/delegacion.geojson',
+        'Localidades': 'https://cors-anywhere.herokuapp.com/https://softteca.com/geojson/localidades.geojson',
+        
+    };
+
+    function loadInitialLayers() {
+        Object.keys(geoJSONUrls).forEach(layerName => {
+            loadGeoJSON(layerName, geoJSONUrls[layerName]);
+        });
+    }
+
+    function addLayerControl() {
+        const baseLayers = {
+            'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            })
+        };
+        const overlayLayers = layerGroups;
+        L.control.layers(baseLayers, overlayLayers).addTo(map);
+    }
+
+    $('#modalNuevaCampana').on('shown.bs.modal', function () {
+        initializeMap();
+        loadInitialLayers();
+        addLayerControl();
+    });
+
+    function updateMapLayer(selectedValue) {
+        console.log('Actualizando capa del mapa:', selectedValue);
+        Object.values(layerGroups).forEach(group => group.clearLayers());
+        if (geoJSONUrls[selectedValue]) {
+            loadGeoJSON(selectedValue, geoJSONUrls[selectedValue], () => {
+                layerGroups[selectedValue].addTo(map);
+            });
+        } else {
+            console.warn(`No hay URL de GeoJSON disponible para ${selectedValue}`);
+        }
+    }
+
+    if (territorioInput.value === 'geograficos' && territorioGeograficosLevelSelect.value === '01') {
+        territorioGeograficosSubSelect.value = 'Estados';
+        updateMapLayer('Estados');
+    }
 });
 </script>
 
-<!-- Script para cargar los subtipos dependiendo del tipo seleccionado -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Obtener referencias a los elementos select
-        const tipoSelect = document.getElementById('tipo_id');
-        const subtipoSelect = document.getElementById('subtipo_id');
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoSelect = document.getElementById('tipo_id');
+    const subtipoSelect = document.getElementById('subtipo_id');
 
-        // Función para cargar los subtipos
-        function cargarSubtipos(tipoId) {
-            // Limpiar las opciones actuales
-            subtipoSelect.innerHTML = '<option value="">Seleccione un subtipo</option>';
+    function cargarSubtipos(tipoId) {
+        subtipoSelect.innerHTML = '<option value="">Seleccione un subtipo</option>';
 
-            if (!tipoId)
-                return;
+        if (!tipoId)
+            return;
 
-            // Construir la URL correcta
-            const url = '<?= base_url(); ?>campanas/obtener/subtipos/' + tipoId;
-            console.log('Realizando petición a:', url);
+        const url = '<?= base_url(); ?>campanas/obtener/subtipos/' + tipoId;
+        console.log('Realizando petición a:', url);
 
-            // Realizar petición AJAX para obtener los subtipos
-            fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error en la respuesta del servidor: ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Datos recibidos:', data);
-                        if (data && data.length > 0) {
-                            data.forEach(subtipo => {
-                                const option = document.createElement('option');
-                                option.value = subtipo.id;
-                                option.textContent = subtipo.nombre;
-                                subtipoSelect.appendChild(option);
-                            });
-                            console.log('Subtipos cargados correctamente');
-                        } else {
-                            console.log('No se encontraron subtipos para este tipo');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al cargar subtipos:', error);
-                        // Mostrar mensaje de error en la interfaz
-                        subtipoSelect.innerHTML = '<option value="">Error al cargar subtipos</option>';
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos recibidos:', data);
+                if (data && data.length > 0) {
+                    data.forEach(subtipo => {
+                        const option = document.createElement('option');
+                        option.value = subtipo.id;
+                        option.textContent = subtipo.nombre;
+                        subtipoSelect.appendChild(option);
                     });
-        }
+                    console.log('Subtipos cargados correctamente');
+                } else {
+                    console.log('No se encontraron subtipos para este tipo');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar subtipos:', error);
+                subtipoSelect.innerHTML = '<option value="">Error al cargar subtipos</option>';
+            });
+    }
 
-        // Asignar el evento change al select de tipos
-        tipoSelect.addEventListener('change', function () {
-            console.log('Tipo seleccionado:', this.value);
-            cargarSubtipos(this.value);
-        });
-
-        // Log para verificar que el script se está ejecutando
-        console.log('Script de carga de subtipos inicializado');
+    tipoSelect.addEventListener('change', function() {
+        console.log('Tipo seleccionado:', this.value);
+        cargarSubtipos(this.value);
     });
+
+    console.log('Script de carga de subtipos inicializado');
+});
 </script>

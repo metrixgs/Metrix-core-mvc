@@ -13,10 +13,17 @@ class CampanasModel extends Model {
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'tipo_id', 'subtipo_id', 'area_id', 'nombre',
-        'coordinador', 'descripcion', 'fecha_inicio',
-        'fecha_fin', 'estado'
-    ];
+    'tipo_id', 'subtipo_id', 'area_id', 'nombre',
+    'coordinador', 'descripcion', 'fecha_inicio',
+    'fecha_fin', 'estado',
+    'encuesta',           
+    'entregables',       
+    'universo',            
+    'territorio',          
+    'territorio_subtype',   
+    'sectorizacion'  
+];
+
     protected $useTimestamps = false;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
