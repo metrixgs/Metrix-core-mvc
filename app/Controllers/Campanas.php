@@ -50,16 +50,31 @@ class Campanas extends BaseController {
         helper('Menu');
     }
 
-     public function index() {
+    public function index() {
     $data['titulo_pagina'] = 'Metrix | Panel de Control';
+
+    // Tickets y notificaciones
     $tickets = $this->tickets->obtenerTickets();
     $data['tickets'] = $tickets;
+
     $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
     $data['notificaciones'] = $notificaciones;
+
+    // Campañas
     $campanas = $this->campanas->obtenerCampanas();
+
+    // AGREGADO: incluir nombre del coordinador
+    foreach ($campanas as &$campana) {
+        $usuario = $this->usuarios->find($campana['coordinador']);
+        $campana['nombre_coordinador'] = $usuario['nombre'] ?? 'N/D';
+    }
+
     $data['campanas'] = $campanas;
+
+    // Encuestas
     $data['surveys'] = $this->survey->findAll();
 
+    // Generar nuevo ID visual de campaña
     $new_id = 1;
     if (!empty($campanas)) {
         $ids = array_column($campanas, 'id');
@@ -68,19 +83,22 @@ class Campanas extends BaseController {
     }
     $data['new_campana_id'] = '#CAM-' . str_pad($new_id, 6, '0', STR_PAD_LEFT);
 
+    // Tipos de campaña
     $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
     $data['tipos_campanas'] = $tipos_campanas;
 
+    // Segmentaciones y áreas
     $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
     $areas = $this->areas->obtenerAreas();
     $data['areas'] = $areas;
 
-    // NUEVO: obtenemos usuarios con id >= 2
+    // Lista de usuarios desde ID 2
     $data['usuarios_desde_2'] = $this->usuarios
         ->select('id, nombre')
         ->where('id >=', 2)
         ->findAll();
 
+    // Renderizar vistas
     return view('incl/head-application', $data)
         . view('incl/header-application', $data)
         . view('incl/menu-admin', $data)
@@ -88,6 +106,7 @@ class Campanas extends BaseController {
         . view('incl/footer-application', $data)
         . view('incl/scripts-application', $data);
 }
+
 
 
     public function tipos() {

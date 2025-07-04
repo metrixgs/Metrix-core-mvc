@@ -128,7 +128,7 @@
                                                 </td>
 
                                                 <!-- Coordinador -->
-                                                <td><?= htmlspecialchars($campana['coordinador']); ?></td>
+                                                <td><?= esc($campana['nombre_coordinador']) ?></td>
 
                                                 <!-- Fecha de inicio -->
                                                 <td><?= date('d/M/Y', strtotime($campana['fecha_inicio'])); ?></td>
