@@ -2,6 +2,9 @@
     <div class="card-header bg-light border-bottom py-3">
         <h5 class="mb-0 text-dark fw-semibold"><i class="bi bi-person-plus-fill me-2"></i>Registrar nuevo ciudadano</h5>
     </div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     <div class="card-body">
         <?php if (session('errors')): ?>
             <div class="alert alert-danger">
@@ -126,6 +129,15 @@
         </select>
     </div>
 </div>
+<input type="hidden" id="latitud" name="latitud" value="<?= old('latitud') ?>">
+<input type="hidden" id="longitud" name="longitud" value="<?= old('longitud') ?>">
+
+ <!-- Mapa-->
+<div class="mb-3">
+  <label class="form-label">Selecciona ubicación en el mapa</label>
+  <div id="map" style="height: 400px; width: 100%;"></div>
+  <small class="text-muted">Haz clic o arrastra el marcador para elegir la ubicación exacta.</small>
+</div>
 
             <div class="d-flex justify-content-between">
                 <a href="<?= base_url('directorio') ?>" class="btn btn-secondary">Cancelar</a>
@@ -153,6 +165,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.value = capitalizarPrimeraLetra(input.value.trim());
             });
         }
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const latInput = document.getElementById('latitud');
+    const lngInput = document.getElementById('longitud');
+
+    // Valor inicial (opcional: centrar en algún lugar)
+    const defaultLat = latInput.value || 19.4326;  // CDMX ejemplo
+    const defaultLng = lngInput.value || -99.1332;
+
+    const map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Crear marcador
+    const marker = L.marker([defaultLat, defaultLng], {
+        draggable: true
+    }).addTo(map);
+
+    // Actualizar campos cuando se mueve el marcador
+    marker.on('dragend', function(e) {
+        const latlng = marker.getLatLng();
+        latInput.value = latlng.lat;
+        lngInput.value = latlng.lng;
+    });
+
+    // Permitir clic en mapa para mover marcador
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        latInput.value = e.latlng.lat;
+        lngInput.value = e.latlng.lng;
     });
 });
 </script>

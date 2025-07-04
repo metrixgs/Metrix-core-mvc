@@ -638,14 +638,21 @@
     </a>
 
     <!-- Botón de eliminar -->
-    <form action="<?= base_url('directorio/eliminar/' . $contacto['id']) ?>" method="post" class="d-inline-block" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');">
-        <?= csrf_field() ?>
-        <button type="submit" class="btn btn-outline-danger btn-lg ms-2">
-            <i class="bi bi-trash me-2"></i>Eliminar usuario
-        </button>
-    </form>
-</div>
+  
+<form 
+    action="<?= base_url('directorio/' . $contacto['id']) ?>" 
+    method="post" 
+    class="d-inline-block"
+    onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');"
+>
+    <?= csrf_field() ?>
+    <!-- Spoofing de DELETE -->
+    <input type="hidden" name="_method" value="DELETE">
 
+    <button type="submit" class="btn btn-outline-danger btn-lg ms-2">
+        <i class="bi bi-trash me-2"></i>Eliminar usuario
+    </button>
+</form>
 
 <!-- Floating Action Button -->
 <div class="floating-action">

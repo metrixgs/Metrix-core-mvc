@@ -34,11 +34,8 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="campana_id" class="form-label">Campaña</label>
-                                    <input type="number" class="form-control" id="campana_id" name="campana_id" value="1">
-                                    <small class="text-muted">ID de la campaña a la que pertenece esta ronda</small>
-                                </div>
+                               <input type="hidden" name="campana_id" value="<?= esc($_GET['campana_id'] ?? '') ?>">
+
                             </div>
                             <div class="col-lg-6">
                                 <div class="mb-3">

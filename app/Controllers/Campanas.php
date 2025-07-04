@@ -14,6 +14,7 @@ use App\Models\SubtiposCampanasModel;
 use App\Models\SegmentacionesModel;
 use App\Models\SurveyModel;
  
+ 
 
 class Campanas extends BaseController {
 
@@ -49,54 +50,45 @@ class Campanas extends BaseController {
         helper('Menu');
     }
 
-    public function index() {
-        # Creamo el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Panel de Control';
+     public function index() {
+    $data['titulo_pagina'] = 'Metrix | Panel de Control';
+    $tickets = $this->tickets->obtenerTickets();
+    $data['tickets'] = $tickets;
+    $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+    $data['notificaciones'] = $notificaciones;
+    $campanas = $this->campanas->obtenerCampanas();
+    $data['campanas'] = $campanas;
+    $data['surveys'] = $this->survey->findAll();
 
-        # Obtenemos todos los tickets del cliente...
-        $tickets = $this->tickets->obtenerTickets();
-        $data['tickets'] = $tickets;
-
-        # Obtenemos todas las notificaciones por usuario...
-        $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
-        $data['notificaciones'] = $notificaciones;
-
-        # Obtenemos todas las campañas...
-        // Assuming $this->campanas->obtenerCampanas() returns an array of campaigns
-        $campanas = $this->campanas->obtenerCampanas();
-        $data['campanas'] = $campanas;
-          $data['surveys'] = $this->survey->findAll();
-
-        // Initialize the new ID
-        $new_id = 1; // Default to 1 if no campaigns exist
-
-        if (!empty($campanas)) {
-            // Extract all IDs and find the maximum
-            $ids = array_column($campanas, 'id');
-            $last_id = max($ids);
-            $new_id = $last_id + 1;
-        }
-
-        // Format the new ID as #CAM-XXXXXX (padded with zeros to 6 digits)
-        $data['new_campana_id'] = '#CAM-' . str_pad($new_id, 6, '0', STR_PAD_LEFT);
-
-        # Obtenemso los tipos de campañas...
-        $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
-        $data['tipos_campanas'] = $tipos_campanas;
-
-        $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
-
-        # Obtenemos todas las areas...
-        $areas = $this->areas->obtenerAreas();
-        $data['areas'] = $areas;
-
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('campanas/lista-campanas', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
+    $new_id = 1;
+    if (!empty($campanas)) {
+        $ids = array_column($campanas, 'id');
+        $last_id = max($ids);
+        $new_id = $last_id + 1;
     }
+    $data['new_campana_id'] = '#CAM-' . str_pad($new_id, 6, '0', STR_PAD_LEFT);
+
+    $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
+    $data['tipos_campanas'] = $tipos_campanas;
+
+    $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
+    $areas = $this->areas->obtenerAreas();
+    $data['areas'] = $areas;
+
+    // NUEVO: obtenemos usuarios con id >= 2
+    $data['usuarios_desde_2'] = $this->usuarios
+        ->select('id, nombre')
+        ->where('id >=', 2)
+        ->findAll();
+
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/lista-campanas', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
 
     public function tipos() {
         # Creamo el titulo de la pagina...
@@ -198,8 +190,7 @@ class Campanas extends BaseController {
                 . view('incl/scripts-application', $data);
     }
 
-   public function crear() {
-    // 1️⃣ Obtenemos los datos del formulario
+    public function crear() {
     $nombre = $this->request->getPost('nombre');
     $coordinador = $this->request->getPost('coordinador');
     $tipo_id = $this->request->getPost('tipo_id');
@@ -209,27 +200,28 @@ class Campanas extends BaseController {
     $descripcion = $this->request->getPost('descripcion');
     $fecha_inicio = $this->request->getPost('fecha_inicio');
     $fecha_fin = $this->request->getPost('fecha_fin');
-    $encuesta = $this->request->getPost('encuesta');           // ✅ Ahora sí capturas encuesta
-    $entregables = $this->request->getPost('entregables');     // ✅ Ahora sí capturas entregables
-    $universo = $this->request->getPost('universo');           // ✅ Ahora sí capturas universo
-    $territorio = $this->request->getPost('territorio');       // ✅ Ahora sí capturas territorio
-    $sectorizacion = $this->request->getPost('sectorizacion'); // ✅ Ahora sí capturas sectorizacion
+    $encuesta = $this->request->getPost('encuesta');
+    $entregables = $this->request->getPost('entregables');
+    $universo = $this->request->getPost('universo');
+    $territorio = $this->request->getPost('territorio');
+    $territorio_subtype = $this->request->getPost('territorio-electorales-subtype') 
+        ?? $this->request->getPost('territorio-geograficos-subtype');
+    $sectorizacion = $this->request->getPost('sectorizacion');
 
-    // 2️⃣ Definimos reglas de validación para todos los campos
     $validationRules = [
-        'nombre' => 'required|max_length[100]',
-        'coordinador' => 'required|max_length[100]',
-        'tipo_id' => 'required|numeric',
-        'area_id' => 'required|numeric',
-        'estado' => 'required|in_list[Programada,Activa,Finalizada,Propuesta]',
-        'descripcion' => 'required',
-        'fecha_inicio' => 'required|valid_date',
-        'fecha_fin' => 'required|valid_date',
-        // Validaciones opcionales para campos adicionales:
+        'nombre' => 'permit_empty|max_length[100]',
+        'coordinador' => 'permit_empty|max_length[100]',
+        'tipo_id' => 'permit_empty|numeric',
+        'area_id' => 'permit_empty|numeric',
+        'estado' => 'permit_empty|in_list[Programada,Activa,Finalizada,Propuesta]',
+        'descripcion' => 'permit_empty|string',
+        'fecha_inicio' => 'permit_empty|valid_date',
+        'fecha_fin' => 'permit_empty|valid_date',
         'encuesta' => 'permit_empty|numeric',
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
         'territorio' => 'permit_empty|in_list[electorales,geograficos]',
+        'territorio_subtype' => 'permit_empty|string',
         'sectorizacion' => 'permit_empty',
     ];
 
@@ -237,13 +229,11 @@ class Campanas extends BaseController {
         $validationRules['subtipo_id'] = 'numeric';
     }
 
-    // 3️⃣ Validamos los datos
     if (!$this->validate($validationRules)) {
         session()->setFlashdata('validation', $this->validator->getErrors());
         return redirect()->to("campanas/")->withInput();
     }
 
-    // 4️⃣ Creamos el array para guardar en la base de datos
     $infoCampana = [
         'nombre' => $nombre,
         'coordinador' => $coordinador,
@@ -257,6 +247,7 @@ class Campanas extends BaseController {
         'entregables' => $entregables ?? null,
         'universo' => $universo ?? null,
         'territorio' => $territorio ?? null,
+        'territorio_subtype' => $territorio_subtype ?? null,
         'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
     ];
 
@@ -264,7 +255,6 @@ class Campanas extends BaseController {
         $infoCampana['subtipo_id'] = $subtipo_id;
     }
 
-    // 5️⃣ Guardamos en la base de datos
     if ($this->campanas->crearCampana($infoCampana)) {
         $this->session->setFlashdata([
             'titulo' => "¡Éxito!",

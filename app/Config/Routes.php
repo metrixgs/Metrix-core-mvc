@@ -43,6 +43,8 @@ $routes->get('rondas/eliminar/(:num)', 'Rondas::eliminar/$1');
 $routes->get('rondas/cambiar_estado/(:num)/(:any)', 'Rondas::cambiar_estado/$1/$2');
  $routes->get('rondas/puntos', 'Rondas::puntos');
 $routes->get('rondas/zonas', 'Rondas::zonas');
+$routes->get('rondas/listar/(:num)', 'Rondas::listar/$1');
+
 
 #Rutas de Rondas por Segmentación...
 $routes->get('rondas/por_segmentacion', 'Rondas::por_segmentacion');
@@ -172,8 +174,12 @@ $routes->get('/directorio/crear', 'Directorio::crear');
 $routes->post('/directorio/guardar', 'Directorio::guardar');
 $routes->get('/directorio/editar/(:num)', 'Directorio::editar/$1');
 $routes->post('/directorio/actualizar/(:num)', 'Directorio::actualizar/$1');
-$routes->get('/directorio/eliminar/(:num)', 'Directorio::eliminar/$1');
+ 
+$routes->delete('/directorio/(:num)', 'Directorio::eliminar/$1');
+
 $routes->get('/directorio/ver/(:num)', 'Directorio::ver/$1');
+$routes->get('directorio/mapa/(:num)', 'Directorio::mapa/$1');
+
 
 //pagina para el Qr 
 $routes->get('tickets/listadosQr', 'TiketListaController::index');

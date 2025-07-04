@@ -150,9 +150,14 @@
                                         <td><?= esc($c['segundo_apellido'] ?? '—') ?></td>
                                         <td>
                                             <span class="text-primary fw-medium"><?= esc($c['codigo_ciudadano'] ?? '—') ?></span>
-                                        </td>
-                                        <td><?= esc($c['residencia'] ?? '—') ?></td>
-                                       <td>
+  <td>
+    <?php if (!empty($c['municipio']) || !empty($c['estado'])): ?>
+        <?= esc(trim($c['municipio']) . ',' . trim($c['estado'])) ?>
+    <?php else: ?>
+        &mdash;
+    <?php endif; ?>
+</td>
+<td>
     <?php if (!empty($c['lider_nombre'])): ?>
         <small class="text-muted">
             <?= esc($c['lider_nombre'] . ' ' . $c['lider_apellido'] . ' ' . $c['lider_segundo']) ?>
@@ -178,11 +183,11 @@
                                                 </a>
                                                 
                                                 <!-- Ubicación -->
-                                                <button type="button" class="btn p-0 border-0 bg-transparent" title="Ubicación" style="color: #6c757d;" disabled>
+                                                <a href="<?= base_url('directorio/mapa/' . $c['id']) ?>" class="btn p-0 border-0 bg-transparent" title="Ubicación" style="color: #6c757d;">
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                                                     </svg>
-                                                </button>
+                                                </a>
                                                 
                                             
                                             </div>

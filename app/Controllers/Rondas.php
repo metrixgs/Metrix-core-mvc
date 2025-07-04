@@ -435,5 +435,19 @@ public function zonas()
         . view('incl/scripts-application', $data);
 }
 
+ public function listar($campana_id = null)
+{
+    if (!$campana_id) {
+        return $this->response->setJSON([]);
+    }
+
+    // Obtener todas las rondas asociadas a la campaña
+    $rondas = $this->rondas
+        ->select('id, fecha_actividad, hora_actividad, encargado, estado')
+        ->where('campana_id', $campana_id)
+        ->findAll();
+
+    return $this->response->setJSON($rondas);
+}
 
 }

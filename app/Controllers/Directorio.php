@@ -63,60 +63,68 @@ class Directorio extends BaseController
          . view('incl/footer-application', $data)
          . view('incl/scripts-application', $data);
 }
-
-
-   public function guardar()
+ public function guardar()
 {
     $validation = \Config\Services::validation();
 
     $rules = [
-        'nombre' => 'required|min_length[3]|max_length[100]',
-        'primer_apellido' => 'permit_empty|max_length[100]',
-        'segundo_apellido' => 'permit_empty|max_length[100]',
-        'curp' => 'permit_empty|exact_length[18]',
-        'fecha_nacimiento' => 'permit_empty|valid_date[Y-m-d]',
-        'residencia' => 'permit_empty|max_length[255]',
-        'email' => 'permit_empty|valid_email|max_length[150]',
-        'telefono' => 'permit_empty|max_length[50]',
-        'direccion' => 'permit_empty|max_length[255]',
-        'estado' => 'permit_empty|max_length[100]',
-        'municipio' => 'permit_empty|max_length[100]',
-        'localidad' => 'permit_empty|max_length[100]',
-        'colonia' => 'permit_empty|max_length[100]',
-        'calle' => 'permit_empty|max_length[100]',
-        'numero_exterior' => 'permit_empty|max_length[20]',
-        'numero_interior' => 'permit_empty|max_length[20]',
-        'codigo_postal' => 'permit_empty|max_length[10]',
-        'empresa' => 'permit_empty|max_length[100]',
-        'cargo' => 'permit_empty|max_length[100]',
-        'tipo_cliente' => 'permit_empty|max_length[50]',
-        'nivel_estudios' => 'permit_empty|max_length[100]',
-        'ocupacion' => 'permit_empty|max_length[100]',
-        'tipo_discapacidad' => 'permit_empty|max_length[100]',
-        'grupo_etnico' => 'permit_empty|max_length[100]',
-        'acepta_avisos' => 'permit_empty|in_list[0,1]',
-        'acepta_terminos' => 'permit_empty|in_list[0,1]',
-        'id_lider' => 'permit_empty|is_natural',
-        'tipo_red' => 'required|in_list[CDN,BNF,RED,EMP]'
+        'nombre'             => 'required|min_length[3]|max_length[100]',
+        'primer_apellido'    => 'permit_empty|max_length[100]',
+        'segundo_apellido'   => 'permit_empty|max_length[100]',
+        'curp'               => 'permit_empty|exact_length[18]',
+        'fecha_nacimiento'   => 'permit_empty|valid_date[Y-m-d]',
+        'residencia'         => 'permit_empty|max_length[255]',
+        'email'              => 'permit_empty|valid_email|max_length[150]',
+        'telefono'           => 'permit_empty|max_length[50]',
+        'direccion'          => 'permit_empty|max_length[255]',
+        'estado'             => 'permit_empty|max_length[100]',
+        'municipio'          => 'permit_empty|max_length[100]',
+        'localidad'          => 'permit_empty|max_length[100]',
+        'colonia'            => 'permit_empty|max_length[100]',
+        'calle'              => 'permit_empty|max_length[100]',
+        'numero_exterior'    => 'permit_empty|max_length[20]',
+        'numero_interior'    => 'permit_empty|max_length[20]',
+        'codigo_postal'      => 'permit_empty|max_length[10]',
+        'empresa'            => 'permit_empty|max_length[100]',
+        'cargo'              => 'permit_empty|max_length[100]',
+        'tipo_cliente'       => 'permit_empty|max_length[50]',
+        'nivel_estudios'     => 'permit_empty|max_length[100]',
+        'ocupacion'          => 'permit_empty|max_length[100]',
+        'tipo_discapacidad'  => 'permit_empty|max_length[100]',
+        'grupo_etnico'       => 'permit_empty|max_length[100]',
+        'acepta_avisos'      => 'permit_empty|in_list[0,1]',
+        'acepta_terminos'    => 'permit_empty|in_list[0,1]',
+        'id_lider'           => 'permit_empty|is_natural',
+        'tipo_red'           => 'required|in_list[CDN,BNF,RED,EMP]',
+        'latitud'            => 'permit_empty|decimal',
+        'longitud'           => 'permit_empty|decimal',
     ];
 
+    // Obtener datos del formulario y normalizar
     $data = $this->request->getPost(array_keys($rules));
-    $data['acepta_avisos'] = $this->request->getPost('acepta_avisos') ? 1 : 0;
-    $data['acepta_terminos'] = $this->request->getPost('acepta_terminos') ? 1 : 0;
+    $data['acepta_avisos']  = $this->request->getPost('acepta_avisos') ? 1 : 0;
+    $data['acepta_terminos']= $this->request->getPost('acepta_terminos') ? 1 : 0;
 
-    if (!$validation->setRules($rules)->run($data)) {
+    // Validación
+    if (! $validation->setRules($rules)->run($data)) {
         return redirect()->back()->withInput()->with('errors', $validation->getErrors());
     }
 
+    // Limpiar espacios
+    $data['estado']    = trim($data['estado']);
+    $data['municipio'] = trim($data['municipio']);
+
     // Generar código único
-    $ultimo = $this->directorioModel->orderBy('id', 'DESC')->first();
+    $ultimo      = $this->directorioModel->orderBy('id', 'DESC')->first();
     $siguienteId = $ultimo ? $ultimo['id'] + 1 : 1;
     $data['codigo_ciudadano'] = 'CDZ-' . str_pad($siguienteId, 4, '0', STR_PAD_LEFT);
 
+    // Guardar en DB (estado y municipio se guardan por separado)
     $this->directorioModel->save($data);
 
     return redirect()->to('/directorio')->with('mensaje', 'Ciudadano registrado con éxito.');
 }
+
 
 
 
@@ -148,10 +156,12 @@ class Directorio extends BaseController
          . view('incl/scripts-application', $data);
 }
 
-     public function actualizar($id = null)
+ 
+ 
+ public function actualizar($id = null)
 {
+    // Verificar existencia del contacto
     $contacto = $this->directorioModel->find($id);
-
     if (!$contacto) {
         throw new \CodeIgniter\Exceptions\PageNotFoundException("No se encontró el contacto con ID $id");
     }
@@ -159,47 +169,70 @@ class Directorio extends BaseController
     $validation = \Config\Services::validation();
 
     $rules = [
-        'nombre' => 'required|min_length[3]|max_length[100]',
-        'primer_apellido' => 'permit_empty|max_length[100]',
-        'segundo_apellido' => 'permit_empty|max_length[100]',
-        'curp' => 'permit_empty|exact_length[18]',
-        'fecha_nacimiento' => 'permit_empty|valid_date[Y-m-d]',
-        'residencia' => 'permit_empty|max_length[255]',
-        'email' => 'permit_empty|valid_email|max_length[150]',
-        'telefono' => 'permit_empty|max_length[50]',
-        'direccion' => 'permit_empty|max_length[255]',
-        'estado' => 'permit_empty|max_length[100]',
-        'municipio' => 'permit_empty|max_length[100]',
-        'localidad' => 'permit_empty|max_length[100]',
-        'colonia' => 'permit_empty|max_length[100]',
-        'calle' => 'permit_empty|max_length[100]',
-        'numero_exterior' => 'permit_empty|max_length[20]',
-        'numero_interior' => 'permit_empty|max_length[20]',
-        'codigo_postal' => 'permit_empty|max_length[10]',
-        'empresa' => 'permit_empty|max_length[100]',
-        'cargo' => 'permit_empty|max_length[100]',
-        'tipo_cliente' => 'permit_empty|max_length[50]',
-        'nivel_estudios' => 'permit_empty|max_length[100]',
-        'ocupacion' => 'permit_empty|max_length[100]',
-        'tipo_discapacidad' => 'permit_empty|max_length[100]',
-        'grupo_etnico' => 'permit_empty|max_length[100]',
-        'acepta_avisos' => 'permit_empty|in_list[0,1]',
-        'acepta_terminos' => 'permit_empty|in_list[0,1]',
-        'activo' => 'permit_empty|in_list[0,1]',
-        'id_lider' => 'permit_empty|is_natural',
-        'tipo_red' => 'required|in_list[CDN,BNF,RED,EMP]'
+        'nombre'             => 'required|min_length[3]|max_length[100]',
+        'primer_apellido'    => 'permit_empty|max_length[100]',
+        'segundo_apellido'   => 'permit_empty|max_length[100]',
+        'curp'               => 'permit_empty|exact_length[18]',
+        'old_curp'           => 'permit_empty',
+        'fecha_nacimiento'   => 'permit_empty|valid_date[Y-m-d]',
+        'residencia'         => 'permit_empty|max_length[255]',
+        'email'              => 'permit_empty|valid_email|max_length[150]',
+        'telefono'           => 'permit_empty|max_length[50]',
+        'direccion'          => 'permit_empty|max_length[255]',
+        'estado'             => 'permit_empty|max_length[100]',
+        'municipio'          => 'permit_empty|max_length[100]',
+        'localidad'          => 'permit_empty|max_length[100]',
+        'colonia'            => 'permit_empty|max_length[100]',
+        'calle'              => 'permit_empty|max_length[100]',
+        'numero_exterior'    => 'permit_empty|max_length[20]',
+        'numero_interior'    => 'permit_empty|max_length[20]',
+        'codigo_postal'      => 'permit_empty|max_length[10]',
+        'empresa'            => 'permit_empty|max_length[100]',
+        'cargo'              => 'permit_empty|max_length[100]',
+        'tipo_cliente'       => 'permit_empty|max_length[50]',
+        'nivel_estudios'     => 'permit_empty|max_length[100]',
+        'ocupacion'          => 'permit_empty|max_length[100]',
+        'tipo_discapacidad'  => 'permit_empty|max_length[100]',
+        'grupo_etnico'       => 'permit_empty|max_length[100]',
+        'acepta_avisos'      => 'permit_empty|in_list[0,1]',
+        'acepta_terminos'    => 'permit_empty|in_list[0,1]',
+        'activo'             => 'permit_empty|in_list[0,1]',
+        'id_lider'           => 'permit_empty|is_natural',
+        'tipo_red'           => 'required|in_list[CDN,BNF,RED,EMP]',
+        'latitud'            => 'permit_empty|decimal',
+        'longitud'           => 'permit_empty|decimal',
     ];
 
+    // Obtener datos del formulario
     $post = $this->request->getPost();
-    $post['acepta_avisos'] = $this->request->getPost('acepta_avisos') ? 1 : 0;
+    $post['acepta_avisos']   = $this->request->getPost('acepta_avisos') ? 1 : 0;
     $post['acepta_terminos'] = $this->request->getPost('acepta_terminos') ? 1 : 0;
-    $post['activo'] = $this->request->getPost('activo') ?? 1;
+    $post['activo']          = $this->request->getPost('activo') ?? 1;
 
+    // Validación
     if (!$validation->setRules($rules)->run($post)) {
         return redirect()->back()->withInput()->with('errors', $validation->getErrors());
     }
 
+    // Manejo de CURP: asegurarse de que no sea cadena vacía
+    if (isset($post['curp'])) {
+        $post['curp'] = trim($post['curp']);
+
+        if ($post['curp'] === '') {
+            // Si viene vacío, conservar el valor anterior o dejarlo en null
+            $post['curp'] = !empty($post['old_curp']) ? $post['old_curp'] : null;
+        }
+    }
+    unset($post['old_curp']);
+
+    // Limpiar espacios en municipio y estado
+    $post['municipio'] = isset($post['municipio']) ? trim($post['municipio']) : null;
+    $post['estado']    = isset($post['estado']) ? trim($post['estado']) : null;
+
+    // Asignar ID para la actualización
     $post['id'] = $id;
+
+    // Guardar en la base de datos
     $this->directorioModel->save($post);
 
     return redirect()->to('/directorio')->with('mensaje', 'Contacto actualizado con éxito.');
@@ -239,5 +272,27 @@ class Directorio extends BaseController
          . view('incl/scripts-application', $data);
 }
 
+
+
+public function mapa($id = null)
+{
+    $contacto = $this->directorioModel->find($id);
+
+    if (!$contacto || !$contacto['latitud'] || !$contacto['longitud']) {
+        throw new \CodeIgniter\Exceptions\PageNotFoundException('No se encontró ubicación para el contacto.');
+    }
+
+    $data = [
+        'titulo_pagina' => 'Ubicación del Ciudadano',
+        'contacto' => $contacto
+    ];
+
+    return view('incl/head-application', $data)
+         . view('incl/header-application', $data)
+         . view('incl/menu-admin', $data)
+         . view('directorio/mapa', $data)
+         . view('incl/footer-application', $data)
+         . view('incl/scripts-application', $data);
+}
 
 }
