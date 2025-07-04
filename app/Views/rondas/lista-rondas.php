@@ -28,7 +28,7 @@
                         <div class="col-md-auto ms-auto">
                             <div class="d-flex gap-2">
                                 <a href="<?= base_url('rondas/crear') ?>" class="btn btn-success">
-                                    <i class="ri-add-line align-bottom"></i> Nueva Ronda
+                                    <i class="ri-add-line align-bottom"></i> 
                                 </a>
                             </div>
                         </div>
@@ -87,8 +87,9 @@
                                                 ?>
                                                 <span class="badge <?= $estadoClase ?>"><?= esc($ronda['estado']) ?></span>
                                             </td>
-                                            <td><?= esc($ronda['coordinador']) ?></td>
-                                            <td><?= esc($ronda['encargado']) ?></td>
+                                            <td><?= esc($ronda['nombre_coordinador']) ?></td>
+                                            <td><?= esc($ronda['nombre_encargado']) ?></td>
+
                                             <td><?= date('d/m/Y', strtotime($ronda['fecha_actividad'])) ?></td>
                                             <td><?= date('H:i', strtotime($ronda['hora_actividad'])) ?></td>
                                             <td class="text-center">

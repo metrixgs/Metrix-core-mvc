@@ -2,11 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
-use App\Models\UsuariosModel;
-use App\Models\TicketsModel;
-use App\Models\TareasModel;
 use App\Models\RondasModel;
+use App\Models\TareasModel;
+use App\Models\TicketsModel;
+use App\Models\UsuariosModel;
+use App\Controllers\BaseController;
 use App\Models\SegmentacionesModel;
 use App\Models\RondasSegmentacionesModel;
 
@@ -36,44 +36,45 @@ class Rondas extends BaseController {
     }
 
     public function index() {
-        # Creamos el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Lista de Rondas';
+    # Creamos el titulo de la pagina...
+    $data['titulo_pagina'] = 'Metrix | Lista de Rondas';
 
-        # Obtenemos todas las rondas
-        $rondas = $this->rondas->obtenerRondas();
+    # Obtenemos todas las rondas con nombres de coordinador y encargado
+    $rondas = $this->rondas->obtenerRondasConUsuarios();
 
-        # Obtener las segmentaciones para cada ronda
-        foreach ($rondas as $key => $ronda) {
-            // Obtener relaciones de segmentación para esta ronda
-            $relaciones = $this->rondasSegmentaciones->obtenerRelacionesPorRonda($ronda['id']);
+    # Obtener las segmentaciones para cada ronda
+    foreach ($rondas as $key => $ronda) {
+        // Obtener relaciones de segmentación para esta ronda
+        $relaciones = $this->rondasSegmentaciones->obtenerRelacionesPorRonda($ronda['id']);
 
-            // Inicializar array para almacenar las segmentaciones
-            $segmentacionesRonda = [];
+        // Inicializar array para almacenar las segmentaciones
+        $segmentacionesRonda = [];
 
-            // Obtener detalles de cada segmentación
-            foreach ($relaciones as $relacion) {
-                $segmentacion = $this->segmentaciones->obtenerSegmentacion($relacion['segmentacion_id']);
-                if ($segmentacion) {
-                    $segmentacionesRonda[] = $segmentacion;
-                }
+        // Obtener detalles de cada segmentación
+        foreach ($relaciones as $relacion) {
+            $segmentacion = $this->segmentaciones->obtenerSegmentacion($relacion['segmentacion_id']);
+            if ($segmentacion) {
+                $segmentacionesRonda[] = $segmentacion;
             }
-
-            // Añadir las segmentaciones a la información de la ronda
-            $rondas[$key]['segmentaciones'] = $segmentacionesRonda;
         }
 
-        $data['rondas'] = $rondas;
-
-        # También podemos preparar la lista de segmentaciones para el filtro
-        $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
-
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('rondas/lista-rondas', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
+        // Añadir las segmentaciones a la información de la ronda
+        $rondas[$key]['segmentaciones'] = $segmentacionesRonda;
     }
+
+    $data['rondas'] = $rondas;
+
+    # También podemos preparar la lista de segmentaciones para el filtro
+    $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
+
+    return view('incl/head-application', $data)
+            . view('incl/header-application', $data)
+            . view('incl/menu-admin', $data)
+            . view('rondas/lista-rondas', $data)
+            . view('incl/footer-application', $data)
+            . view('incl/scripts-application', $data);
+}
+
 
     public function detalle($id = null) {
         if (!$id) {
@@ -112,50 +113,51 @@ class Rondas extends BaseController {
                 . view('incl/scripts-application', $data);
     }
 
-    public function crear() {
-        # Título de la página
-        $data['titulo_pagina'] = 'Metrix | Crear Ronda';
+     public function crear() {
+    $data['titulo_pagina'] = 'Metrix | Crear Ronda';
 
-        # Obtener todas las segmentaciones para el formulario
-        $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
+    // Cargar usuarios y segmentaciones
+    $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
+    $data['usuarios'] = $this->usuarios->findAll(); // Listar todos los usuarios
 
-        # Verificar si es una solicitud POST
-        if ($this->request->getMethod() === 'post') {
-            # Recoger datos del formulario
-            $datosRonda = [
-                'campana_id' => $this->request->getPost('campana_id') ? $this->request->getPost('campana_id') : 1,
-                'nombre' => $this->request->getPost('nombre'),
-                'coordinador' => $this->request->getPost('coordinador'),
-                'encargado' => $this->request->getPost('encargado'),
-                'fecha_actividad' => $this->request->getPost('fecha_actividad'),
-                'hora_actividad' => $this->request->getPost('hora_actividad'),
-                'estado' => $this->request->getPost('estado') ? $this->request->getPost('estado') : 'Programada'
-            ];
+    if ($this->request->getMethod() === 'post') {
+        // Recoger los datos del formulario
+        $datosRonda = [
+            'campana_id' => $this->request->getPost('campana_id') ?: 1,
+            'nombre' => $this->request->getPost('nombre'),
+            'coordinador' => $this->request->getPost('coordinador'),
+            'encargado' => $this->request->getPost('encargado'),
+            'fecha_actividad' => $this->request->getPost('fecha_actividad'),
+            'hora_actividad' => $this->request->getPost('hora_actividad'),
+            'estado' => $this->request->getPost('estado') ?: 'Programada'
+        ];
 
-            # Crear la ronda
-            $rondaId = $this->rondas->crearRonda($datosRonda);
+        // Crear la ronda
+        $rondaId = $this->rondas->crearRonda($datosRonda);
 
-            # Procesar segmentaciones seleccionadas
-            $segmentacionesIds = $this->request->getPost('segmentaciones');
-            if ($segmentacionesIds) {
-                foreach ($segmentacionesIds as $segId) {
-                    $this->rondasSegmentaciones->crearRelacion([
-                        'ronda_id' => $rondaId,
-                        'segmentacion_id' => $segId
-                    ]);
-                }
+        // Relacionar segmentaciones
+        $segmentacionesIds = $this->request->getPost('segmentaciones');
+        if ($segmentacionesIds) {
+            foreach ($segmentacionesIds as $segId) {
+                $this->rondasSegmentaciones->crearRelacion([
+                    'ronda_id' => $rondaId,
+                    'segmentacion_id' => $segId
+                ]);
             }
-
-            return redirect()->to('/rondas')->with('success', 'Ronda creada correctamente');
         }
 
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('rondas/crear-ronda', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
+        return redirect()->to('/rondas')->with('success', 'Ronda creada correctamente');
     }
+
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('rondas/crear-ronda', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
+
 
     public function editar($id = null) {
         if (!$id) {
@@ -448,6 +450,23 @@ public function zonas()
         ->findAll();
 
     return $this->response->setJSON($rondas);
+}
+
+public function finalizarRondaWeb($id = null)
+{
+    if (!$id) {
+        return redirect()->to('/rondas')->with('error', 'ID de ronda no especificado');
+    }
+
+    $actualizado = $this->rondas->update($id, [
+        'estado' => 'Finalizada'
+    ]);
+
+    if ($actualizado) {
+        return redirect()->to('/rondas')->with('success', 'Ronda finalizada correctamente.');
+    } else {
+        return redirect()->to('/rondas')->with('error', 'No se pudo finalizar la ronda.');
+    }
 }
 
 }

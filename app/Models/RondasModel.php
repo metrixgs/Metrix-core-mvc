@@ -13,9 +13,10 @@ class RondasModel extends Model {
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 
-        'encargado', 'fecha_actividad', 'hora_actividad', 'estado'
-    ];
+        'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 'encargado', 
+        'fecha_actividad', 'hora_actividad', 'estado', 'ronda_id'
+    ]; 
+
     protected $useTimestamps = false;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
@@ -40,5 +41,15 @@ class RondasModel extends Model {
     public function eliminarRonda($id) {
         return $this->delete($id);
     }
-}
 
+    // ✅ Nuevo método para mostrar nombres en lugar de IDs
+    public function obtenerRondasConUsuarios()
+    {
+        return $this->select('tbl_rondas.*, 
+                              coord.nombre AS nombre_coordinador, 
+                              encar.nombre AS nombre_encargado')
+                    ->join('tbl_usuarios AS coord', 'coord.id = tbl_rondas.coordinador', 'left')
+                    ->join('tbl_usuarios AS encar', 'encar.id = tbl_rondas.encargado', 'left')
+                    ->findAll();
+    }
+}

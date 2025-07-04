@@ -146,7 +146,11 @@
         Directorio(CRM)
     </a>
 </li>
-
+<li class="nav-item">
+    <a href="<?= base_url('campanas/'); ?>" class="nav-link">
+        Lista de Campañas
+    </a>
+</li>
 
                         <li class="nav-item">
                             <a href="#sidebarIncidencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Incidencias</a>
