@@ -79,7 +79,7 @@ class SurveyController extends BaseController {
         $data = [
             'title' => $title,
             'description' => $description,
-            'questions' => json_encode($processedQuestions),
+            'questions' => json_encode($processedQuestions, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
             'image' => $imagePath,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
@@ -110,7 +110,7 @@ class SurveyController extends BaseController {
             'survey_id'  => $id,
             'name'       => $this->request->getPost('name'),
             'email'      => $this->request->getPost('email'),
-            'answers'    => json_encode($this->request->getPost('answers'))
+            'answers'    => json_encode($this->request->getPost('answers'), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
         ];
         
         $surveyResponseModel->save($data);
