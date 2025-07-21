@@ -192,3 +192,6 @@ $routes->get('export/excel', 'ExportController::excel');
 $routes->get('export/pdf', 'ExportController::pdf');
 $routes->get('export/csv', 'ExportController::csv');
 $routes->post('export/enviar-correo', 'ExportController::enviarCorreo');
+
+// Rutas de la Bitácora de Usuarios
+$routes->get('bitacora/', 'BitacoraController::index');

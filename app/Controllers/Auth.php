@@ -19,6 +19,7 @@ class Auth extends BaseController {
         # Cargar los Helpers
         helper('Alerts');
         helper('Email');
+		helper('bitacora'); // Cargar el helper de bitácora
     }
 
     public function index() {
@@ -195,8 +196,17 @@ class Auth extends BaseController {
         'nombre'     => $cuenta['nombre'],
         'correo'     => $cuenta['correo'],
         'rol_id'     => $cuenta['rol_id'],
+        'area_id'     => $cuenta['area_id'],
         'cuenta_id'  => $cuenta['cuenta_id']
     ]);
+	
+	// Registrar el inicio de sesión en la bitácora
+    log_activity(
+        $cuenta['id'],       // ID del usuario
+        'Autenticación',      // Módulo
+        'Inicio de sesión',   // Acción
+        ['correo' => $cuenta['correo']] // Detalles (opcional)
+    );
 
     // Obtener configuración general del sistema
     $configuracion = $this->configuracion->obtenerConfiguracion(1);
@@ -301,7 +311,17 @@ class Auth extends BaseController {
     }
 
     public function logout() {
-        session()->destroy();
-        return redirect()->to('/login');
+    // Registrar el cierre de sesión en la bitácora
+    if(session()->has('session_data')) {
+        log_activity(
+            session('session_data.usuario_id'),       // ID del usuario
+            'Autenticación',      // Módulo
+            'Cierre de sesión',   // Acción
+            ['correo' => session('session_data.correo')] // Detalles (opcional)
+        );
     }
+
+    session()->destroy();
+    return redirect()->to('/login');
+}
 }
