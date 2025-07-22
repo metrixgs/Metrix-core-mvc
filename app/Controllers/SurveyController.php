@@ -9,11 +9,20 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SurveyController extends BaseController {
+    protected $surveyModel;
+    protected $surveyResponseModel;
+
+    public function __construct()
+    {
+        $this->surveyModel = new SurveyModel();
+        $this->surveyResponseModel = new SurveyResponseModel();
+        helper('bitacora'); // Cargar helper de bitácora
+    }
+    
     // Lista todas las encuestas
     public function index()
     {
-        $surveyModel = new SurveyModel();
-        $surveys = $surveyModel->paginate(10);
+        $surveys = $this->surveyModel->paginate(10);
         return view('survey/index', ['surveys' => $surveys]);
     }
     
@@ -25,8 +34,6 @@ class SurveyController extends BaseController {
     
     // Almacena una nueva encuesta con preguntas dinámicas
     public function store() {
-        $surveyModel = new SurveyModel();
-        
         // Obtener datos del formulario
         $title = $this->request->getPost('title');
         $description = $this->request->getPost('description');
@@ -86,132 +93,164 @@ class SurveyController extends BaseController {
         ];
         
         // Guardar en la base de datos
-        $surveyModel->save($data);
+        $this->surveyModel->save($data);
+        $surveyId = $this->surveyModel->getInsertID();
         
-        return redirect()->to('/survey/' . $surveyModel->getInsertID())
+        // Registrar en bitácora
+        log_activity(
+            session('session_data.usuario_id') ?? 0,
+            'Encuestas',
+            'Creación',
+            [
+                'survey_id' => $surveyId,
+                'titulo' => $title,
+                'preguntas' => count($processedQuestions)
+            ]
+        );
+        
+        return redirect()->to('/survey/' . $surveyId)
             ->with('message', 'Encuesta guardada exitosamente.');
     }
     
     // Muestra una encuesta específica
     public function show($id)
     {
-        $surveyModel = new SurveyModel();
-        $survey = $surveyModel->find($id);
-        
+        $survey = $this->surveyModel->find($id);
         return view('survey/show', ['survey' => $survey]);
     }
     
     // Guarda una respuesta a una encuesta
     public function storeResponse($id)
     {
-        $surveyResponseModel = new SurveyResponseModel();
+        $name = $this->request->getPost('name');
+        $email = $this->request->getPost('email');
+        $answers = $this->request->getPost('answers');
         
         $data = [
             'survey_id'  => $id,
-            'name'       => $this->request->getPost('name'),
-            'email'      => $this->request->getPost('email'),
-            'answers'    => json_encode($this->request->getPost('answers'), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            'name'       => $name,
+            'email'      => $email,
+            'answers'    => json_encode($answers, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
         ];
         
-        $surveyResponseModel->save($data);
+        $this->surveyResponseModel->save($data);
+        $responseId = $this->surveyResponseModel->getInsertID();
+        
+        // Registrar en bitácora
+        log_activity(
+            session('session_data.usuario_id') ?? 0, // 0 para invitados
+            'Encuestas',
+            'Respuesta',
+            [
+                'survey_id' => $id,
+                'response_id' => $responseId,
+                'nombre' => $name,
+                'email' => $email
+            ]
+        );
         
         return redirect()->to('/survey/' . $id . '/responded')->with('message', 'Gracias por responder!');
     }
 
     // Encuesta respondida con éxito
-public function surveyResponded($id)
-{
-    return view('survey/survey_responded');
-}
-
-// Muestra todas las respuestas de una encuesta
-public function showResponses($id)
-{
-    $surveyModel = new SurveyModel();
-    $surveyResponseModel = new SurveyResponseModel();
-
-    // Obtener las respuestas de la encuesta
-    $responses = $surveyResponseModel->where('survey_id', $id)->findAll();
-    $survey = $surveyModel->find($id);
-
-    return view('survey/responses', ['survey' => $survey, 'responses' => $responses]);
-}
-
-public function exportResponses($id)
-{
-    $surveyModel = new SurveyModel();
-    $surveyResponseModel = new SurveyResponseModel();
-
-    // Obtener las respuestas de la encuesta
-    $responses = $surveyResponseModel->where('survey_id', $id)->findAll();
-    $survey = $surveyModel->find($id);
-
-    if (!$survey) {
-        return redirect()->back()->with('error', 'Encuesta no encontrada');
+    public function surveyResponded($id)
+    {
+        return view('survey/survey_responded');
     }
 
-    // Decodificar las preguntas
-    $questions = json_decode($survey['questions'], true);
+    // Muestra todas las respuestas de una encuesta
+    public function showResponses($id)
+    {
+        // Obtener las respuestas de la encuesta
+        $responses = $this->surveyResponseModel->where('survey_id', $id)->findAll();
+        $survey = $this->surveyModel->find($id);
 
-    // Verificar si las preguntas son un array
-    if (!is_array($questions)) {
-        return redirect()->back()->with('error', 'Las preguntas de la encuesta no son válidas');
+        return view('survey/responses', ['survey' => $survey, 'responses' => $responses]);
     }
 
-    // Crear una nueva hoja de cálculo
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+    public function exportResponses($id)
+    {
+        // Obtener las respuestas de la encuesta
+        $responses = $this->surveyResponseModel->where('survey_id', $id)->findAll();
+        $survey = $this->surveyModel->find($id);
 
-    // Título de la hoja de cálculo
-    $sheet->setCellValue('A1', 'Respuestas de la Encuesta: ' . $survey['title']);
-    $sheet->mergeCells('A1:' . chr(65 + count($questions) + 2) . '1'); // Merge the header row
-    $sheet->getStyle('A1')->getFont()->setBold(true);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        if (!$survey) {
+            return redirect()->back()->with('error', 'Encuesta no encontrada');
+        }
 
-    // Escribir los encabezados
-    $headers = ['Nombre', 'Correo Electrónico', 'Fecha de Respuesta'];
+        // Decodificar las preguntas
+        $questions = json_decode($survey['questions'], true);
 
-    // Añadir preguntas como encabezados
-    foreach ($questions as $question) {
-        $headers[] = $question['text'];
-    }
+        // Verificar si las preguntas son un array
+        if (!is_array($questions)) {
+            return redirect()->back()->with('error', 'Las preguntas de la encuesta no son válidas');
+        }
 
-    // Escribir los encabezados en la primera fila
-    $column = 0;
-    foreach ($headers as $header) {
-        $sheet->setCellValue(chr(65 + $column) . '2', $header); // Cambiado a setCellValue con coordenada
-        $column++;
-    }
+        // Crear una nueva hoja de cálculo
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // Escribir las respuestas
-    $row = 3;
-    foreach ($responses as $response) {
-        $sheet->setCellValue('A' . $row, $response['name']);
-        $sheet->setCellValue('B' . $row, $response['email']);
-        $sheet->setCellValue('C' . $row, date('d/m/Y H:i', strtotime($response['created_at'])));
+        // Título de la hoja de cálculo
+        $sheet->setCellValue('A1', 'Respuestas de la Encuesta: ' . $survey['title']);
+        $sheet->mergeCells('A1:' . chr(65 + count($questions) + 2) . '1'); // Merge the header row
+        $sheet->getStyle('A1')->getFont()->setBold(true);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $answers = json_decode($response['answers'], true);
-        $column = 4;
-        foreach ($questions as $index => $question) {
-            $answer = isset($answers[$index]) ? $answers[$index]['response'] : 'No respondida';
-            $sheet->setCellValue(chr(65 + $column) . $row, $answer); // Cambiado a setCellValue con coordenada
+        // Escribir los encabezados
+        $headers = ['Nombre', 'Correo Electrónico', 'Fecha de Respuesta'];
+
+        // Añadir preguntas como encabezados
+        foreach ($questions as $question) {
+            $headers[] = $question['text'];
+        }
+
+        // Escribir los encabezados en la primera fila
+        $column = 0;
+        foreach ($headers as $header) {
+            $sheet->setCellValue(chr(65 + $column) . '2', $header); // Cambiado a setCellValue con coordenada
             $column++;
         }
 
-        $row++;
+        // Escribir las respuestas
+        $row = 3;
+        foreach ($responses as $response) {
+            $sheet->setCellValue('A' . $row, $response['name']);
+            $sheet->setCellValue('B' . $row, $response['email']);
+            $sheet->setCellValue('C' . $row, date('d/m/Y H:i', strtotime($response['created_at'])));
+
+            $answers = json_decode($response['answers'], true);
+            $column = 4;
+            foreach ($questions as $index => $question) {
+                $answer = isset($answers[$index]) ? $answers[$index]['response'] : 'No respondida';
+                $sheet->setCellValue(chr(65 + $column) . $row, $answer); // Cambiado a setCellValue con coordenada
+                $column++;
+            }
+
+            $row++;
+        }
+
+        // Crear un escritor de Excel
+        $writer = new Xlsx($spreadsheet);
+
+        // Generar el archivo Excel y forzar la descarga
+        $filename = 'respuestas_encuesta_' . $survey['id'] . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Registrar en bitácora
+        log_activity(
+            session('session_data.usuario_id'),
+            'Encuestas',
+            'Exportación',
+            [
+                'survey_id' => $id,
+                'titulo' => $survey['title'],
+                'respuestas' => count($responses)
+            ]
+        );
+
+        $writer->save('php://output');
+        exit();
     }
-
-    // Crear un escritor de Excel
-    $writer = new Xlsx($spreadsheet);
-
-    // Generar el archivo Excel y forzar la descarga
-    $filename = 'respuestas_encuesta_' . $survey['id'] . '.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-
-    $writer->save('php://output');
-    exit();
-}
-
 }
