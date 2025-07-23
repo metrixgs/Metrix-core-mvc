@@ -42,10 +42,7 @@ class Tickets extends BaseController {
         $this->tipos = new TiposIncidenciasModel();
 
         # Cargar los Helpers
-        helper('Alerts');
-        helper('Email');
-        helper('Rol');
-        helper('Menu');
+        helper(['Alerts', 'Email', 'Rol', 'Menu', 'bitacora']);
     }
 
     public function index() {
@@ -89,6 +86,13 @@ class Tickets extends BaseController {
     }
     
     public function crearTipo() {
+        // Registrar en bitácora
+        log_activity(
+            $this->getUsuarioId(),
+            'Tipos de Incidencias',
+            'Creación',
+            $_POST
+        );
         print_r($_POST);
     }
 
@@ -153,7 +157,6 @@ class Tickets extends BaseController {
         $campanas = $this->campanas->obtenerCampanas();
         $data['campanas'] = $campanas;
     
-        // 🔥 ESTE ES EL CAMBIO QUE DEBES AGREGAR:
         $tipos_incidencias = $this->tipos->findAll();
         $data['tipos_incidencias'] = $tipos_incidencias;
     
@@ -241,8 +244,8 @@ class Tickets extends BaseController {
         # Comprobamos si el archivo es válido
         if ($archivo->isValid() && !$archivo->hasMoved()) {
             # Obtener información del archivo
-            $nombre_original = $archivo->getClientName();  // Nombre original del archivo
-            $extencion = $archivo->getExtension();        // Extensión del archivo (sin el punto)
+            $nombre_original = $archivo->getClientName();
+            $extencion = $archivo->getExtension();
             $tamano = $archivo->getSize();
 
             # Definir una lista de extensiones permitidas
@@ -258,13 +261,10 @@ class Tickets extends BaseController {
                 return redirect()->to("tickets/detalle/{$ticket_id}");
             }
 
-            # Generar un nombre único para el archivo sin agregar la extensión dos veces
-            $newName = $archivo->getRandomName();  // Nombre aleatorio sin extensión
-            $ruta = 'public/uploads/tickets/archivos/' . $newName;  // Guardamos solo el nombre aleatorio
-            $archivo->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo sin extensión adicional
-            # Ahora añadimos la extensión solo una vez
-            $rutaConExtension = 'public/uploads/tickets/archivos/' . $newName;
-            $ruta = $rutaConExtension;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
+            # Generar un nombre único para el archivo
+            $newName = $archivo->getRandomName();
+            $ruta = 'public/uploads/tickets/archivos/' . $newName;
+            $archivo->move('public/uploads/tickets/archivos/', $newName);
         } else {
             # El archivo no es válido
             $this->session->setFlashdata([
@@ -278,8 +278,16 @@ class Tickets extends BaseController {
         # Obtenemos información del ticket
         $ticket = $this->tickets->obtenerTicket($ticket_id);
 
-        # Obtener el usuario_id (esto puede cambiar según tu implementación)
+        # Obtener el usuario_id
         $usuario_id = session('session_data.id');
+        if (empty($usuario_id)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "No se ha encontrado el usuario en la sesión. Por favor, inicia sesión nuevamente.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->to("login");
+        }
 
         # Preparar los datos para la base de datos
         $infoArchivo = [
@@ -287,7 +295,7 @@ class Tickets extends BaseController {
             'usuario_id' => $usuario_id,
             'descripcion' => $descripcion,
             'ruta' => $ruta,
-            'extencion' => $extencion, // Guardamos la extensión en lugar del MIME
+            'extencion' => $extencion,
             'tamano' => $tamano,
             'tipo_mime' => $extencion,
             'fecha_subida' => date('Y-m-d H:i:s')
@@ -295,6 +303,19 @@ class Tickets extends BaseController {
 
         # Creamos el archivo en la base de datos
         if ($this->archivos->crearArchivo($infoArchivo)) {
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Subir Archivo',
+                [
+                    'ticket_id' => $ticket_id,
+                    'ticket_identificador' => $ticket['identificador'],
+                    'archivo_nombre' => $newName,
+                    'tamano' => $tamano
+                ]
+            );
+            
             # Se subió el archivo con éxito
             $this->session->setFlashdata([
                 'titulo' => "¡Éxito!",
@@ -373,6 +394,18 @@ class Tickets extends BaseController {
 
         # Creamos la accion en el sistema...
         if ($this->acciones->crearAccion($infoAccion)) {
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Crear Comentario',
+                [
+                    'ticket_id' => $ticket_id,
+                    'ticket_identificador' => $ticket['identificador'],
+                    'comentario' => substr($comentario, 0, 100) . '...' // Guardar solo parte del comentario
+                ]
+            );
+            
             # Se creo el comentario...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -467,7 +500,19 @@ class Tickets extends BaseController {
         $mensaje = str_replace(array_keys($variables), array_values($variables), $template);
 
         # Enviamos el correo a los destinatarios
-        if (enviarCorreo($destinatarios, $asunto, $mensaje, $adjuntos, true, $bcc)) {
+         if (enviarCorreo($destinatarios, $asunto, $mensaje, $adjuntos, true, $bcc)) {
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Enviar Recordatorio',
+                [
+                    'ticket_id' => $ticket_id,
+                    'ticket_identificador' => $ticket['identificador'],
+                    'destinatarios' => count($correos)
+                ]
+            );
+            
             # Se envio el recordatorio...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -532,9 +577,6 @@ class Tickets extends BaseController {
             return redirect()->to("tickets/");
         }
 
-        # Obtenemos informacion del area...
-        $area = $this->areas->obtenerArea($ticket['area_id']);
-
         # Creamos la variable de modificacion del ticket...
         $infoTicket = [
             'estado' => 'Cerrado',
@@ -543,6 +585,18 @@ class Tickets extends BaseController {
 
         # Actualizamos el ticket...
         if ($this->tickets->actualizarTicket($ticket_id, $infoTicket)) {
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Cerrar Ticket',
+                [
+                    'ticket_id' => $ticket_id,
+                    'ticket_identificador' => $ticket['identificador'],
+                    'comentario' => $comentario
+                ]
+            );
+            
             # Se cerro el ticket...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -719,7 +773,7 @@ class Tickets extends BaseController {
         $infoTicket = [
             'cliente_id' => $cliente_id,
             'area_id' => $area_id,
-            'usuario_id' => session('session_data.id'),
+            'usuario_id' => $this->getUsuarioId(),
             'campana_id' => $campana_id,
             'identificador' => 'TKD-' . strtoupper(bin2hex(random_bytes(5))),
             'titulo' => $titulo,
@@ -769,32 +823,48 @@ class Tickets extends BaseController {
                 }
 
                 # Generar un nombre único para el archivo sin agregar la extensión dos veces
-                $newName = $imagen->getRandomName();  // Nombre aleatorio sin extensión
-                $ruta = 'public/uploads/tickets/archivos/' . $newName;  // Guardamos solo el nombre aleatorio
+                $usuario_id = $this->getUsuarioId();
+                if (empty($usuario_id)) {
+                    $this->session->setFlashdata([
+                        'titulo' => "¡Error!",
+                        'mensaje' => "No se ha encontrado el usuario en la sesión. Por favor, inicia sesión nuevamente.",
+                        'tipo' => "danger"
+                    ]);
+                    return redirect()->to("login");
+                }
                 $imagen->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo sin extensión adicional
                 # Ahora añadimos la extensión solo una vez
                 $rutaConExtension = 'public/uploads/tickets/archivos/' . $newName;
                 $ruta = $rutaConExtension;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
+
+                # Preparar los datos para la base de datos
+                $infoArchivo = [
+                    'ticket_id' => $ticket_id,
+                    'usuario_id' => $usuario_id,
+                    'descripcion' => $descripcion,
+                    'ruta' => $ruta,
+                    'extencion' => $extencion, // Guardamos la extensión en lugar del MIME
+                    'tamano' => $tamano,
+                    'tipo_mime' => $extencion,
+                    'fecha_subida' => date('Y-m-d H:i:s')
+                ];
+
+                # Creamos el archivo...
+                $this->archivos->crearArchivo($infoArchivo);
             }
 
-            # Obtener el usuario_id (esto puede cambiar según tu implementación)
-            $usuario_id = session('session_data.id');
-
-            # Preparar los datos para la base de datos
-            $infoArchivo = [
-                'ticket_id' => $ticket_id,
-                'usuario_id' => $usuario_id,
-                'descripcion' => $descripcion,
-                'ruta' => $ruta,
-                'extencion' => $extencion, // Guardamos la extensión en lugar del MIME
-                'tamano' => $tamano,
-                'tipo_mime' => $extencion,
-                'fecha_subida' => date('Y-m-d H:i:s')
-            ];
-
-            # Creamos el archivo...
-            $this->archivos->crearArchivo($infoArchivo);
-
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Crear Ticket',
+                [
+                    'ticket_id' => $this->tickets->insertID(),
+                    'titulo' => $titulo,
+                    'prioridad' => $prioridad,
+                    'area_id' => $area_id
+                ]
+            );
             # Se creo el ticket
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -893,6 +963,17 @@ class Tickets extends BaseController {
 
         # Eliminamos el reuquerimiento...
         if ($this->tickets->eliminarTicket($requerimiento_id)) {
+            # Registrar en bitácora
+            log_activity(
+                $this->getUsuarioId(),
+                'Tickets',
+                'Eliminar Ticket',
+                [
+                    'ticket_id' => $requerimiento_id,
+                    'ticket_identificador' => $requerimiento['identificador']
+                ]
+            );
+            
             # Se elimino el requerimiento...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -911,5 +992,9 @@ class Tickets extends BaseController {
 
             return redirect()->to("tickets/detalle/{$requerimiento_id}");
         }
+    }
+
+    private function getUsuarioId() {
+        return (int) (session('session_data')['id'] ?? session('session_data')['usuario_id'] ?? 1);
     }
 }
