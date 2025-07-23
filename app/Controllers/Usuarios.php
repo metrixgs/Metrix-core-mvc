@@ -20,7 +20,7 @@ class Usuarios extends BaseController {
     protected $permisos;
     protected $modulos;
     protected $notificaciones;
-     protected $roles; 
+    protected $roles; 
     protected $cuentas;
 
     public function __construct() {
@@ -35,10 +35,11 @@ class Usuarios extends BaseController {
         $this->cuentas = new CuentasModel();
 
         # Cargar los Helpers
-        helper('Alerts');
-        helper('Email');
-        helper('Rol');
-        helper('Menu');
+        helper(['Alerts', 'Email', 'Rol', 'Menu', 'bitacora']);
+    }
+
+    private function getUserId() {
+        return session('session_data.usuario_id') ?? 0;
     }
 
     public function index() {
@@ -69,74 +70,74 @@ class Usuarios extends BaseController {
                 . view('incl/footer-application', $data)
                 . view('incl/scripts-application', $data);
     }
- public function nuevo() {
-    $data['titulo_pagina'] = 'Metrix | Nuevo usuario';
-    $data['tickets'] = $this->tickets->obtenerTickets();
-    $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
-    $data['areas'] = $this->areas->obtenerAreas();
-    $data['roles'] = $this->roles->obtenerRoles();
-
-    // ✅ Obtener nombre del rol y cuenta actual desde la sesión
-    $rolId = session('session_data.rol_id');
-    $cuentaId = session('session_data.cuenta_id');
-
-    $data['nombre_rol'] = '';
-    $data['nombre_cuenta'] = '';
-
-    if ($rolId) {
-        $rol = $this->roles->obtenerRol($rolId);
-        $data['nombre_rol'] = $rol['nombre'] ?? 'Rol ID: ' . $rolId;
-    }
-
-    if ($cuentaId) {
-        $this->cuentas = new \App\Models\CuentasModel(); // Asegúrate de tener cargado el modelo
-        $cuenta = $this->cuentas->obtenerCuenta($cuentaId);
-        $data['nombre_cuenta'] = $cuenta['nombre'] ?? 'Cuenta ID: ' . $cuentaId;
-    }
-
-    return view('incl/head-application', $data)
-        . view('incl/header-application', $data)
-        . view('incl/menu-admin', $data)
-        . view('usuarios/nuevo-usuario', $data)
-        . view('incl/footer-application', $data)
-        . view('incl/scripts-application', $data);
-}
-
-
-  public function detalle($usuario_id) {
-    $data['titulo_pagina'] = 'Metrix | Informacion del Usuario';
     
-    $data['tickets'] = $this->tickets->obtenerTickets();
-    $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
-    
-    $areas = $this->areas->obtenerAreas();
-    $data['areas'] = $areas;
+    public function nuevo() {
+        $data['titulo_pagina'] = 'Metrix | Nuevo usuario';
+        $data['tickets'] = $this->tickets->obtenerTickets();
+        $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+        $data['areas'] = $this->areas->obtenerAreas();
+        $data['roles'] = $this->roles->obtenerRoles();
 
-    // 🚀 Agrega esta línea para que la vista tenga acceso a $roles
-    $data['roles'] = $this->roles->obtenerRoles();
+        // ✅ Obtener nombre del rol y cuenta actual desde la sesión
+        $rolId = session('session_data.rol_id');
+        $cuentaId = session('session_data.cuenta_id');
 
-    $usuario = $this->usuarios->obtenerUsuario($usuario_id);
-    $data['usuario'] = $usuario;
+        $data['nombre_rol'] = '';
+        $data['nombre_cuenta'] = '';
 
-    if (empty($usuario)) {
-        return redirect()->to("usuarios/");
-    }
+        if ($rolId) {
+            $rol = $this->roles->obtenerRol($rolId);
+            $data['nombre_rol'] = $rol['nombre'] ?? 'Rol ID: ' . $rolId;
+        }
 
-    $permisos = $this->permisos->obtenerPermisosPorUsuario($usuario_id);
-    $data['permisos'] = $permisos;
+        if ($cuentaId) {
+            $this->cuentas = new \App\Models\CuentasModel();
+            $cuenta = $this->cuentas->obtenerCuenta($cuentaId);
+            $data['nombre_cuenta'] = $cuenta['nombre'] ?? 'Cuenta ID: ' . $cuentaId;
+        }
 
-    $modulos = $this->modulos->obtenerModulos();
-    $data['modulos'] = $modulos;
-
-    return view('incl/head-application', $data)
+        return view('incl/head-application', $data)
             . view('incl/header-application', $data)
             . view('incl/menu-admin', $data)
-            . view('usuarios/detalle-usuario', $data)
+            . view('usuarios/nuevo-usuario', $data)
             . view('incl/footer-application', $data)
             . view('incl/scripts-application', $data);
-}
+    }
 
-    function actualizar() {
+    public function detalle($usuario_id) {
+        $data['titulo_pagina'] = 'Metrix | Informacion del Usuario';
+        
+        $data['tickets'] = $this->tickets->obtenerTickets();
+        $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+        
+        $areas = $this->areas->obtenerAreas();
+        $data['areas'] = $areas;
+
+        // 🚀 Agrega esta línea para que la vista tenga acceso a $roles
+        $data['roles'] = $this->roles->obtenerRoles();
+
+        $usuario = $this->usuarios->obtenerUsuario($usuario_id);
+        $data['usuario'] = $usuario;
+
+        if (empty($usuario)) {
+            return redirect()->to("usuarios/");
+        }
+
+        $permisos = $this->permisos->obtenerPermisosPorUsuario($usuario_id);
+        $data['permisos'] = $permisos;
+
+        $modulos = $this->modulos->obtenerModulos();
+        $data['modulos'] = $modulos;
+
+        return view('incl/head-application', $data)
+                . view('incl/header-application', $data)
+                . view('incl/menu-admin', $data)
+                . view('usuarios/detalle-usuario', $data)
+                . view('incl/footer-application', $data)
+                . view('incl/scripts-application', $data);
+    }
+
+    public function actualizar() {
         # Obtenemos los datos del formulario...
         $usuario_id = $this->request->getPost('id');
         $rol_id = $this->request->getPost('rol_id');
@@ -190,6 +191,19 @@ class Usuarios extends BaseController {
 
         # Actualizamos la informacion de la cuenta...
         if ($this->usuarios->actualizarUsuario($usuario_id, $infoUsuario)) {
+            # Registro en bitácora
+            log_activity(
+                $this->getUserId(),
+                'Usuarios',
+                'Actualización',
+                [
+                    'usuario_id' => $usuario_id,
+                    'nombre' => $nombre,
+                    'correo' => $correo,
+                    'rol_id' => $rol_id
+                ]
+            );
+            
             # Se actualizo la cuenta
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -209,67 +223,82 @@ class Usuarios extends BaseController {
             return redirect()->to("usuarios/detalle/{$usuario_id}");
         }
     }
- public function crear() {
-    # Obtenemos los datos del formulario...
-    $rol_id = $this->request->getPost('rol_id');
-    $cargo = $this->request->getPost('cargo');
-    $nombre = $this->request->getPost('nombre');
-    $correo = $this->request->getPost('correo');
-    $telefono = $this->request->getPost('telefono');
-    $contrasena = $this->request->getPost('contrasena');
-    $area_id = $this->request->getPost('area_id') ?? NULL;
+    
+    public function crear() {
+        # Obtenemos los datos del formulario...
+        $rol_id = $this->request->getPost('rol_id');
+        $cargo = $this->request->getPost('cargo');
+        $nombre = $this->request->getPost('nombre');
+        $correo = $this->request->getPost('correo');
+        $telefono = $this->request->getPost('telefono');
+        $contrasena = $this->request->getPost('contrasena');
+        $area_id = $this->request->getPost('area_id') ?? NULL;
 
-    # Obtenemos datos de sesión para multitenencia y trazabilidad
-    $creador_id = session('session_data.id');
-    $cuenta_id = session('session_data.cuenta_id') ?? NULL;
+        # Obtenemos datos de sesión para multitenencia y trazabilidad
+        $creador_id = $this->getUserId();
+        $cuenta_id = session('session_data.cuenta_id') ?? NULL;
 
-    # Definimos las reglas de validación para los campos...
-    $validationRules = [
-        'rol_id' => 'required|numeric',
-        'cargo' => 'required',
-        'nombre' => 'required|min_length[3]|max_length[100]',
-        'correo' => 'required|valid_email|is_unique[tbl_usuarios.correo]',
-        'telefono' => 'required|numeric|is_unique[tbl_usuarios.telefono]',
-        'contrasena' => 'required|min_length[6]',
-    ];
+        # Definimos las reglas de validación para los campos...
+        $validationRules = [
+            'rol_id' => 'required|numeric',
+            'cargo' => 'required',
+            'nombre' => 'required|min_length[3]|max_length[100]',
+            'correo' => 'required|valid_email|is_unique[tbl_usuarios.correo]',
+            'telefono' => 'required|numeric|is_unique[tbl_usuarios.telefono]',
+            'contrasena' => 'required|min_length[6]',
+        ];
 
-    # Validamos los datos del formulario...
-    if (!$this->validate($validationRules)) {
-        session()->setFlashdata('validation', $this->validator->getErrors());
-        return redirect()->to("usuarios/nuevo")->withInput();
+        # Validamos los datos del formulario...
+        if (!$this->validate($validationRules)) {
+            session()->setFlashdata('validation', $this->validator->getErrors());
+            return redirect()->to("usuarios/nuevo")->withInput();
+        }
+
+        # Armamos el arreglo con la información del nuevo usuario
+        $infoUsuario = [
+            'rol_id' => $rol_id,
+            'area_id' => $area_id,
+            'cargo' => $cargo,
+            'nombre' => strtoupper($nombre),
+            'correo' => $correo,
+            'telefono' => $telefono,
+            'contrasena' => $contrasena,
+            'creado_por_id' => $creador_id,
+            'cuenta_id' => $cuenta_id
+        ];
+
+        # Creamos el nuevo usuario...
+        if ($this->usuarios->crearUsuario($infoUsuario)) {
+            $nuevoUsuarioId = $this->usuarios->insertID();
+            
+            # Registro en bitácora
+            log_activity(
+                $this->getUserId(),
+                'Usuarios',
+                'Creación',
+                [
+                    'usuario_id' => $nuevoUsuarioId,
+                    'nombre' => $nombre,
+                    'correo' => $correo,
+                    'rol_id' => $rol_id
+                ]
+            );
+            
+            $this->session->setFlashdata([
+                'titulo' => "¡Éxito!",
+                'mensaje' => "Se ha creado el usuario de forma correcta.",
+                'tipo' => "success"
+            ]);
+            return redirect()->to("usuarios");
+        } else {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "No se pudo crear el usuario, intenta nuevamente.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->to("usuarios/nuevo");
+        }
     }
-
-    # Armamos el arreglo con la información del nuevo usuario
-    $infoUsuario = [
-        'rol_id' => $rol_id,
-        'area_id' => $area_id,
-        'cargo' => $cargo,
-        'nombre' => strtoupper($nombre),
-        'correo' => $correo,
-        'telefono' => $telefono,
-        'contrasena' => $contrasena,
-        'creado_por_id' => $creador_id,
-        'cuenta_id' => $cuenta_id
-    ];
-
-    # Creamos el nuevo usuario...
-    if ($this->usuarios->crearUsuario($infoUsuario)) {
-        $this->session->setFlashdata([
-            'titulo' => "¡Éxito!",
-            'mensaje' => "Se ha creado el usuario de forma correcta.",
-            'tipo' => "success"
-        ]);
-        return redirect()->to("usuarios");
-    } else {
-        $this->session->setFlashdata([
-            'titulo' => "¡Error!",
-            'mensaje' => "No se pudo crear el usuario, intenta nuevamente.",
-            'tipo' => "danger"
-        ]);
-        return redirect()->to("usuarios/nuevo");
-    }
-}
-
 
     public function eliminar() {
         # Obtenemos la informacion del formulario...
@@ -300,6 +329,18 @@ class Usuarios extends BaseController {
 
         # Eliminamos el usuario...
         if ($this->usuarios->eliminarUsuario($usuario_id)) {
+            # Registro en bitácora
+            log_activity(
+                $this->getUserId(),
+                'Usuarios',
+                'Eliminación',
+                [
+                    'usuario_id' => $usuario_id,
+                    'nombre' => $usuario['nombre'],
+                    'correo' => $usuario['correo']
+                ]
+            );
+            
             # Se elimino el usuario...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -364,6 +405,21 @@ class Usuarios extends BaseController {
 
         # Creamos los nuevos permisos...
         if ($this->permisos->crearPermiso($infoPermisos)) {
+            $permisoId = $this->permisos->insertID();
+            
+            # Registro en bitácora
+            log_activity(
+                $this->getUserId(),
+                'Permisos',
+                'Creación',
+                [
+                    'permiso_id' => $permisoId,
+                    'usuario_id' => $usuario_id,
+                    'modulo_id' => $modulo_id,
+                    'modulo_nombre' => $modulo['nombre']
+                ]
+            );
+            
             # Se creo el permiso
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -404,6 +460,19 @@ class Usuarios extends BaseController {
 
         # Eliminamos el permiso...
         if ($this->permisos->eliminarPermiso($permiso_id)) {
+            # Registro en bitácora
+            log_activity(
+                $this->getUserId(),
+                'Permisos',
+                'Eliminación',
+                [
+                    'permiso_id' => $permiso_id,
+                    'usuario_id' => $permiso['usuario_id'],
+                    'modulo_id' => $permiso['modulo_id'],
+                    'modulo_nombre' => $modulo['nombre']
+                ]
+            );
+            
             # Se elimino el permiso...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
