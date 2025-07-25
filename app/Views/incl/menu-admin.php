@@ -66,164 +66,147 @@
     <div id="scrollbar">
         <div class="container-fluid">
             <div id="two-column-menu"></div>
-            <!-- ========== Menú Fusionado Completo ========== -->
             <ul class="navbar-nav" id="navbar-nav">
 
-                <!-- Dashboard -->
-                <li class="menu-title">Menu Principal</li>
+                <!-- Inicio -->
+                <li class="menu-title"><span data-key="t-menu">Menu Principal</span></li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="<?= base_url() . 'panel/'; ?>">
+                    <a id="inicio" class="nav-link menu-link" href="<?= base_url() . "panel/"; ?>">
                         <i class="ri ri-home-line"></i> <span>Dashboard</span>
                     </a>
                 </li>
                 <hr>
 
+                <!-- Operación -->
+                <a class="nav-link menu-link" href="#sidebarOperacion" data-bs-toggle="collapse" data-bs-parent="#navbar-nav" role="button" aria-expanded="false" aria-controls="sidebarOperacion">
+                    <i class="ri ri-settings-2-line"></i> <span>Operación</span>
+                </a>
+                <div class="collapse menu-dropdown" id="sidebarOperacion" data-bs-parent="#navbar-nav">
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="#sidebarDependencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarOperacion">Dependencias</a>
+                            <div class="collapse menu-dropdown" id="sidebarDependencias" data-bs-parent="#sidebarOperacion">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'dependencias/'; ?>" class="nav-link">Lista de Dependencias</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url() . 'clientes/'; ?>" class="nav-link">Clientes</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a href="<?= base_url() . "reportes/requerimientos"; ?>" class="nav-link">Reportes / Incidencias</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url() . "reportes/tareas"; ?>" class="nav-link">Reporte / Tareas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url() . 'notificaciones/'; ?>" class="nav-link">Notificaciones</a>
+                        </li>
+                    </ul>
+                </div>
+                <hr>
+
                 <!-- Módulos -->
-                <a class="nav-link menu-link" href="#sidebarModulos" data-bs-toggle="collapse" role="button" aria-expanded="false">
+                <a class="nav-link menu-link" href="#sidebarModulos" data-bs-toggle="collapse" data-bs-parent="#navbar-nav" role="button" aria-expanded="false" aria-controls="sidebarModulos">
                     <i class="ri ri-stack-line"></i> <span>Módulos</span>
                 </a>
-                <div class="collapse menu-dropdown" id="sidebarModulos">
+
+
+                <div class="collapse menu-dropdown" id="sidebarModulos" data-bs-parent="#navbar-nav">
                     <ul class="nav nav-sm flex-column">
-
-                        <!-- Visor -->
                         <li class="nav-item">
-                            <a href="#sidebarVisor" class="nav-link" data-bs-toggle="collapse">Visor</a>
-                            <div class="collapse menu-dropdown" id="sidebarVisor">
+                            <a href="#sidebarMapas" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarMapas">Mapa</a>
+                            <div class="collapse menu-dropdown" id="sidebarMapas" data-bs-parent="#sidebarMapas">
                                 <ul class="nav nav-sm flex-column">
-                                    <li><a href="<?= base_url('mapa/crear'); ?>" class="nav-link">Crear Mapa</a></li>
-                                    <li><a href="<?= base_url('mapa'); ?>" class="nav-link">Panel de Mapas</a></li>
-                                    <li><a href="<?= base_url('mapa/puntos'); ?>" class="nav-link">Repertorio de Puntos</a></li>
-                                    <li><a href="<?= base_url('mapa/indicadores'); ?>" class="nav-link">Indicadores</a></li>
-                                    <!-- Elemento añadido del segundo menú -->
-                                    <li><a href="<?= base_url('mapa'); ?>" class="nav-link">Incidencias</a></li>
-                                </ul>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url('mapa'); ?>" class="nav-link">Incidencias</a>
+                                    </li>
+                                </ul>  
                             </div>
                         </li>
-
-                        <!-- Directorio (CRM) -->
                         <li class="nav-item">
-                            <a href="#sidebarCRM" class="nav-link" data-bs-toggle="collapse">Directorio (CRM)</a>
-                            <div class="collapse menu-dropdown" id="sidebarCRM">
-                                <ul class="nav nav-sm flex-column">
-                                    <li><a href="<?= base_url('#'); ?>" class="nav-link">Nueva Alta</a></li>
-                                    <li><a href="<?= base_url('directorio'); ?>" class="nav-link">Panel de Registros</a></li>
-                                    <li><a href="<?= base_url('directorio/import'); ?>" class="nav-link">Importar/Exportar BDD</a></li>
-                                    <li><a href="<?= base_url('directorio/indicadores'); ?>" class="nav-link">Indicadores</a></li>
-                                    <!-- Elemento añadido del segundo menú -->
-                                    <li><a href="<?= base_url('cuentas/create'); ?>" class="nav-link">Crear y Administrar Clientes</a></li>
-                                </ul>
-                            </div>
+                            <a href="<?= base_url('surveys'); ?>" class="nav-link">Encuestas</a>
                         </li>
 
-                        <!-- Operación -->
-                        <li class="nav-item">
-                            <a href="#sidebarOperacion" class="nav-link" data-bs-toggle="collapse">Operación</a>
-                            <div class="collapse menu-dropdown" id="sidebarOperacion">
-                                <ul class="nav nav-sm flex-column">
 
-                                    <!-- Campañas & Rondas -->
-                                    <li class="nav-item">
-                                        <a href="#sidebarCampanas" class="nav-link" data-bs-toggle="collapse">Campañas & Rondas</a>
-                                        <div class="collapse menu-dropdown" id="sidebarCampanas">
-                                            <ul class="nav nav-sm flex-column">
-                                                <li><a href="<?= base_url('campanas/crear'); ?>" class="nav-link">Crear Campaña</a></li>
-                                                <li><a href="<?= base_url('campanas'); ?>" class="nav-link">Panel de Campañas</a></li>
-                                                <!-- Elementos añadidos del segundo menú -->
-                                                <li><a href="<?= base_url('campanas/tipos'); ?>" class="nav-link">Tipos de Campañas</a></li>
-                                                <li><a href="<?= base_url('campanas/subtipos'); ?>" class="nav-link">Sub-Tipos de Campañas</a></li>
-                                                <li><a href="<?= base_url('rondas'); ?>" class="nav-link">Lista de Rondas</a></li>
-                                                <li><a href="<?= base_url('rondas/zonas'); ?>" class="nav-link">Zonas de Rondas</a></li>
-                                                <li><a href="<?= base_url('rondas/puntos'); ?>" class="nav-link">Puntos de Rondas</a></li>
-                                                <!-- Fin elementos añadidos -->
-                                                <li><a href="<?= base_url('rondas/brigadas'); ?>" class="nav-link">Brigadas & Operadores</a></li>
-                                                <li><a href="<?= base_url('campanas/indicadores'); ?>" class="nav-link">Indicadores</a></li>
-                                                <li><a href="<?= base_url('campanas/config'); ?>" class="nav-link">Configuraciones</a></li>
-                                            </ul>
-                                        </div>
-                                    </li>
-
-                                    <!-- Encuestas -->
-                                    <li class="nav-item">
-                                        <a href="#sidebarEncuestas" class="nav-link" data-bs-toggle="collapse">Encuestas</a>
-                                        <div class="collapse menu-dropdown" id="sidebarEncuestas">
-                                            <ul class="nav nav-sm flex-column">
-                                                <li><a href="<?= base_url('surveys/crear'); ?>" class="nav-link">Crear Encuesta</a></li>
-                                                <li><a href="<?= base_url('surveys'); ?>" class="nav-link">Panel de Encuestas</a></li>
-                                                <li><a href="<?= base_url('surveys/indicadores'); ?>" class="nav-link">Indicadores</a></li>
-                                            </ul>
-                                        </div>
-                                    </li>
-
-                                    <!-- Inventarios -->
-                                    <li class="nav-item">
-                                        <a href="#sidebarInventarios" class="nav-link" data-bs-toggle="collapse">Inventarios</a>
-                                        <div class="collapse menu-dropdown" id="sidebarInventarios">
-                                            <ul class="nav nav-sm flex-column">
-                                                <li><a href="<?= base_url('inventarios/crear'); ?>" class="nav-link">Crear Orden</a></li>
-                                                <li><a href="<?= base_url('inventarios'); ?>" class="nav-link">Panel de Órdenes</a></li>
-                                                <li><a href="<?= base_url('inventarios/almacen'); ?>" class="nav-link">Almacenamiento</a></li>
-                                                <li><a href="<?= base_url('inventarios/indicadores'); ?>" class="nav-link">Indicadores</a></li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    
-                                    <!-- Incidencias -->
-                                    <li class="nav-item">
-                                        <a href="#sidebarIncidencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Incidencias</a>
-                                        <div class="collapse menu-dropdown" id="sidebarIncidencias" data-bs-parent="#sidebarModulos">
-                                            <ul class="nav nav-sm flex-column">
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tickets'; ?>" class="nav-link">Todas las Incidencias</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tickets/tipos'; ?>" class="nav-link">Tipos de Incidencias</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tickets/creados'; ?>" class="nav-link">Incidencias Creadas</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tickets/asignados'; ?>" class="nav-link">Incidencias Asignadas</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tickets/nuevo'; ?>" class="nav-link">Nueva Incidencia</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'tareas/'; ?>" class="nav-link">Mis Tareas</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    
-                                    <!-- Elementos añadidos del segundo menú -->
-                                    <li class="nav-item">
-                                        <a href="#sidebarDependencias" class="nav-link" data-bs-toggle="collapse">Dependencias</a>
-                                        <div class="collapse menu-dropdown" id="sidebarDependencias">
-                                            <ul class="nav nav-sm flex-column">
-                                                <li class="nav-item">
-                                                    <a href="<?= base_url() . 'dependencias/'; ?>" class="nav-link">Lista de Dependencias</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="<?= base_url() . 'clientes/'; ?>" class="nav-link">Clientes</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="<?= base_url() . "reportes/requerimientos"; ?>" class="nav-link">Reportes / Incidencias</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="<?= base_url() . "reportes/tareas"; ?>" class="nav-link">Reporte / Tareas</a>
-                                    </li>
-                                    <!-- Fin elementos añadidos -->
-                                    
-                                </ul>
-                            </div>
-                        </li>
-
-                        <!-- Elemento añadido del segundo menú -->
                         <li class="nav-item">
                             <a href="<?= base_url() . 'usuarios/'; ?>" class="nav-link">Usuarios</a>
                         </li>
+<li class="nav-item">
+    <a href="<?= base_url('cuentas/create'); ?>" class="nav-link">
+        Crear y Administrar Clientes
+    </a>
+</li>
+<li class="nav-item">
+    <a href="<?= base_url('directorio'); ?>" class="nav-link">
+        Directorio(CRM)
+    </a>
+</li>
+<li class="nav-item">
+    <a href="<?= base_url('campanas/'); ?>" class="nav-link">
+        Lista de Campañas
+    </a>
+</li>
+
+                        <li class="nav-item">
+                            <a href="#sidebarIncidencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Incidencias</a>
+                            <div class="collapse menu-dropdown" id="sidebarIncidencias" data-bs-parent="#sidebarModulos">
+                                <ul class="nav nav-sm flex-column">
+                                    
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tickets'; ?>" class="nav-link">Todas las Incidencias</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tickets/tipos'; ?>" class="nav-link">Tipos de Incidencias</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tickets/creados'; ?>" class="nav-link">Incidencias Creadas</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tickets/asignados'; ?>" class="nav-link">Incidencias Asignadas</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tickets/nuevo'; ?>" class="nav-link">Nueva Incidencia</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'tareas/'; ?>" class="nav-link">Mis Tareas</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+    <a href="#sidebarCampanasRondas" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">
+        Campañas & Rondas
+    </a>
+    <div class="collapse menu-dropdown" id="sidebarCampanasRondas" data-bs-parent="#sidebarModulos">
+        <ul class="nav nav-sm flex-column">
+            <!-- Campañas -->
+            <li class="nav-item">
+                <a href="<?= base_url() . 'campanas'; ?>" class="nav-link">Lista de Campañas</a>
+            </li>
+            <li class="nav-item">
+                <a href="<?= base_url() . 'campanas/tipos'; ?>" class="nav-link">Tipos de Campañas</a>
+            </li>
+            <li class="nav-item">
+                <a href="<?= base_url() . 'campanas/subtipos'; ?>" class="nav-link">Sub-Tipos de Campañas</a>
+            </li>
+            <!-- Rondas -->
+            <li class="nav-item">
+                <a href="<?= base_url() . 'rondas'; ?>" class="nav-link">Lista de Rondas</a>
+            </li>
+            <li class="nav-item">
+                <a href="<?= base_url() . 'rondas/zonas'; ?>" class="nav-link">Zonas de Rondas</a>
+            </li>
+            <li class="nav-item">
+                <a href="<?= base_url() . 'rondas/puntos'; ?>" class="nav-link">Puntos de Rondas</a>
+            </li>
+        </ul>
+    </div>
+</li>
 
                     </ul>
                 </div>
@@ -261,10 +244,10 @@
                 <hr>
 
                 <!-- Configuración -->
-                <a class="nav-link menu-link" href="#sidebarConfiguracion" data-bs-toggle="collapse" role="button" aria-expanded="false">
+                <a class="nav-link menu-link" href="#sidebarConfiguracion" data-bs-toggle="collapse" data-bs-parent="#navbar-nav" role="button" aria-expanded="false" aria-controls="sidebarConfiguracion">
                     <i class="ri ri-settings-3-line"></i> <span>Configuración</span>
                 </a>
-                <div class="collapse menu-dropdown" id="sidebarConfiguracion">
+                <div class="collapse menu-dropdown" id="sidebarConfiguracion" data-bs-parent="#navbar-nav">
                     <ul class="nav nav-sm flex-column">
                         <li class="nav-item">
                             <a href="<?= base_url() . 'perfil/'; ?>" class="nav-link">Perfil</a>
@@ -275,17 +258,19 @@
                         <li class="nav-item">
                             <a href="<?= base_url() . 'configuracion/sla'; ?>" class="nav-link">TDR</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url() . 'soporte/conversaciones'; ?>" class="nav-link">Soporte</a>
+                        </li>
                     </ul>
                 </div>
             </ul>
         </div>
+        <!-- Sidebar -->
     </div>
 
     <div class="sidebar-background"></div>
 </div>
 <!-- Left Sidebar End -->
-
-<!-- El script JavaScript permanece igual -->
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
