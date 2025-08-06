@@ -11,17 +11,15 @@ class CampanasModel extends Model {
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
-    protected $allowedFields = [
-        'tipo_id', 'subtipo_id', 'area_id', 'nombre',
-        'coordinador', 'descripcion', 'fecha_inicio',
-        'fecha_fin', 'estado',
-        'encuesta',           
-        'entregables',       
-        'universo',            
-        'territorio',          
-        'territorio_subtype',   
-        'sectorizacion'  
-    ];
+ protected $allowedFields = [
+    'tipo_id', 'subtipo_id', 'area_id', 'nombre',
+    'coordinador', 'descripcion', 'fecha_inicio',
+    'fecha_fin', 'estado', 'encuesta',
+    'entregables', 'universo', 'territorio',
+    'territorio_subtype', 'sectorizacion',
+    'canal_difusion', 'objetivo', 'sector_electoral', 'territorio_local' // ← Agrega esto
+];
+
 
     protected $useTimestamps = false;
     protected $createdField = 'created_at';
@@ -129,6 +127,7 @@ public function contarPeticionesPorCampana($campana_id)
         ->where('campana_id', $campana_id)
         ->countAllResults();
 }
+
 
 }
 

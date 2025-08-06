@@ -184,13 +184,13 @@
     <div class="d-flex align-items-center" style="border: 2px solid black; border-radius: 5px; overflow: hidden; width: 100px; height: 20px;">
         <?php 
             // Creamos un array de "bloques" para simular la barra llena
-            $bloques = floor(64 / 10); // 64% -> 6 bloques llenos
+            $bloques = floor(0 / 1); // 0% -> 0 bloques llenos
             for ($i = 0; $i < $bloques; $i++) {
                 echo '<div style="width: 8px; height: 100%; background-color: black; margin: 0 1px;"></div>';
             }
         ?>
     </div>
-    <span class="fw-bold">64%</span>
+    <span class="fw-bold">0%</span>
     <a href="#" class="btn btn-sm btn-light">Registro de Actividad</a>
     <a href="#" class="btn btn-sm btn-light">+ Indicadores</a>
 </div>
@@ -207,38 +207,27 @@
             </div>
         <?php endif; ?>
 
-        <!-- Estadísticas dinámicas en tarjetas pequeñas y compactas -->
-        <?php
-      $stats = [
-    ['icon' => 'ri-map-pin-line', 'color' => 'primary', 'value' => $total_rondas ?? 0, 'label' => 'Rondas'],
-    ['icon' => 'ri-group-line', 'color' => 'success', 'value' => $total_brigadas ?? 0, 'label' => 'Brigadas'],
-    ['icon' => 'ri-target-line', 'color' => 'purple', 'value' => $total_visitas ?? '0/0', 'label' => 'Visitas'],
-    ['icon' => 'ri-alert-line', 'color' => 'warning', 'value' => $total_incidencias ?? 0, 'label' => 'Incidencias'],
-    ['icon' => 'ri-file-text-line', 'color' => 'info', 'value' => $total_encuestas ?? 0, 'label' => 'Encuestas'],
-    ['icon' => 'ri-truck-line', 'color' => 'danger', 'value' => $total_entregas ?? 0, 'label' => 'Entregas'],
-    ['icon' => 'ri-handshake-line', 'color' => 'teal', 'value' => $total_peticiones ?? 0, 'label' => 'Peticiones'],
-];
-
-        ?>
-        <div class="row mt-2 mb-3 g-2">
-            <?php foreach ($stats as $stat): ?>
-                <div class="col-6 col-md-3 col-lg-2">
-                    <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn" style="min-width:0;">
-                        <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
-                            <div class="rounded-circle bg-<?= $stat['color']; ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
-                                <i class="<?= $stat['icon']; ?> text-<?= $stat['color']; ?> fs-5"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold" style="font-size:1rem;"><?= $stat['value']; ?></div>
-                                <div class="text-muted" style="font-size:0.8rem;"><?= $stat['label']; ?></div>
-                            </div>
-                        </div>
+    <!-- Estadísticas dinámicas en tarjetas pequeñas y compactas -->
+<div class="row mt-2 mb-3 g-2">
+    <?php foreach ($stats as $stat): ?>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn" style="min-width:0;">
+                <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
+                    <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
+                        <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" style="font-size:1rem;"><?= esc($stat['value']); ?></div>
+                        <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label']); ?></div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
         </div>
-        <!-- Puedes agregar animate.css para animaciones: https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <?php endforeach; ?>
+</div>
+
+<!-- Animate.css para animaciones suaves -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 
 <!-- Modal para editar datos completos de la campaña -->

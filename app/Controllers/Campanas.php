@@ -193,12 +193,12 @@ public function detalle($campana_id)
             'value' => $this->campanas->contarBrigadasPorCampana($campana_id), // ya implementado
             'label' => 'Brigadas'
         ],
-        [
-            'icon' => 'ri-target-line',
-            'color' => 'purple',
-            'value' => $this->campanas->contarVisitasPorCampana($campana_id), // debes implementarlo tú
-            'label' => 'Visitas'
-        ],
+         [
+        'icon' => 'ri-target-line',
+        'color' => 'purple',
+        'value' => $this->campanas->contarVisitasPorCampana($campana_id), 
+        'label' => 'Visitas'
+    ],
         [
             'icon' => 'ri-alert-line',
             'color' => 'warning',
