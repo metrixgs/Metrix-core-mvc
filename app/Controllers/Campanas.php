@@ -42,6 +42,8 @@ class Campanas extends BaseController {
     $this->subtiposCampanas = new SubtiposCampanasModel();
     $this->segmentaciones = new SegmentacionesModel();
     $this->survey = new SurveyModel();
+     $this->rolesModel = new \App\Models\RolesModel();  // Cargar el modelo de roles
+
 
 
         # Cargar los Helpers
@@ -267,7 +269,19 @@ public function detalle($campana_id)
 }
 
 
-    public function crear() {
+     public function crear()
+{
+    $data['usuarios_coordinador'] = $this->usuarios
+        ->select('id, nombre')
+        ->where('rol_id', 9)
+        ->findAll();
+
+    // ⚠️ Si la solicitud es GET, solo muestra el formulario
+    if ($this->request->getMethod() === 'get') {
+        return view('campanas/crear-campana', $data);
+    }
+
+    // 🔽 Todo esto se ejecuta solo si es POST
     $nombre = $this->request->getPost('nombre');
     $coordinador = $this->request->getPost('coordinador');
     $tipo_id = $this->request->getPost('tipo_id');
@@ -284,7 +298,6 @@ public function detalle($campana_id)
     $territorio_subtype = $this->request->getPost('territorio-electorales-subtype') 
         ?? $this->request->getPost('territorio-geograficos-subtype');
     $sectorizacion = $this->request->getPost('sectorizacion');
-    
 
     $validationRules = [
         'nombre' => 'permit_empty|max_length[100]',
@@ -309,7 +322,7 @@ public function detalle($campana_id)
 
     if (!$this->validate($validationRules)) {
         session()->setFlashdata('validation', $this->validator->getErrors());
-        return redirect()->to("campanas/")->withInput();
+        return redirect()->to("campanas/crear")->withInput();
     }
 
     $infoCampana = [
@@ -328,10 +341,9 @@ public function detalle($campana_id)
         'territorio_subtype' => $territorio_subtype ?? null,
         'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
         'canal_difusion' => $this->request->getPost('canal_difusion'),
-'objetivo' => $this->request->getPost('objetivo'),
-'sector_electoral' => $this->request->getPost('sector_electoral'),
-'territorio_local' => $this->request->getPost('territorio_local'),
-
+        'objetivo' => $this->request->getPost('objetivo'),
+        'sector_electoral' => $this->request->getPost('sector_electoral'),
+        'territorio_local' => $this->request->getPost('territorio_local'),
     ];
 
     if (!empty($subtipo_id)) {
@@ -351,7 +363,7 @@ public function detalle($campana_id)
             'mensaje' => "No se pudo crear la campaña, inténtalo nuevamente o contacta con soporte técnico.",
             'tipo' => "danger"
         ]);
-        return redirect()->to("campanas/")->withInput();
+        return redirect()->to("campanas/crear")->withInput();
     }
 }
 
@@ -767,12 +779,18 @@ public function detalle($campana_id)
             ->findAll();
         $data['surveys'] = $this->survey->findAll();
 
+        $data['usuarios_coordinador'] = $this->usuarios
+    ->select('id, nombre')
+    ->where('rol_id', 9)
+    ->findAll();
+
         // Usar función reutilizable de breadcrumb
         $data['breadcrumb'] = $this->generarBreadcrumb([
             ['title' => 'Inicio', 'url' => base_url('/')],
             ['title' => 'Campañas', 'url' => base_url('campanas')],
             ['title' => 'Nueva Campaña'],
         ]);
+
 
         return view('incl/head-application', $data)
             . view('incl/header-application', $data)

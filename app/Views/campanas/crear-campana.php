@@ -128,14 +128,17 @@
                 <?php endforeach; ?>
               </select>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Coordinador(a) <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="coordinador" name="coordinador" required style="border-color: #8bc34a;">
-                <?php foreach ($usuarios_desde_2 as $usuario): ?>
-                  <option value="<?= $usuario['id']; ?>"><?= htmlspecialchars($usuario['nombre']); ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+          <div class="mb-3">
+  <label class="form-label fw-semibold" style="color: #8bc34a;">Coordinador(a) <span class="text-danger">*</span></label>
+ <select class="form-select select2" id="coordinador" name="coordinador" required>
+    <?php foreach ($usuarios_coordinador as $usuario): ?>
+        <option value="<?= $usuario['id'] ?>"><?= esc($usuario['nombre']) ?></option>
+    <?php endforeach; ?>
+</select>
+
+
+</div>
+
           </div>
         </div>
       </div>
