@@ -103,11 +103,16 @@ class CampanasModel extends Model {
             ->countAllResults();
     }
 
-    public function contarEncuestasPorCampana($campana_id) {
-        return $this->db->table('tbl_respuestas')
-            ->where('campana_id', $campana_id)
-            ->countAllResults();
-    }
+  public function contarEncuestasPorCampana($campana_id)
+{
+    $row = $this->select('encuesta')
+                ->where('id', $campana_id)
+                ->get()
+                ->getRow();
+
+    return (!empty($row) && !empty($row->encuesta)) ? 1 : 0;
+}
+
     public function contarVisitasPorCampana($campana_id)
 {
     return $this->db->table('tbl_visitas')
@@ -127,6 +132,7 @@ public function contarPeticionesPorCampana($campana_id)
         ->where('campana_id', $campana_id)
         ->countAllResults();
 }
+
 
 
 }

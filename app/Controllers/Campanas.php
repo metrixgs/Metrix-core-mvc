@@ -205,12 +205,13 @@ public function detalle($campana_id)
             'value' => $this->tickets->contarIncidenciasPorCampana($campana_id), // ya implementado
             'label' => 'Incidencias'
         ],
-        [
-            'icon' => 'ri-file-text-line',
-            'color' => 'info',
-            'value' => $this->survey->contarEncuestasPorCampana($campana_id), // ya implementado
-            'label' => 'Encuestas'
-        ],
+      [
+    'icon' => 'ri-file-text-line',
+    'color' => 'info',
+    'value' => $this->campanas->contarEncuestasPorCampana($campana_id),  // ✅ SOLUCIÓN
+    'label' => 'Encuestas'
+],
+
         [
             'icon' => 'ri-truck-line',
             'color' => 'danger',
