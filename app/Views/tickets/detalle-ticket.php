@@ -213,25 +213,32 @@
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <?php
-                                                        // Obtener la extensión directamente del archivo
-                                                        $extension = strtolower(pathinfo($archivo['ruta'], PATHINFO_EXTENSION));
-                                                        $rutaArchivo = base_url($archivo['ruta']); // Ruta del archivo en el servidor
-                                                        // Vista previa según el tipo de archivo
-                                                        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                                            // Para imágenes, usamos <img> para la vista previa
-                                                            echo "<img src='$rutaArchivo' width='100%' height='400px' />";
-                                                        } elseif ($extension === 'pdf') {
-                                                            // Para PDFs, usamos <embed>
-                                                            echo "<embed src='$rutaArchivo' width='100%' height='400px' type='application/pdf'>";
-                                                        } elseif (in_array($extension, ['xls', 'xlsx', 'doc', 'docx', 'txt'])) {
-                                                            // Para formatos de Office y TXT, usamos Google Docs Viewer
-                                                            $googleViewer = "https://docs.google.com/viewer?embedded=true&url=" . urlencode($rutaArchivo);
-                                                            echo "<iframe src='$googleViewer' width='100%' height='500px'></iframe>";
-                                                        } else {
-                                                            // Si el formato no es compatible para vista previa
-                                                            echo "Este formato no es compatible para vista previa.";
-                                                        }
+                  <?php
+// Mejora para obtener la extensión de una URL de Wasabi S3
+function getFileExtensionFromUrl($url) {
+    // Eliminar los parámetros de consulta de la URL
+    $urlPath = strtok($url, '?');
+    // Obtener la extensión del archivo
+    return strtolower(pathinfo($urlPath, PATHINFO_EXTENSION));
+}
+
+// Usar en tu código:
+$extension = getFileExtensionFromUrl($archivo['ruta']);
+$rutaArchivo = $archivo['ruta']; // La URL completa de Wasabi S3
+
+// Vista previa según el tipo de archivo
+if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+    echo "<img src='$rutaArchivo' width='100%' height='400px' />";
+} elseif (in_array($extension, ['mp4', 'webm', 'ogg'])) {
+    echo "<video src='$rutaArchivo' width='100%' height='400px' controls></video>";
+} elseif ($extension === 'pdf') {
+    echo "<embed src='$rutaArchivo' width='100%' height='400px' type='application/pdf'>";
+} elseif (in_array($extension, ['xls', 'xlsx', 'doc', 'docx', 'txt'])) {
+    $googleViewer = 'https://docs.google.com/viewer?embedded=true&url=' . urlencode($rutaArchivo);
+    echo "<iframe src='$googleViewer' width='100%' height='500px'></iframe>";
+} else {
+    echo "Este formato no es compatible para vista previa.";
+}
                                                         ?>
                                                         <br><br>
                                                         <!-- Opción de descarga para todos los archivos -->

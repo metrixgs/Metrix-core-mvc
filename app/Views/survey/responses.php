@@ -21,6 +21,10 @@
         Respuestas de la Encuesta: <?= htmlspecialchars($survey['title']) ?>
     </h1>
     <p class="text-gray-600 mb-6"><?= htmlspecialchars($survey['description']) ?></p>
+          <a href="<?= base_url('survey/' . $survey['id'] . '/estadistica') ?>" 
+   class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-lg shadow-md transition mb-4">
+   <i class="fas fa-chart-pie mr-2"></i> Ver Estadísticas
+</a>
 
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-200 rounded-lg">

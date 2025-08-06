@@ -33,6 +33,9 @@ $routes->get('campanas/tipos/detalle/(:num)', 'Campanas::detalle_tipo/$1');
 $routes->post('campanas/tipos/crear', 'Campanas::crear_tipo');
 $routes->post('campanas/tipos/eliminar', 'Campanas::eliminar_tipo');
 $routes->post('campanas/tipos/actualizar', 'Campanas::actualizar_tipo');
+$routes->get('campanas/nueva', 'Campanas::nueva');
+ $routes->get('campanas/tags', 'Campanas::tagsCatalog');
+
 
 #Rutas de la Rondas...
 $routes->get('rondas/', 'Rondas::index');
@@ -155,7 +158,7 @@ $routes->post('/survey/store', 'SurveyController::store');
 $routes->get('/survey/(:num)', 'SurveyController::show/$1');
 $routes->post('/survey/(:num)/storeResponse', 'SurveyController::storeResponse/$1');
 
-
+$routes->get('/survey/(:num)/estadistica', 'SurveyController::estadisticaPorEncuesta/$1');
 $routes->get('/survey/(:num)/responded', 'SurveyController::surveyResponded/$1');
 
 //respuestas
@@ -174,8 +177,9 @@ $routes->get('/directorio/crear', 'Directorio::crear');
 $routes->post('/directorio/guardar', 'Directorio::guardar');
 $routes->get('/directorio/editar/(:num)', 'Directorio::editar/$1');
 $routes->post('/directorio/actualizar/(:num)', 'Directorio::actualizar/$1');
- 
-$routes->delete('/directorio/(:num)', 'Directorio::eliminar/$1');
+
+$routes->post('directorio/eliminar/(:num)', 'Directorio::eliminar/$1');
+
 
 $routes->get('/directorio/ver/(:num)', 'Directorio::ver/$1');
 $routes->get('directorio/mapa/(:num)', 'Directorio::mapa/$1');
@@ -192,3 +196,6 @@ $routes->get('export/excel', 'ExportController::excel');
 $routes->get('export/pdf', 'ExportController::pdf');
 $routes->get('export/csv', 'ExportController::csv');
 $routes->post('export/enviar-correo', 'ExportController::enviarCorreo');
+
+// Rutas de la Bitácora de Usuarios
+$routes->get('bitacora/', 'BitacoraController::index');

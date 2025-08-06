@@ -21,8 +21,7 @@ class CampanasModel extends Model {
     'universo',            
     'territorio',          
     'territorio_subtype',   
-    'sectorizacion'  ,
-     
+    'sectorizacion'  
 ];
 
     protected $useTimestamps = false;

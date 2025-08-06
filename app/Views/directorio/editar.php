@@ -105,31 +105,24 @@
 
                         <!-- CURP -->
                         <div class="col-md-6">
-    <div class="form-floating">
-        <input 
-            type="text" 
-            class="form-control border-2 shadow-sm text-uppercase" 
-            id="curp" 
-            name="curp" 
-            value="<?= set_value('curp', esc($contacto['curp'] ?? '')); ?>"
-            placeholder="CURP de 18 caracteres"
-            maxlength="18"
-            pattern="[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9]{2}"
-        >
-        <label for="curp">
-            <i class="bi bi-card-text me-1"></i>
-            CURP
-        </label>
-        <div class="form-text">Formato: ABCD123456HDFXYZ01</div>
-    </div>
-</div>
-
-<!-- Hidden para conservar la CURP antigua -->
-<input 
-    type="hidden" 
-    name="old_curp" 
-    value="<?= esc(set_value('old_curp', $contacto['curp'] ?? '')); ?>"
->
+                            <div class="form-floating">
+                                <input 
+                                    type="text" 
+                                    class="form-control border-2 shadow-sm text-uppercase" 
+                                    id="curp" 
+                                    name="curp" 
+                                    value="<?= set_value('curp', esc($contacto['curp'] ?? '')); ?>"
+                                    placeholder="CURP de 18 caracteres"
+                                    maxlength="18"
+                                    pattern="[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9]{2}"
+                                >
+                                <label for="curp">
+                                    <i class="bi bi-card-text me-1"></i>
+                                    CURP
+                                </label>
+                                <div class="form-text">Formato: ABCD123456HDFXYZ01</div>
+                            </div>
+                        </div>
 
                         <!-- Fecha de Nacimiento -->
                         <div class="col-md-6">

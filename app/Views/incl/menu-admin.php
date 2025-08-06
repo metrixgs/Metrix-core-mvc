@@ -212,6 +212,37 @@
                 </div>
                 <hr>
 
+                <!-- Ajustes & Soporte -->
+                <a class="nav-link menu-link" href="#sidebarAjustes" data-bs-toggle="collapse" role="button" aria-expanded="false">
+                    <i class="ri ri-settings-3-line"></i> <span>Ajustes & Soporte</span>
+                </a>
+                <div class="collapse menu-dropdown" id="sidebarAjustes">
+                    <ul class="nav nav-sm flex-column">
+                        <li><a href="<?= base_url('bitacora'); ?>" class="nav-link">Bitácora de Actividad</a></li>
+                        <li>
+                            <a href="#sidebarUsuarios" class="nav-link" data-bs-toggle="collapse">Control de Usuarios</a>
+                            <div class="collapse menu-dropdown" id="sidebarUsuarios">
+                                <ul class="nav nav-sm flex-column">
+                                    <li><a href="<?= base_url('usuarios/tipos'); ?>" class="nav-link">Tipos de Usuarios</a></li>
+                                    <li><a href="<?= base_url('usuarios/permisos'); ?>" class="nav-link">Permisos & Roles</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li><a href="<?= base_url('notificaciones'); ?>" class="nav-link">Notificaciones</a></li>
+                        <li>
+                            <a href="#sidebarSoporte" class="nav-link" data-bs-toggle="collapse">Ticket de Soporte</a>
+                            <div class="collapse menu-dropdown" id="sidebarSoporte">
+                                <ul class="nav nav-sm flex-column">
+                                    <li><a href="<?= base_url('soporte/nuevo'); ?>" class="nav-link">Nuevo Ticket</a></li>
+                                    <!-- Elemento añadido del segundo menú -->
+                                    <li><a href="<?= base_url('soporte/conversaciones'); ?>" class="nav-link">Conversaciones</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <hr>
+
                 <!-- Configuración -->
                 <a class="nav-link menu-link" href="#sidebarConfiguracion" data-bs-toggle="collapse" data-bs-parent="#navbar-nav" role="button" aria-expanded="false" aria-controls="sidebarConfiguracion">
                     <i class="ri ri-settings-3-line"></i> <span>Configuración</span>

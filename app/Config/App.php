@@ -16,7 +16,7 @@ class App extends BaseConfig
      *
      *    http://example.com/
      */
-    public string $baseURL = 'https://rondero360.com/';
+    public string $baseURL = 'https://tan-gull-153177.hostingersite.com/';
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

@@ -79,18 +79,9 @@
                                                             <i class="ri-eye-line"></i>
                                                         </a>
                                                         
-                                                        <!-- Actualizar -->
-                                                        <a href="<?= base_url() . 'usuarios/actualizar/' . $usuario['id']; ?>" 
-                                                           class="btn btn-warning me-2" title="Actualizar usuario">
-                                                            <i class="ri-pencil-line"></i>
-                                                        </a>
+ 
                                                         
-                                                        <!-- Desactivar -->
-                                                        <a href="<?= base_url() . 'usuarios/desactivar/' . $usuario['id']; ?>" 
-                                                           class="btn btn-danger" title="Desactivar usuario" 
-                                                           onclick="return confirm('¿Está seguro de desactivar este usuario?');">
-                                                            <i class="ri-user-unfollow-line"></i>
-                                                        </a>
+                                                       
                                                     </div>
                                                 </td>
                                             </tr>

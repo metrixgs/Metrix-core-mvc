@@ -1,141 +1,181 @@
-<div class="page-content">
-<div class="container-fluid">
+<?php
+// Si $brigadas no existe o es vacío, definimos un valor temporal
+$brigadas = $brigadas ?? [
+    ['id' => 1, 'nombre' => 'Brigada Temporal']
+];
 
-    <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Crear Ronda</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="<?= base_url() ?>">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="<?= base_url('rondas') ?>">Rondas</a></li>
-                        <li class="breadcrumb-item active">Crear Ronda</li>
-                    </ol>
+$operadores = $operadores ?? [
+    ['id' => 1, 'nombre' => 'Operador Temporal']
+];
+
+$territorios = $territorios ?? [
+    ['id' => 1, 'nombre' => 'Territorio Temporal']
+];
+
+$distribucion = $distribucion ?? [
+    ['nombre' => 'Juan Temporal', 'puntos' => 10]
+];
+?>
+
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                    <h4 class="mb-sm-0">Nueva Ronda</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="<?= base_url() ?>">Inicio</a></li>
+                            <li class="breadcrumb-item"><a href="<?= base_url('rondas') ?>">Rondas</a></li>
+                            <li class="breadcrumb-item active">Nueva Ronda</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- end page title -->   
+        <!-- end page title -->
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Nueva Ronda</h5>
-                </div>
-                <div class="card-body">
-                    <form action="<?= base_url('rondas/crear') ?>" method="post" id="form-crear-ronda">
-                        <div class="row g-3">
-                            <!-- Nombre -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre de la Ronda <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
+        <form action="<?= base_url('rondas/crear') ?>" method="post" id="form-crear-ronda">
+            <div class="row g-3">
+                <!-- Datos Generales -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">Datos Generales</h5>
+                        </div>
+                        <div class="card-body row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre de la Campaña</label>
+                                <input type="text" name="nombre_campana" class="form-control" value="Entrega de Tarjeta de Salud (+60)">
                             </div>
-
-                            <!-- Campaña ID (oculto) -->
-                            <div class="col-lg-6">
-                                <input type="hidden" name="campana_id" value="<?= esc($_GET['campana_id'] ?? '') ?>">
+                            <div class="col-md-3">
+                                <label class="form-label">Fecha</label>
+                                <input type="date" name="fecha" class="form-control">
                             </div>
-
-                            <!-- Coordinador -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="coordinador" class="form-label">Coordinador(a) <span class="text-danger">*</span></label>
-                                    <select class="form-select select2" id="coordinador" name="coordinador" required>
-                                        <option value="">Seleccione un coordinador</option>
-                                        <?php foreach ($usuarios as $usuario): ?>
-                                            <option value="<?= esc($usuario['id']) ?>"><?= esc($usuario['nombre']) ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Encargado -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="encargado" class="form-label">Encargado(a) <span class="text-danger">*</span></label>
-                                    <select class="form-select select2" id="encargado" name="encargado" required>
-                                        <option value="">Seleccione un encargado</option>
-                                        <?php foreach ($usuarios as $usuario): ?>
-                                            <option value="<?= esc($usuario['id']) ?>"><?= esc($usuario['nombre']) ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Fecha -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="fecha_actividad" class="form-label">Fecha de Actividad <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="fecha_actividad" name="fecha_actividad" required>
-                                </div>
-                            </div>
-
-                            <!-- Hora -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="hora_actividad" class="form-label">Hora de Actividad <span class="text-danger">*</span></label>
-                                    <input type="time" class="form-control" id="hora_actividad" name="hora_actividad" required>
-                                </div>
-                            </div>
-
-                            <!-- Estado -->
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="estado" name="estado" required>
-                                        <option value="Programada" selected>Programada</option>
-                                        <option value="Activa">Activa</option>
-                                        <option value="Finalizada">Finalizada</option>
-                                        <option value="Pospuesta">Pospuesta</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Segmentaciones -->
-                            <div class="col-lg-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Segmentaciones</label>
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <?php if (!empty($segmentaciones)): ?>
-                                                    <?php foreach ($segmentaciones as $seg): ?>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" name="segmentaciones[]" value="<?= $seg['id'] ?>" id="seg-<?= $seg['id'] ?>">
-                                                            <label class="form-check-label" for="seg-<?= $seg['id'] ?>">
-                                                                <?= esc($seg['codigo']) ?> - <?= esc($seg['descripcion']) ?>
-                                                            </label>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <p class="text-muted">No hay segmentaciones disponibles</p>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botones -->
-                            <div class="col-lg-12 mt-4">
-                                <div class="hstack gap-2 justify-content-end">
-                                    <a href="<?= base_url('rondas') ?>" class="btn btn-light">Cancelar</a>
-                                    <button type="submit" class="btn btn-primary">Guardar Ronda</button>
-                                </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Horario</label>
+                                <input type="time" name="horario" class="form-control">
                             </div>
                         </div>
-                    </form>
-                </div> <!-- /.card-body -->
-            </div> <!-- /.card -->
-        </div> <!-- /.col-lg-12 -->
-    </div> <!-- /.row -->
+                    </div>
+                </div>
 
-</div> <!-- /.container-fluid -->
-</div> <!-- /.page-content -->
+                <!-- Responsables + Interacciones -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">Responsables</h5>
+                        </div>
+                        <div class="card-body row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Brigada(s)</label>
+                                <select name="brigadas[]" class="form-select select2">
+                                    <option value="">Seleccione brigada</option>
+                                    <?php foreach($brigadas as $brigada): ?>
+                                        <option value="<?= esc($brigada['id']) ?>"><?= esc($brigada['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Operadores</label>
+                                <select name="operadores[]" class="form-select select2">
+                                    <option value="">Seleccione operador</option>
+                                    <?php foreach($operadores as $op): ?>
+                                        <option value="<?= esc($op['id']) ?>"><?= esc($op['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">Interacciones</h5>
+                        </div>
+                        <div class="card-body row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Universo</label>
+                                <input type="number" name="universo" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Entregable</label>
+                                <input type="number" name="entregable" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delimitación Territorial -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">Delimitación Territorial</h5>
+                        </div>
+                        <div class="card-body row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Territorio</label>
+                                <select name="territorio" class="form-select select2">
+                                    <option value="">Seleccione territorio</option>
+                                    <?php foreach($territorios as $t): ?>
+                                        <option value="<?= esc($t['id']) ?>"><?= esc($t['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Nombre</label>
+                                <select name="nombre_territorio" class="form-select select2">
+                                    <option value="">Seleccione nombre</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Sectorización</label>
+                                <select name="sectorizacion" class="form-select select2">
+                                    <option value="">Seleccione sectorización</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Nombre</label>
+                                <select name="nombre_sectorizacion" class="form-select select2">
+                                    <option value="">Seleccione nombre</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribución de Puntos -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Distribución de Puntos</h5>
+                            <button type="button" class="btn btn-success btn-sm">Generar Asignación</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <?php foreach($distribucion as $item): ?>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control form-control-sm" value="<?= esc($item['nombre']) ?> (<?= esc($item['puntos']) ?>)">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="col-12 text-end mt-3">
+                    <a href="<?= base_url('rondas') ?>" class="btn btn-light">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Ronda</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Select2 CSS & JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -143,23 +183,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        $('.select2').select2({
-            width: '100%',
-            placeholder: 'Seleccione una opción',
-            allowClear: true
-        });
-
-        // Prellenar fecha con hoy
-        document.getElementById('fecha_actividad').valueAsDate = new Date();
-
-        // Validar al menos una segmentación
-        document.getElementById('form-crear-ronda').addEventListener('submit', function(e) {
-            const segmentaciones = document.querySelectorAll('input[name="segmentaciones[]"]:checked');
-            if (segmentaciones.length === 0) {
-                alert('Por favor, selecciona al menos una segmentación.');
-                e.preventDefault();
-            }
-        });
+        $('.select2').select2({ width: '100%' });
     });
-    
 </script>

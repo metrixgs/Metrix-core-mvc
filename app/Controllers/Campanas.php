@@ -226,6 +226,7 @@ class Campanas extends BaseController {
     $territorio_subtype = $this->request->getPost('territorio-electorales-subtype') 
         ?? $this->request->getPost('territorio-geograficos-subtype');
     $sectorizacion = $this->request->getPost('sectorizacion');
+    
 
     $validationRules = [
         'nombre' => 'permit_empty|max_length[100]',
@@ -268,6 +269,11 @@ class Campanas extends BaseController {
         'territorio' => $territorio ?? null,
         'territorio_subtype' => $territorio_subtype ?? null,
         'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
+        'canal_difusion' => $this->request->getPost('canal_difusion'),
+'objetivo' => $this->request->getPost('objetivo'),
+'sector_electoral' => $this->request->getPost('sector_electoral'),
+'territorio_local' => $this->request->getPost('territorio_local'),
+
     ];
 
     if (!empty($subtipo_id)) {
@@ -692,4 +698,23 @@ class Campanas extends BaseController {
         // Retornar JSON limpio
         return $this->response->setJSON($subtipos);
     }
+
+    public function nueva() {
+    $data['titulo_pagina'] = 'Metrix | Nueva Campaña';
+    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
+    $data['areas'] = $this->areas->obtenerAreas();
+    $data['usuarios_desde_2'] = $this->usuarios
+        ->select('id, nombre')
+        ->where('id >=', 2)
+        ->findAll();
+    $data['surveys'] = $this->survey->findAll();
+
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/crear-campana', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
 }

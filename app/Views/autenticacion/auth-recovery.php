@@ -147,7 +147,7 @@
                         <div class="col-lg-12">
                             <div class="text-center">
                                 <p class="mb-0">&copy;
-                                    <script>document.write(new Date().getFullYear())</script> Metrix.   Creado por <a class="text-white-50" href="https://wa.me/573027479401">Robinson H.V</a>
+                                    <script>document.write(new Date().getFullYear())</script> Metrix.    
                                 </p>
                             </div>
                         </div>
