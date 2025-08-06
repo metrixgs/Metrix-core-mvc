@@ -33,15 +33,15 @@ class Campanas extends BaseController {
     public function __construct() {
         // Instanciar los modelos
         $this->usuarios = new UsuariosModel();
-        $this->areas = new AreasModel();
-        $this->tickets = new TicketsModel();
-        $this->notificaciones = new NotificacionesModel();
-        $this->tareas = new TareasModel();
-        $this->campanas = new CampanasModel();
-        $this->tiposCampanas = new TiposCampanasModel();
-        $this->subtiposCampanas = new SubtiposCampanasModel();
-        $this->segmentaciones = new SegmentacionesModel();
-        $this->survey = new SurveyModel();
+    $this->areas = new AreasModel();
+    $this->tickets = new TicketsModel();
+    $this->notificaciones = new NotificacionesModel();
+    $this->tareas = new TareasModel();
+    $this->campanas = new CampanasModel();
+    $this->tiposCampanas = new TiposCampanasModel();
+    $this->subtiposCampanas = new SubtiposCampanasModel();
+    $this->segmentaciones = new SegmentacionesModel();
+    $this->survey = new SurveyModel();
 
 
         # Cargar los Helpers
@@ -151,7 +151,7 @@ class Campanas extends BaseController {
 }
 
 
-   public function detalle($campana_id) {
+public function detalle($campana_id) {
     // Título de la página
     $data['titulo_pagina'] = 'Metrix | Detalle de la Campaña';
 
@@ -178,6 +178,56 @@ class Campanas extends BaseController {
         ['title' => 'Campañas', 'url' => base_url('campanas')],
         ['title' => 'Detalle'],
     ]);
+
+    // Indicadores dinámicos
+    $campana_id = $campana['id'];
+
+    $data['stats'] = [
+        [
+            'icon' => 'ri-map-pin-line',
+            'color' => 'primary',
+            'value' => count($this->campanas->obtenerRondasPorCampana($campana_id)),
+ // Debes implementar este método
+            'label' => 'Rondas'
+        ],
+       [
+    'icon' => 'ri-group-line',
+    'color' => 'success',
+    'value' => $this->campanas->contarBrigadasPorCampana($campana_id), // ✅ Correcto
+    'label' => 'Brigadas'
+],
+
+        [
+            'icon' => 'ri-target-line',
+            'color' => 'purple',
+            'value' => '203/2333', // Ejemplo estático por ahora
+            'label' => 'Visitas'
+        ],
+        [
+            'icon' => 'ri-alert-line',
+            'color' => 'warning',
+            'value' => $this->tickets->contarIncidenciasPorCampana($campana_id), // Debes implementar este método
+            'label' => 'Incidencias'
+        ],
+        [
+            'icon' => 'ri-file-text-line',
+            'color' => 'info',
+            'value' => $this->survey->contarEncuestasPorCampana($campana_id), // Opcional: si tienes esta relación
+            'label' => 'Encuestas'
+        ],
+        [
+            'icon' => 'ri-truck-line',
+            'color' => 'danger',
+            'value' => '997', // Valor ficticio, puedes calcularlo con entregas reales
+            'label' => 'Entregas'
+        ],
+        [
+            'icon' => 'ri-handshake-line',
+            'color' => 'teal',
+            'value' => '453', // Valor ficticio, puedes calcularlo si tienes tabla de peticiones
+            'label' => 'Peticiones'
+        ],
+    ];
 
     // Renderizar vistas
     return view('incl/head-application', $data)

@@ -211,10 +211,11 @@
         <?php
         $stats = [
             ['icon' => 'ri-map-pin-line', 'color' => 'primary', 'value' => '32', 'label' => 'Rondas'],
-            ['icon' => 'ri-group-line', 'color' => 'success', 'value' => '07', 'label' => 'Brigadas'],
+           ['icon' => 'ri-group-line', 'color' => 'success', 'value' => $total_brigadas ?? 0, 'label' => 'Brigadas'],
             ['icon' => 'ri-target-line', 'color' => 'purple', 'value' => '203/2,333', 'label' => 'Visitas'],
             ['icon' => 'ri-alert-line', 'color' => 'warning', 'value' => '2,377', 'label' => 'Incidencias'],
-            ['icon' => 'ri-file-text-line', 'color' => 'info', 'value' => '1,346', 'label' => 'Encuestas'],
+          ['icon' => 'ri-file-text-line', 'color' => 'info', 'value' => $total_encuestas ?? 0, 'label' => 'Encuestas'],
+
             ['icon' => 'ri-truck-line', 'color' => 'danger', 'value' => '997', 'label' => 'Entregas'],
             ['icon' => 'ri-handshake-line', 'color' => 'teal', 'value' => '453', 'label' => 'Peticiones'],
         ];

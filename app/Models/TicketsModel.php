@@ -136,4 +136,10 @@ class TicketsModel extends Model {
     public function eliminarTicket($id) {
         return $this->delete($id);
     }
+
+    public function contarIncidenciasPorCampana($campana_id)
+{
+    return $this->where('campana_id', $campana_id)->countAllResults();
+}
+
 }
