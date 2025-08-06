@@ -164,331 +164,307 @@
 </div>
 
 <!-- Modal para crear una nueva campaña -->
-
-<div class="modal fade" id="modalNuevaCampana" tabindex="-1" aria-labelledby="modalNuevaCampanaLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header text-white" style="background-color: #8bc34a;">
-                <h5 class="modal-title fw-bold" id="modalNuevaCampanaLabel">Nueva Campaña</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <input type="hidden" name="estado" value="Programada">
-
-            <div class="modal-body bg-light">
-                <form method="post" action="<?= base_url() . "campanas/crear"; ?>" id="formNuevaCampana">
-                    <?= csrf_field(); ?>
-                    <div class="row">
-                        <!-- Columna con todos los campos organizados -->
-                        <div class="col-md-12">
-                            <!-- Información Básica -->
-                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
-                                <div class="card-header text-white" style="background-color: #8bc34a;">
-                                    <h6 class="mb-0 fw-semibold">📋 Información Básica</h6>
-                                </div>
-                                <div class="card-body bg-white">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label class="form-label fw-semibold" style="color: #8bc34a;">ID de
-                                                    Campaña</label>
-                                                <div class="alert py-2 mb-0"
-                                                    style="background-color: #f1f8e9; border-color: #8bc34a; color: #33691e;">
-                                                    <strong><?= $new_campana_id; ?></strong>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="nombre" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Nombre de Campaña <span
-                                                        class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" style="border-color: #8bc34a;"
-                                                    id="nombre" name="nombre" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                     <div class="col-md-6">
-    <div class="mb-3">
-        <label for="tipo_id" class="form-label fw-semibold" style="color: #8bc34a;">Tipos de Campaña <span class="text-danger">*</span></label>
-        <select class="form-select select2" style="border-color: #8bc34a;" id="tipo_id" name="tipo_id" required>
-            <option value="">Seleccione un tipo</option>
-            <?php if (isset($tipos_campanas)) { ?>
-                <?php foreach ($tipos_campanas as $tipo): ?>
-                    <option value="<?= $tipo['id']; ?>"><?= htmlspecialchars($tipo['nombre']); ?></option>
-                <?php endforeach; ?>
-            <?php } ?>
-        </select>
-    </div>
-</div>
-
-<div class="col-md-6">
-    <div class="mb-3">
-        <label for="subtipo_id" class="form-label fw-semibold" style="color: #8bc34a;">Subtipo de Campaña</label>
-        <select class="form-select select2" style="border-color: #8bc34a;" id="subtipo_id" name="subtipo_id">
-            <option value="">Seleccione un subtipo</option>
-        </select>
-    </div>
-</div>
-
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="universo" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Universo (144)</label>
-                                                <input type="text" class="form-control" style="border-color: #8bc34a;"
-                                                    id="universo" name="universo" list="universo-options">
-                                                <datalist id="universo-options">
-                                                    <option value="Deportistas">
-                                                    <option value="Estudiantes">
-                                                    <option value="Profesionales">
-                                                </datalist>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Territorio -->
-                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
-                                <div class="card-header text-white" style="background-color: #8bc34a;">
-                                    <h6 class="mb-0 fw-semibold">🗺️ Configuración de Territorio</h6>
-                                </div>
-                                <div class="card-body bg-white">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold" style="color: #8bc34a;">Territorio <span
-                                                class="text-danger">*</span></label>
-                                        <input type="hidden" id="territorio" name="territorio" required>
-                                        <div class="d-flex gap-4 mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="territorio-type"
-                                                    id="territorio-electorales" value="electorales" required>
-                                                <label class="form-check-label fw-semibold" style="color: #8bc34a;"
-                                                    for="territorio-electorales">Electorales</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="territorio-type"
-                                                    id="territorio-geograficos" value="geograficos">
-                                                <label class="form-check-label fw-semibold" style="color: #8bc34a;"
-                                                    for="territorio-geograficos">Geográficos</label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div id="territorio-electorales-options" class="border rounded p-3 bg-light"
-                                        style="border-color: #8bc34a !important; display: none;">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <label class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Sectorización <span
-                                                        class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-outline dropdown-toggle w-100 text-start"
-                                                        style="border-color: #8bc34a; color: #8bc34a;" type="button"
-                                                        id="territorioElectoralesDropdown" data-bs-toggle="dropdown"
-                                                        aria-expanded="false">
-                                                        Seleccione Sectorización
-                                                    </button>
-                                                    <ul class="dropdown-menu w-100"
-                                                        aria-labelledby="territorioElectoralesDropdown"
-                                                        id="territorio-electorales-suboptions-list">
-                                                        <li><a class="dropdown-item" href="#" data-value="1.1">Distrito
-                                                                Federal</a></li>
-                                                        <li><a class="dropdown-item" href="#" data-value="1.2">Distrito
-                                                                Local</a></li>
-                                                        <li><a class="dropdown-item" href="#" data-value="1.3">Sección
-                                                                Electoral</a></li>
-                                                    </ul>
-                                                    <input type="hidden" id="territorio-electorales-subtype"
-                                                        name="territorio-electorales-subtype">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div id="territorio-geograficos-options" class="border rounded p-3 bg-light"
-                                        style="border-color: #8bc34a !important; display: none;">
-                                        <div class="row mb-3">
-                                            <div class="col-md-3">
-                                                <label class="form-label fw-semibold" style="color: #8bc34a;">Nivel
-                                                    Territorial <span class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <select class="form-select" style="border-color: #8bc34a;"
-                                                    id="territorio-geograficos-level"
-                                                    name="territorio-geograficos-level">
-                                                    <option value="">Seleccione nivel</option>
-                                                    <option value="01">Municipios</option>
-                                                    <option value="02">Delegaciones</option>
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <label class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Sectorización <span
-                                                        class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-outline dropdown-toggle w-100 text-start"
-                                                        style="border-color: #8bc34a; color: #8bc34a;" type="button"
-                                                        id="territorioGeograficosDropdown" data-bs-toggle="dropdown"
-                                                        aria-expanded="false">
-                                                        Seleccione Sectorización
-                                                    </button>
-                                                    <ul class="dropdown-menu w-100"
-                                                        aria-labelledby="territorioGeograficosDropdown"
-                                                        id="territorio-geograficos-suboptions-list"></ul>
-                                                    <input type="hidden" id="territorio-geograficos-subtype"
-                                                        name="territorio-geograficos-subtype">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Configuración y Responsables -->
-                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
-                                <div class="card-header text-white" style="background-color: #8bc34a;">
-                                    <h6 class="mb-0 fw-semibold">⚙️ Configuración y Responsables</h6>
-                                </div>
-                                <div class="card-body bg-white">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="encuesta" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Encuesta <span
-                                                        class="text-danger">*</span></label>
-                                                <select class="form-select select2" style="border-color: #8bc34a;"
-                                                    id="encuesta" name="encuesta">
-                                                    <option value="">Seleccione una encuesta</option>
-                                                    <?php if (isset($surveys) && !empty($surveys)) { ?>
-                                                        <?php foreach ($surveys as $survey): ?>
-                                                            <option value="<?= htmlspecialchars($survey['id']); ?>">
-                                                                #<?= htmlspecialchars($survey['id']); ?>
-                                                                <?= htmlspecialchars($survey['title']); ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    <?php } ?>
-                                                </select>
-
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="entregables" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Entregables <span
-                                                        class="text-danger">*</span></label>
-                                                <select class="form-select select2" style="border-color: #8bc34a;"
-                                                    id="entregables" name="entregables" required>
-                                                    <option value="00001">Orden # 00001</option>
-                                                    <option value="00002">Orden # 00002</option>
-                                                    <option value="00003">Orden # 00003</option>
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="area_id" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Área Responsable <span
-                                                        class="text-danger">*</span></label>
-                                                <select class="form-select select2" style="border-color: #8bc34a;"
-                                                    id="area_id" name="area_id" required>
-                                                    <?php if (isset($areas)) { ?>
-                                                        <?php foreach ($areas as $area): ?>
-                                                            <option value="<?= $area['id']; ?>">
-                                                                <?= htmlspecialchars($area['nombre']); ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    <?php } ?>
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for= "coordinador" class="form-label fw-semibold"
-                                                    class="text-danger">*</span></label>
-                                                <div class="mb-3">
-                                                    <label for="coordinador" class="form-label fw-semibold" style="color: #8bc34a;">Coordinador(a) <span class="text-danger">*</span></label>
-<select class="form-select select2" style="border-color: #8bc34a;" id="coordinador" name="coordinador" required>
-
-                                                        <option value="">Seleccione Encargado(a)</option>
-                                                        <?php if (isset($usuarios_desde_2) && !empty($usuarios_desde_2)) { ?>
-                                                            <?php foreach ($usuarios_desde_2 as $usuario): ?>
-                                                                <option value="<?= htmlspecialchars($usuario['id']); ?>">
-                                                                    <?= htmlspecialchars($usuario['nombre']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fechas -->
-                            <div class="card mb-3 shadow" style="border-color: #8bc34a;">
-                                <div class="card-header text-white" style="background-color: #8bc34a;">
-                                    <h6 class="mb-0 fw-semibold">📅 Programación</h6>
-                                </div>
-                                <div class="card-body bg-white">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="fecha_inicio" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Fecha de Inicio <span
-                                                        class="text-danger">*</span></label>
-                                                <input type="date" class="form-control" style="border-color: #8bc34a;"
-                                                    id="fecha_inicio" name="fecha_inicio" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="fecha_fin" class="form-label fw-semibold"
-                                                    style="color: #8bc34a;">Fecha de Término <span
-                                                        class="text-danger">*</span></label>
-                                                <input type="date" class="form-control" style="border-color: #8bc34a;"
-                                                    id="fecha_fin" name="fecha_fin" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Columna derecha con el mapa más amplio -->
-<div class="mb-3">
-  <label for="descripcion" class="form-label fw-semibold" style="color: #8bc34a;">Descripción <span class="text-danger">*</span></label>
-  <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
-</div>   </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-outline me-2" style="border-color: #8bc34a; color: #8bc34a;"
-                    data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Cancelar
-                </button>
-                <button type="submit" form="formNuevaCampana" class="btn text-white"
-                    style="background-color: #8bc34a; border-color: #8bc34a;">
-                    <i class="fas fa-plus me-1"></i>Crear Campaña
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
+ <div class="modal fade" id="modalNuevaCampana" tabindex="-1" aria-labelledby="modalNuevaCampanaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background-color: #8bc34a;">
+        <h5 class="modal-title fw-bold" id="modalNuevaCampanaLabel">Nueva Campaña</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <input type="hidden" name="estado" value="Programada">
+      <form method="post" action="<?= base_url() . 'campanas/crear'; ?>" id="formNuevaCampana">
+        <?= csrf_field(); ?>
+        <div class="modal-body bg-light">
+          <div class="row g-3">
+            <!-- DATOS GENERALES -->
+            <div class="col-md-12">
+              <div class="card shadow" style="border-color: #8bc34a;">
+                <div class="card-header text-white" style="background-color: #8bc34a;">
+                  <h6 class="mb-0 fw-semibold">📋 Datos Generales</h6>
+                </div>
+                <div class="card-body bg-white">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold" style="color: #8bc34a;">Nombre de la Campaña <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" style="border-color: #8bc34a;" id="nombre" name="nombre" required>
                     </div>
-                </form>
+                    <div class="col-md-4">
+                      <label for="fecha_inicio" class="form-label fw-semibold" style="color: #8bc34a;">Vigencia <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio" required style="border-color: #8bc34a;">
+                        <input type="date" class="form-control" name="fecha_fin" id="fecha_fin" required style="border-color: #8bc34a;">
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="tipo_id" class="form-label fw-semibold" style="color: #8bc34a;">Tipo <span class="text-danger">*</span></label>
+                      <select class="form-select select2" style="border-color: #8bc34a;" id="tipo_id" name="tipo_id" required>
+                        <?php foreach ($tipos_campanas as $tipo): ?>
+                          <option value="<?= $tipo['id']; ?>"><?= htmlspecialchars($tipo['nombre']); ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </div>
+                  </div>
+                  <!-- NUEVOS CAMPOS TEMPORALES -->
+                  <div class="row mt-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold" style="color: #8bc34a;">Canal de difusión</label>
+                      <input type="text" class="form-control" name="canal_difusion" placeholder="Ej: Redes Sociales" style="border-color: #8bc34a;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold" style="color: #8bc34a;">Objetivo de la campaña</label>
+                      <textarea class="form-control" name="objetivo" rows="1" style="border-color: #8bc34a;"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DELIMITACIÓN TERRITORIAL -->
+            <div class="col-md-6">
+              <div class="card shadow" style="border-color: #8bc34a;">
+                <div class="card-header text-white" style="background-color: #8bc34a;">
+                  <h6 class="mb-0 fw-semibold">🗺️ Delimitación Territorial</h6>
+                </div>
+                <div class="card-body bg-white">
+                  <div class="mb-3">
+                    <label for="sector_electoral" class="form-label fw-semibold" style="color: #8bc34a;">Sector Electoral</label>
+                    <select class="form-select select2" id="sector_electoral" name="sector_electoral" style="border-color: #8bc34a;">
+                      <option value="">Seleccione una opción</option>
+                      <option value="distrito">Distrito</option>
+                      <option value="seccion">Sección</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="territorio_local" class="form-label fw-semibold" style="color: #8bc34a;">Territorio Local</label>
+                    <select class="form-select select2" id="territorio_local" name="territorio_local" style="border-color: #8bc34a;">
+                      <option value="">Seleccione una opción</option>
+                      <option value="municipio">Municipio</option>
+                      <option value="delegacion">Delegación</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- IMPACTOS -->
+            <div class="col-md-6">
+              <div class="card shadow" style="border-color: #8bc34a;">
+                <div class="card-header text-white" style="background-color: #8bc34a;">
+                  <h6 class="mb-0 fw-semibold">🎯 Impactos</h6>
+                </div>
+                <div class="card-body bg-white">
+                  <label id="labelUniverso" class="form-label fw-semibold" style="color: #8bc34a;">Universo (0)</label>
+                  <button type="button" class="btn btn-outline-success w-100" id="btnAbrirUniverso">Seleccionar Universo</button>
+                  <input type="hidden" id="universo" name="universo">
+                  <div id="universoSeleccionado" class="mt-2 text-muted small">Ningún universo seleccionado</div>
+                  <div class="mt-3">
+                    <span class="badge bg-light border text-dark">#Adultos Mayores (681)</span>
+                    <span class="badge bg-light border text-dark">#Jubilados (344)</span>
+                    <span class="badge bg-light border text-dark">Mayores +60 años (231)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RESPONSABLES -->
+            <div class="col-md-6">
+              <div class="card shadow" style="border-color: #8bc34a;">
+                <div class="card-header text-white" style="background-color: #8bc34a;">
+                  <h6 class="mb-0 fw-semibold">👥 Responsables</h6>
+                </div>
+                <div class="card-body bg-white">
+                  <div class="mb-3">
+                    <label for="area_id" class="form-label fw-semibold" style="color: #8bc34a;">Área Responsable <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="area_id" name="area_id" required style="border-color: #8bc34a;">
+                      <?php foreach ($areas as $area): ?>
+                        <option value="<?= $area['id']; ?>"><?= htmlspecialchars($area['nombre']); ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="coordinador" class="form-label fw-semibold" style="color: #8bc34a;">Coordinador(a) <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="coordinador" name="coordinador" required style="border-color: #8bc34a;">
+                      <?php foreach ($usuarios_desde_2 as $usuario): ?>
+                        <option value="<?= htmlspecialchars($usuario['id']); ?>"><?= htmlspecialchars($usuario['nombre']); ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INTERACCIONES -->
+            <div class="col-md-6">
+              <div class="card shadow" style="border-color: #8bc34a;">
+                <div class="card-header text-white" style="background-color: #8bc34a;">
+                  <h6 class="mb-0 fw-semibold">🔗 Interacciones</h6>
+                </div>
+                <div class="card-body bg-white">
+                  <div class="mb-3">
+                    <label for="encuesta" class="form-label fw-semibold" style="color: #8bc34a;">Encuesta <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="encuesta" name="encuesta" style="border-color: #8bc34a;">
+                      <option value="">Seleccione una encuesta</option>
+                      <?php foreach ($surveys as $survey): ?>
+                        <option value="<?= htmlspecialchars($survey['id']); ?>">#<?= htmlspecialchars($survey['id']); ?> <?= htmlspecialchars($survey['title']); ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="entregables" class="form-label fw-semibold" style="color: #8bc34a;">Entregables <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="entregables" name="entregables" required style="border-color: #8bc34a;">
+                      <option value="00001">Orden # 00001</option>
+                      <option value="00002">Orden # 00002</option>
+                      <option value="00003">Orden # 00003</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DESCRIPCIÓN -->
+            <div class="col-md-12">
+              <div class="mb-3">
+                <label for="descripcion" class="form-label fw-semibold" style="color: #8bc34a;">Descripción <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline me-2" style="border-color: #8bc34a; color: #8bc34a;" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Cancelar
+          </button>
+          <button type="submit" form="formNuevaCampana" class="btn text-white" style="background-color: #8bc34a; border-color: #8bc34a;">
+            <i class="fas fa-plus me-1"></i>Crear Campaña
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+                <!-- Modal de Universo -->
+ <!-- Modal de Filtros -->
+<div class="modal fade" id="modalUniverso" tabindex="-1" aria-labelledby="modalUniversoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fw-bold" id="modalUniversoLabel">Filtros para: Todas las cuentas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+
+          <!-- Columna de Filtros Generales -->
+          <div class="col-md-4 border-end">
+            <h6 class="fw-semibold mb-3">Filtros</h6>
+
+            <div class="mb-3">
+              <label class="form-label">Ubicación</label>
+              <select class="form-select" multiple>
+                <option selected>Querétaro</option>
+                <option selected>México</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Ingresos</label>
+              <select class="form-select">
+                <option selected>Más de 1 millón</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Tecnología</label>
+              <select class="form-select">
+                <option selected>Cualquiera</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Año de fundación</label>
+              <select class="form-select" multiple>
+                <option selected>2023</option>
+                <option selected>2024</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Columna de Financiamiento -->
+          <div class="col-md-8 ps-4">
+            <h6 class="fw-semibold mb-3">Financiamiento</h6>
+
+            <div class="mb-3">
+              <label class="form-label">Selecciona tipo y fecha del financiamiento</label>
+              <div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="tipoFinanciamiento" id="cualquierRonda" checked>
+                  <label class="form-check-label" for="cualquierRonda">Cualquier ronda</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="tipoFinanciamiento" id="ultimaRonda">
+                  <label class="form-check-label" for="ultimaRonda">Última ronda</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Fecha de financiamiento</label>
+              <select class="form-select">
+                <option selected>Todos los tiempos</option>
+              </select>
+            </div>
+
+            <div class="accordion" id="filtrosAvanzados">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="encabezadoAvanzado">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapsarAvanzado">
+                    Avanzado
+                  </button>
+                </h2>
+                <div id="colapsarAvanzado" class="accordion-collapse collapse" data-bs-parent="#filtrosAvanzados">
+                  <div class="accordion-body">
+
+                    <div class="mb-3">
+                      <label class="form-label">Último monto de financiamiento</label>
+                      <div class="d-flex gap-2">
+                        <input type="number" class="form-control" placeholder="Mínimo">
+                        <input type="number" class="form-control" placeholder="Máximo">
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Monto total de financiamiento</label>
+                      <div class="d-flex gap-2">
+                        <input type="number" class="form-control" placeholder="Mínimo">
+                        <input type="number" class="form-control" placeholder="Máximo">
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- Fin col-md-8 -->
+
+        </div> <!-- Fin row -->
+      </div>
+
+      <div class="modal-footer bg-light">
+        <span class="me-auto text-muted">Resultados: 2,240</span>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success">Aplicar filtros</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
          
 <style>
     .custom-multiselect .selected-tags {
@@ -523,6 +499,11 @@
 
 
 
+#subModalUniverso {
+  background-color: #fff;
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+  border: 1px solid #8bc34a;
+}
 
 
 
@@ -825,4 +806,39 @@
             });
         });
     });
+</script>
+
+
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+  // ✅ Abrir el modal con Bootstrap al hacer click en el botón
+  document.getElementById('btnAbrirUniverso').addEventListener('click', function () {
+    var modal = new bootstrap.Modal(document.getElementById('modalUniverso'));
+    modal.show();
+  });
+
+  // ✅ Botón para cancelar (opcional)
+  var btnCancelar = document.getElementById('cancelarUniverso');
+  if (btnCancelar) {
+    btnCancelar.addEventListener('click', function () {
+      var modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalUniverso'));
+      modalInstance.hide();
+    });
+  }
+
+  // ✅ Botón para guardar selección
+  var btnGuardar = document.getElementById('guardarUniverso');
+  if (btnGuardar) {
+    btnGuardar.addEventListener('click', function () {
+      const valor = document.getElementById('selectUniverso').value;
+      document.getElementById('universo').value = valor;
+      document.getElementById('universoSeleccionado').textContent = valor
+        ? `Seleccionado: ${valor}`
+        : 'Ningún universo seleccionado';
+
+      var modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalUniverso'));
+      modalInstance.hide();
+    });
+  }
+});
 </script>
