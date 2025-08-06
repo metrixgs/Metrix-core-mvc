@@ -150,8 +150,8 @@ class Campanas extends BaseController {
         . view('incl/scripts-application', $data);
 }
 
-
-public function detalle($campana_id) {
+public function detalle($campana_id)
+{
     // Título de la página
     $data['titulo_pagina'] = 'Metrix | Detalle de la Campaña';
 
@@ -179,52 +179,48 @@ public function detalle($campana_id) {
         ['title' => 'Detalle'],
     ]);
 
-    // Indicadores dinámicos
-    $campana_id = $campana['id'];
-
+    // Indicadores dinámicos desde BD
     $data['stats'] = [
         [
             'icon' => 'ri-map-pin-line',
             'color' => 'primary',
-            'value' => count($this->campanas->obtenerRondasPorCampana($campana_id)),
- // Debes implementar este método
+            'value' => count($this->campanas->obtenerRondasPorCampana($campana_id)), // ya implementado
             'label' => 'Rondas'
         ],
-       [
-    'icon' => 'ri-group-line',
-    'color' => 'success',
-    'value' => $this->campanas->contarBrigadasPorCampana($campana_id), // ✅ Correcto
-    'label' => 'Brigadas'
-],
-
+        [
+            'icon' => 'ri-group-line',
+            'color' => 'success',
+            'value' => $this->campanas->contarBrigadasPorCampana($campana_id), // ya implementado
+            'label' => 'Brigadas'
+        ],
         [
             'icon' => 'ri-target-line',
             'color' => 'purple',
-            'value' => '203/2333', // Ejemplo estático por ahora
+            'value' => $this->campanas->contarVisitasPorCampana($campana_id), // debes implementarlo tú
             'label' => 'Visitas'
         ],
         [
             'icon' => 'ri-alert-line',
             'color' => 'warning',
-            'value' => $this->tickets->contarIncidenciasPorCampana($campana_id), // Debes implementar este método
+            'value' => $this->tickets->contarIncidenciasPorCampana($campana_id), // ya implementado
             'label' => 'Incidencias'
         ],
         [
             'icon' => 'ri-file-text-line',
             'color' => 'info',
-            'value' => $this->survey->contarEncuestasPorCampana($campana_id), // Opcional: si tienes esta relación
+            'value' => $this->survey->contarEncuestasPorCampana($campana_id), // ya implementado
             'label' => 'Encuestas'
         ],
         [
             'icon' => 'ri-truck-line',
             'color' => 'danger',
-            'value' => '997', // Valor ficticio, puedes calcularlo con entregas reales
+            'value' => $this->campanas->contarEntregasPorCampana($campana_id), // debes implementarlo tú
             'label' => 'Entregas'
         ],
         [
             'icon' => 'ri-handshake-line',
             'color' => 'teal',
-            'value' => '453', // Valor ficticio, puedes calcularlo si tienes tabla de peticiones
+            'value' => $this->campanas->contarPeticionesPorCampana($campana_id), // debes implementarlo tú
             'label' => 'Peticiones'
         ],
     ];

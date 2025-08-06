@@ -110,5 +110,25 @@ class CampanasModel extends Model {
             ->where('campana_id', $campana_id)
             ->countAllResults();
     }
+    public function contarVisitasPorCampana($campana_id)
+{
+    return $this->db->table('tbl_visitas')
+        ->where('campana_id', $campana_id)
+        ->countAllResults();
+}
+public function contarEntregasPorCampana($campana_id)
+{
+    return $this->db->table('tbl_entregas')
+        ->where('campana_id', $campana_id)
+        ->countAllResults();
+}
+
+public function contarPeticionesPorCampana($campana_id)
+{
+    return $this->db->table('tbl_peticiones')
+        ->where('campana_id', $campana_id)
+        ->countAllResults();
+}
+
 }
 
