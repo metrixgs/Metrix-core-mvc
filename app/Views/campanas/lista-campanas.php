@@ -13,11 +13,11 @@
           <h4 class="mb-sm-0"><?= $titulo_pagina; ?></h4>
 
           <div class="page-title-right">
-            <ol class="breadcrumb m-0">
-              <li class="breadcrumb-item"><a href="<?= base_url() . obtener_rol() . "panel/" ?>">Inicio</a></li>
-              <li class="breadcrumb-item active">Campañas</li>
-            </ol>
-          </div>
+  <?php if (!empty($breadcrumb)) : ?>
+    <?= $breadcrumb ?>
+  <?php endif; ?>
+</div>
+
 
         </div>
       </div>

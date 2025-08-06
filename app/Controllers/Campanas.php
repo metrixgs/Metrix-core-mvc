@@ -13,6 +13,7 @@ use App\Models\TiposCampanasModel;
 use App\Models\SubtiposCampanasModel;
 use App\Models\SegmentacionesModel;
 use App\Models\SurveyModel;
+use App\Libraries\Breadcrumb;
  
  
 
@@ -48,27 +49,19 @@ class Campanas extends BaseController {
         helper('Email');
         helper('Rol');
         helper('Menu');
-    }
-
-    public function index() {
+    } public function index() {
     $data['titulo_pagina'] = 'Metrix | Panel de Control';
 
     // Tickets y notificaciones
-    $tickets = $this->tickets->obtenerTickets();
-    $data['tickets'] = $tickets;
+    $data['tickets'] = $this->tickets->obtenerTickets();
+    $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
 
-    $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
-    $data['notificaciones'] = $notificaciones;
-
-    // Campañas
+    // Campañas con nombre del coordinador
     $campanas = $this->campanas->obtenerCampanas();
-
-    // AGREGADO: incluir nombre del coordinador
     foreach ($campanas as &$campana) {
         $usuario = $this->usuarios->find($campana['coordinador']);
         $campana['nombre_coordinador'] = $usuario['nombre'] ?? 'N/D';
     }
-
     $data['campanas'] = $campanas;
 
     // Encuestas
@@ -83,20 +76,22 @@ class Campanas extends BaseController {
     }
     $data['new_campana_id'] = '#CAM-' . str_pad($new_id, 6, '0', STR_PAD_LEFT);
 
-    // Tipos de campaña
-    $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
-    $data['tipos_campanas'] = $tipos_campanas;
-
-    // Segmentaciones y áreas
+    // Tipos, segmentaciones y áreas
+    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
     $data['todas_segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
-    $areas = $this->areas->obtenerAreas();
-    $data['areas'] = $areas;
+    $data['areas'] = $this->areas->obtenerAreas();
 
-    // Lista de usuarios desde ID 2
+    // Usuarios desde ID 2
     $data['usuarios_desde_2'] = $this->usuarios
         ->select('id, nombre')
         ->where('id >=', 2)
         ->findAll();
+
+    // Usar función reutilizable de breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Campañas'],
+    ]);
 
     // Renderizar vistas
     return view('incl/head-application', $data)
@@ -109,105 +104,121 @@ class Campanas extends BaseController {
 
 
 
-    public function tipos() {
-        # Creamo el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Tipos de Campañas';
+ public function tipos() {
+    // Título de la página
+    $data['titulo_pagina'] = 'Metrix | Tipos de Campañas';
 
-        # Obtenemos los tipos de campañas...
-        $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
-        $data['tipos_campanas'] = $tipos_campanas;
+    // Breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Tipos de Campañas'],
+    ]);
 
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('campanas/tipos-campanas', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
-    }
+    // Obtener tipos de campañas
+    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
+
+    // Renderizar vistas
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/tipos-campanas', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
 
     public function subtipos() {
-        # Creamo el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Subtipos de Campañas';
+    // Título de la página
+    $data['titulo_pagina'] = 'Metrix | Subtipos de Campañas';
 
-        # Obtenemos los tipos de campañas...
-        $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
-        $data['tipos_campanas'] = $tipos_campanas;
+    // Breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Subtipos de Campañas'],
+    ]);
 
-        # Obtenemos los subtipos de campañas...
-        $subtipos = $this->subtiposCampanas->obtenerSubtiposCampanas();
-        $data['subtipos_campanas'] = $subtipos;
+    // Obtener tipos y subtipos de campañas
+    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
+    $data['subtipos_campanas'] = $this->subtiposCampanas->obtenerSubtiposCampanas();
 
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('campanas/subtipos-campanas', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
+    // Renderizar vistas
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/subtipos-campanas', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
+
+   public function detalle($campana_id) {
+    // Título de la página
+    $data['titulo_pagina'] = 'Metrix | Detalle de la Campaña';
+
+    // Notificaciones
+    $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+
+    // Información de la campaña
+    $campana = $this->campanas->obtenerCampana($campana_id);
+    if (empty($campana)) {
+        return redirect()->to("campanas/");
     }
+    $data['campana'] = $campana;
 
-    public function detalle($campana_id) {
-        # Creamo el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Detalle de la Campaña';
+    // Tickets por campaña
+    $data['tickets'] = $this->tickets->obtenerTicketsPorCampana($campana['id']);
 
-        # Obtenemos todas las notificaciones por usuario...
-        $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
-        $data['notificaciones'] = $notificaciones;
+    // Tipos de campañas y áreas
+    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
+    $data['areas'] = $this->areas->obtenerAreas();
 
-        # Obtenemos informacion de la campaña...
-        $campana = $this->campanas->obtenerCampana($campana_id);
-        $data['campana'] = $campana;
+    // Breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Campañas', 'url' => base_url('campanas')],
+        ['title' => 'Detalle'],
+    ]);
 
-        # Obtenemos todas los tickets por campaña...
-        $tickets = $this->tickets->obtenerTicketsPorCampana($campana['id']);
-        $data['tickets'] = $tickets;
+    // Renderizar vistas
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/detalle-campana', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
 
-        # validamos si existe la campana...
-        if (empty($campana)) {
-            # No existe la campana...
-            return redirect()->to("campanas/");
-        }
 
-        # Obtenemso los tipos de campañas...
-        $tipos_campanas = $this->tiposCampanas->obtenerTiposCampanas();
-        $data['tipos_campanas'] = $tipos_campanas;
+ public function detalle_tipo($tipo_id) {
+    // Título de la página
+    $data['titulo_pagina'] = 'Metrix | Tipo de campaña';
 
-        # Obtenemos todas las areas...
-        $areas = $this->areas->obtenerAreas();
-        $data['areas'] = $areas;
-
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('campanas/detalle-campana', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
+    // Obtener información del tipo de campaña
+    $tipo_campana = $this->tiposCampanas->obtenerTiposCampana($tipo_id);
+    if (empty($tipo_campana)) {
+        return redirect()->to('campanas/tipos');
     }
+    $data['tipo_campana'] = $tipo_campana;
 
-    public function detalle_tipo($tipo_id) {
-        # Creamo el titulo de la pagina...
-        $data['titulo_pagina'] = 'Metrix | Tipo de campaña';
+    // Obtener subtipos de campañas por tipo
+    $data['subtipos_campana'] = $this->subtiposCampanas->obtenerSubtiposCampanasPorTipoCampana($tipo_id);
 
-        # Obtenemos informacion del tipo de campaña...
-        $tipo_campana = $this->tiposCampanas->obtenerTiposCampana($tipo_id);
-        $data['tipo_campana'] = $tipo_campana;
+    // Breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Tipos de Campañas', 'url' => base_url('campanas/tipos')],
+        ['title' => 'Detalle de Tipo'],
+    ]);
 
-        # Validamos si existe el tipo de campaña...
-        if (empty($tipo_campana)) {
-            # No existe el tipo de campaña...
-            return redirect()->to('campanas/tipos');
-        }
+    // Renderizar vistas
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/detalle-tipo-campana', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
 
-        # Obtenemos los subtipos por tipo de campaña...
-        $subtipos_campanas = $this->subtiposCampanas->obtenerSubtiposCampanasPorTipoCampana($tipo_id);
-        $data['subtipos_campana'] = $subtipos_campanas;
-
-        return view('incl/head-application', $data)
-                . view('incl/header-application', $data)
-                . view('incl/menu-admin', $data)
-                . view('campanas/detalle-tipo-campana', $data)
-                . view('incl/footer-application', $data)
-                . view('incl/scripts-application', $data);
-    }
 
     public function crear() {
     $nombre = $this->request->getPost('nombre');
@@ -700,21 +711,37 @@ class Campanas extends BaseController {
     }
 
     public function nueva() {
-    $data['titulo_pagina'] = 'Metrix | Nueva Campaña';
-    $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
-    $data['areas'] = $this->areas->obtenerAreas();
-    $data['usuarios_desde_2'] = $this->usuarios
-        ->select('id, nombre')
-        ->where('id >=', 2)
-        ->findAll();
-    $data['surveys'] = $this->survey->findAll();
+        $data['titulo_pagina'] = 'Metrix | Nueva Campaña';
+        $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
+        $data['areas'] = $this->areas->obtenerAreas();
+        $data['usuarios_desde_2'] = $this->usuarios
+            ->select('id, nombre')
+            ->where('id >=', 2)
+            ->findAll();
+        $data['surveys'] = $this->survey->findAll();
 
-    return view('incl/head-application', $data)
-        . view('incl/header-application', $data)
-        . view('incl/menu-admin', $data)
-        . view('campanas/crear-campana', $data)
-        . view('incl/footer-application', $data)
-        . view('incl/scripts-application', $data);
+        // Usar función reutilizable de breadcrumb
+        $data['breadcrumb'] = $this->generarBreadcrumb([
+            ['title' => 'Inicio', 'url' => base_url('/')],
+            ['title' => 'Campañas', 'url' => base_url('campanas')],
+            ['title' => 'Nueva Campaña'],
+        ]);
+
+        return view('incl/head-application', $data)
+            . view('incl/header-application', $data)
+            . view('incl/menu-admin', $data)
+            . view('campanas/crear-campana', $data)
+            . view('incl/footer-application', $data)
+            . view('incl/scripts-application', $data);
+    }
+
+    protected function generarBreadcrumb($items = [])
+    {
+        $breadcrumb = new \App\Libraries\Breadcrumb();
+        foreach ($items as $item) {
+            $breadcrumb->add($item['title'], $item['url'] ?? null);
+        }
+        return $breadcrumb->render();
+    }
 }
 
-}

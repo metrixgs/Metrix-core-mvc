@@ -1,4 +1,12 @@
-<h2 class="fw-bold mb-4" style="color: #8bc34a;">Nueva Campaña</h2>
+  
+ <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent mt-5 pt-4">
+  <h4 class="mb-sm-0" style="color: #8bc34a;">Nueva Campaña</h4>
+  <div class="page-title-right">
+    <?php if (!empty($breadcrumb)) : ?>
+      <?= $breadcrumb ?>
+    <?php endif; ?>
+  </div>
+</div>
 
 <form method="post" action="<?= base_url('campanas/crear'); ?>" id="formNuevaCampana">
   <?= csrf_field(); ?>
