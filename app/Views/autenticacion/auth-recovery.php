@@ -106,7 +106,7 @@
                                             <?= mostrar_alerta(); ?>
 
                                             <div class="mt-4">
-                                                <form action="<?= base_url() . "autenticacion/recovery"; ?>" method="post">
+                                                <form action="<?= base_url() . "recuperar/enviar"; ?>" method="post">
 
                                                     <div class="mb-3">
                                                         <label for="username" class="form-label">Correo electronico</label>
@@ -121,7 +121,7 @@
                                             </div>
 
                                             <div class="mt-5 text-center">
-                                                <p class="mb-0">¿Ya estas registrado? <a href="<?= base_url() . "autenticacion/inicio"; ?>" class="fw-semibold text-primary text-decoration-underline"> Iniciar sesion</a> </p>
+                                                <p class="mb-0">¿Ya estas registrado? <a href="<?= base_url() . "login"; ?>" class="fw-semibold text-primary text-decoration-underline"> Iniciar sesion</a> </p>
                                             </div>
                                         </div>
                                     </div>

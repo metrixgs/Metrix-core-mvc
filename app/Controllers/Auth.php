@@ -57,7 +57,7 @@ class Auth extends BaseController {
                 'mensaje' => 'revisa el correo e intentalo nuevamente.',
                 'tipo' => 'danger'
             ]);
-            return redirect()->to('autenticacion/recuperar')->withInput();
+            return redirect()->to('recuperar')->withInput();
         }
 
         # Obtenemos informacion del usuario con el correo...
@@ -71,7 +71,7 @@ class Auth extends BaseController {
                 'mensaje' => 'El correo no esta registrado.',
                 'tipo' => 'danger'
             ]);
-            return redirect()->to('autenticacion/recuperar')->withInput();
+            return redirect()->to('recuperar')->withInput();
         }
 
         # Creamos las variables del correo...
@@ -99,7 +99,7 @@ class Auth extends BaseController {
                         <p style="margin: 0 0 20px;">Te recomendamos cambiar esta contraseña tan pronto como inicies sesión.</p>
                         <p style="margin: 0 0 20px;">Si no has solicitado esta recuperación de cuenta, por favor, ignora este mensaje o ponte en contacto con nuestro equipo de soporte.</p>
                         <p style="margin: 0; text-align: center;">
-                            <a href="' . base_url() . "autenticacion/inicio" . '" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Iniciar Sesión</a>
+                            <a href="' . base_url() . "login" . '" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Iniciar Sesión</a>
                         </p>
                     </td>
                 </tr>
@@ -125,7 +125,7 @@ class Auth extends BaseController {
                 . 'Por favor, revisa tu bandeja de entrada. Si no lo encuentras, no olvides verificar la bandeja de spam.',
                 'tipo' => 'success'
             ]);
-            return redirect()->to('autenticacion/recuperar')->withInput();
+            return redirect()->to('recuperar')->withInput();
         } else {
             # No se pudo enviar el correo...
             $this->session->setFlashdata([
@@ -133,7 +133,7 @@ class Auth extends BaseController {
                 'mensaje' => 'No se ha podido enviar el correo intentalo nuevamente.',
                 'tipo' => 'danger'
             ]);
-            return redirect()->to('autenticacion/recuperar')->withInput();
+            return redirect()->to('recuperar')->withInput();
         }
     }
 
@@ -154,7 +154,7 @@ class Auth extends BaseController {
             'mensaje' => 'El usuario o la contraseña es inválido.',
             'tipo' => 'danger'
         ]);
-        return redirect()->to('autenticacion/inicio')->withInput();
+        return redirect()->to('login')->withInput();
     }
 
     // Buscar usuario por correo
@@ -179,9 +179,8 @@ class Auth extends BaseController {
         return redirect()->to('login')->withInput();
     }
 
-    // Verificar que exista rol_id y cuenta_id
-     if (!isset($cuenta['rol_id']) || (!isset($cuenta['cuenta_id']) && $cuenta['rol_id'] != 1)) {
-
+    // Verificar que exista rol_id
+    if (!isset($cuenta['rol_id'])) {
         $this->session->setFlashdata([
             'titulo' => '¡Error!',
             'mensaje' => 'Tu cuenta está incompleta. Contacta al administrador.',
@@ -190,14 +189,31 @@ class Auth extends BaseController {
         return redirect()->to('login');
     }
 
+    // Corrección automática del cuenta_id basado en el rol
+    $cuenta_id_corregido = $cuenta['cuenta_id'];
+    
+    // Si el usuario no es Master/Mega Admin y tiene cuenta_id = 1 o NULL, asignar cuenta_id = 2
+    if (!in_array($cuenta['rol_id'], [1, 2, 3, 4])) {
+        if (empty($cuenta['cuenta_id']) || $cuenta['cuenta_id'] == 1) {
+            $cuenta_id_corregido = 2;
+            
+            // Actualizar en la base de datos para futuras sesiones
+            $this->usuarios->actualizarUsuario($cuenta['id'], ['cuenta_id' => 2]);
+            
+            // Log de la corrección
+            log_message('info', "Cuenta_id corregido automáticamente para usuario {$cuenta['correo']}: {$cuenta['cuenta_id']} -> 2");
+        }
+    }
+
     // Guardar datos mínimos en la sesión
     session()->set('session_data', [
+        'id'         => $cuenta['id'],
         'usuario_id' => $cuenta['id'],
         'nombre'     => $cuenta['nombre'],
         'correo'     => $cuenta['correo'],
         'rol_id'     => $cuenta['rol_id'],
-        'area_id'     => $cuenta['area_id'],
-        'cuenta_id'  => $cuenta['cuenta_id']
+        'area_id'    => $cuenta['area_id'],
+        'cuenta_id'  => $cuenta_id_corregido
     ]);
 	
 	// Registrar el inicio de sesión en la bitácora
@@ -239,7 +255,7 @@ class Auth extends BaseController {
             session()->setFlashdata('validation', $this->validator->getErrors());
 
             # Si la validación falla, almacenamos los errores y los datos en la sesión...
-            return redirect()->to('autenticacion/registro')->withInput();
+            return redirect()->to('registro')->withInput();
         }
 
         # Creamos la variable para crear la empresa...
@@ -267,7 +283,7 @@ class Auth extends BaseController {
 
             # Creamos la variable para crear la cuenta del usuario...
             $infoUsuario = [
-                'rol_id' => 1,
+                'rol_id' => 3,
                 'empresa_id' => $empresa_id,
                 'condominio_id' => NULL,
                 'nombre' => strtoupper($responsable),
@@ -285,7 +301,7 @@ class Auth extends BaseController {
                     'mensaje' => 'Se ha creado el usuario de forma correcta.',
                     'tipo' => 'success'
                 ]);
-                return redirect()->to('autenticacion/inicio');
+                return redirect()->to('login');
             } else {
                 # No se pudo crear el usuario...
                 $this->session->setFlashdata([
@@ -293,7 +309,7 @@ class Auth extends BaseController {
                     'mensaje' => 'No se pudo registrar el usuario, intentalo nuevamente.',
                     'tipo' => 'danger'
                 ]);
-                return redirect()->to('autenticacion/registro')->withInput();
+                return redirect()->to('registro')->withInput();
             }
         } else {
             # No se creo la empresa...
@@ -302,7 +318,7 @@ class Auth extends BaseController {
                 'mensaje' => 'No se pudo crear la empresa, intentalo nuevamenete.',
                 'tipo' => 'danger'
             ]);
-            return redirect()->to('autenticacion/registro')->withInput();
+            return redirect()->to('registro')->withInput();
         }
     }
 

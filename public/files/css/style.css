@@ -45,6 +45,24 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     color: var(--active-text) !important;
 }
 
+/* Estilos globales para Bootstrap Custom Switches */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 0.2rem rgba(62, 137, 20, 0.25) !important;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+    background-color: #fff !important;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before:hover {
+    background-color: #2d6b0f !important;
+}
+
 /* Eliminar la barra lateral verde en los submenús */
 .menu-dropdown .nav-link.active::before {
     display: none !important;

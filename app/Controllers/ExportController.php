@@ -15,6 +15,7 @@ class ExportController extends Controller
     public function __construct()
     {
         $this->directorioModel = new DirectorioModel();
+        helper('bitacora'); // Cargar helper de bitácora
     }
 
     public function excel()
@@ -52,6 +53,16 @@ class ExportController extends Controller
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
+        // Registrar en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'Excel', [
+            'descripcion' => 'Exportación de directorio en formato Excel',
+            'formato' => 'Excel (.xlsx)',
+            'total_registros' => count($contactos),
+            'archivo_generado' => $filename,
+            'metodo_descarga' => 'directa'
+        ], 'info');
+        
         $writer->save('php://output');
         exit;
     }
@@ -83,6 +94,16 @@ class ExportController extends Controller
             ]);
         }
 
+        // Registrar en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'CSV', [
+            'descripcion' => 'Exportación de directorio en formato CSV',
+            'formato' => 'CSV (.csv)',
+            'total_registros' => count($contactos),
+            'archivo_generado' => $filename,
+            'metodo_descarga' => 'directa'
+        ], 'info');
+        
         fclose($file);
         exit;
     }
@@ -113,16 +134,36 @@ class ExportController extends Controller
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
+        // Registrar en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'PDF', [
+            'descripcion' => 'Exportación de directorio en formato PDF',
+            'formato' => 'PDF (.pdf)',
+            'total_registros' => count($contactos),
+            'archivo_generado' => 'directorio.pdf',
+            'orientacion' => 'landscape',
+            'metodo_descarga' => 'directa'
+        ], 'info');
+        
         $dompdf->stream('directorio.pdf', ['Attachment' => 1]);
     }
 
     public function enviarCorreo()
 {
-    $data = $this->request->getJSON(true);
+    $data = json_decode(file_get_contents('php://input'), true);
     $tipo = $data['tipo'] ?? 'excel';
     $email = $data['email'] ?? null;
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        // Registrar intento con email inválido en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'Error Validación Email', [
+            'descripcion' => 'Intento de exportación con correo electrónico inválido',
+            'formato' => strtoupper($tipo),
+            'email_invalido' => $email,
+            'error' => 'Formato de correo electrónico inválido'
+        ], 'warning');
+        
         return $this->response->setJSON([
             'status' => 400,
             'message' => 'Correo electrónico inválido'
@@ -202,6 +243,18 @@ class ExportController extends Controller
     $emailService->attach($rutaArchivo . $nombreArchivo);
 
     if ($emailService->send()) {
+        // Registrar en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'Envío Email', [
+            'descripcion' => 'Directorio enviado por correo electrónico',
+            'formato' => strtoupper($tipo),
+            'destinatario' => $email,
+            'total_registros' => count($contactos),
+            'archivo_generado' => $nombreArchivo,
+            'metodo_entrega' => 'email',
+            'estado_envio' => 'exitoso'
+        ], 'info');
+        
         // Limpieza opcional
         @unlink($rutaArchivo . $nombreArchivo);
 
@@ -210,6 +263,19 @@ class ExportController extends Controller
             'message' => 'Correo enviado exitosamente a ' . $email
         ]);
     } else {
+        // Registrar error en bitácora
+        $usuario_id = session('session_data.usuario_id') ?? 999;
+        log_activity($usuario_id, 'Exportación', 'Error Envío Email', [
+            'descripcion' => 'Error al enviar directorio por correo electrónico',
+            'formato' => strtoupper($tipo),
+            'destinatario' => $email,
+            'total_registros' => count($contactos),
+            'archivo_generado' => $nombreArchivo,
+            'metodo_entrega' => 'email',
+            'estado_envio' => 'fallido',
+            'error' => 'Error en el servicio de correo'
+        ], 'error');
+        
         return $this->response->setJSON([
             'status' => 500,
             'message' => 'Error al enviar el correo'

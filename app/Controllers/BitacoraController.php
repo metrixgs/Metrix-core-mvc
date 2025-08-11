@@ -34,6 +34,19 @@ class BitacoraController extends BaseController
         $total_registros = $this->bitacoraModel->contarRegistros($filtros);
         $total_paginas = ceil($total_registros / $perPage);
 
+        // Aplicar filtrado por cuenta_id para las estadísticas
+        $cuenta_id_sesion = session('session_data.cuenta_id');
+        $rol_id_sesion = session('session_data.rol_id');
+        
+        $estadisticasBuilder = $this->bitacoraModel->builder();
+        if (!in_array($rol_id_sesion, [1, 3]) && $cuenta_id_sesion) {
+            $estadisticasBuilder->where('cuenta_id', $cuenta_id_sesion);
+        }
+        
+        $actividades_hoy = (clone $estadisticasBuilder)->where('DATE(fecha_creacion)', date('Y-m-d'))->countAllResults();
+        $inicios_sesion = (clone $estadisticasBuilder)->where('accion', 'Login')->countAllResults();
+        $creaciones = (clone $estadisticasBuilder)->like('accion', 'Creación')->countAllResults();
+
         $data = [
             'titulo_pagina' => 'Bitácora de Usuarios',
             'bitacoras' => $bitacoras,
@@ -43,9 +56,9 @@ class BitacoraController extends BaseController
             'filtros_actuales' => $filtros,
             'total_registros' => $total_registros,
             'total_actividades' => $total_registros,
-            'actividades_hoy' => $this->bitacoraModel->where('DATE(fecha_creacion)', date('Y-m-d'))->countAllResults(),
-            'inicios_sesion' => $this->bitacoraModel->where('accion', 'Login')->countAllResults(),
-            'creaciones' => $this->bitacoraModel->like('accion', 'Creación')->countAllResults(),
+            'actividades_hoy' => $actividades_hoy,
+            'inicios_sesion' => $inicios_sesion,
+            'creaciones' => $creaciones,
             'pager' => $this->bitacoraModel->pager,
             'perPage' => $perPage,
             'currentPage' => $currentPage,

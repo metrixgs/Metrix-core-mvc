@@ -88,6 +88,15 @@ class Perfil extends BaseController {
 
         # Actualizamos la informacion de la cuenta...
         if ($this->usuarios->actualizarUsuario($usuario_id, $infoUsuario)) {
+            # Registrar cambio de contraseña en bitácora
+            helper('bitacora');
+            $usuario_id_sesion = session('session_data.id') ?? 999;
+            log_activity($usuario_id_sesion, 'Seguridad', 'Cambio Contraseña', [
+                'descripcion' => 'Usuario cambió su contraseña',
+                'usuario_afectado_id' => $usuario_id,
+                'accion' => 'Cambio de contraseña'
+            ], 'info');
+            
             #  Se actualizo el usuario...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -126,7 +135,7 @@ class Perfil extends BaseController {
             $this->session->destroy();
 
             # Redirigimos al login, después de destruir la sesión
-            return redirect()->to('autenticacion/inicio');
+            return redirect()->to('login');
         } else {
             # No se pudo eliminar la cuenta...
             $this->session->setFlashdata([

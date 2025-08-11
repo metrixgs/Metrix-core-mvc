@@ -11,8 +11,8 @@ class CuentasModel extends Model {
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
-    protected $allowedFields = ['nombre']; // Ajusta los campos permitidos según tu estructura
-    protected $useTimestamps = false;
+    protected $allowedFields = ['nombre', 'descripcion', 'activo']; // Campos permitidos para inserción/actualización
+    protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
     protected $deletedField = 'deleted_at';
@@ -27,5 +27,38 @@ class CuentasModel extends Model {
 
     public function obtenerCuentaPorNombre($nombre) {
         return $this->where('nombre', $nombre)->first();
+    }
+
+    public function obtenerCuentasActivas() {
+        return $this->where('activo', 1)->findAll();
+    }
+
+    public function activarCuenta($id) {
+        return $this->update($id, ['activo' => 1]);
+    }
+
+    public function desactivarCuenta($id) {
+        return $this->update($id, ['activo' => 0]);
+    }
+
+    public function crearCuenta($data) {
+        $data['activo'] = 1; // Por defecto activa
+        return $this->insert($data);
+    }
+
+    public function actualizarCuenta($id, $data) {
+        return $this->update($id, $data);
+    }
+
+    public function eliminarCuenta($id) {
+        return $this->delete($id);
+    }
+
+    public function existeNombreCuenta($nombre, $excludeId = null) {
+        $builder = $this->where('nombre', $nombre);
+        if ($excludeId) {
+            $builder->where('id !=', $excludeId);
+        }
+        return $builder->first() !== null;
     }
 }

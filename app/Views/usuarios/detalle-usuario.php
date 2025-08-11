@@ -55,7 +55,7 @@
                                 <select name="rol_id" id="rol_id" class="form-control js-example-basic-single <?= session('validation.rol_id') ? 'is-invalid' : '' ?>" required onchange="controlarArea()">
     <option value="">Seleccione un rol</option>
 <?php foreach ($roles as $rol): ?>
-    <?php if ($rol['id'] != 1): // excluir rol master ?>
+    <?php if (!in_array($rol['id'], [1, 2, 3, 4])): // excluir roles globales ?>
         <option value="<?= $rol['id']; ?>" <?= $rol['id'] == $usuario['rol_id'] ? 'selected' : ''; ?>>
             <?= $rol['nombre']; ?>
         </option>
@@ -349,8 +349,8 @@
     function controlarArea() {
         var rolId = document.getElementById('rol_id').value;
 
-        // Ocultar área si es Admin o Cliente, habilitar si es Usuario
-        if (rolId == '1' || rolId == '3') {
+        // Ocultar área si es Máster o Cliente, habilitar si es Usuario
+        if (rolId == '1' || rolId == '2' || rolId == '3' || rolId == '4') {
             // Deshabilitar el campo de área y ocultarlo
             document.getElementById('area-section').style.display = 'none';
             document.getElementById('area_id').disabled = true;

@@ -19,6 +19,11 @@ class Filters extends BaseConfig {
         'secureheaders' => SecureHeaders::class,
         'role' => \App\Filters\RoleFilter::class,
         'maintenance' => \App\Filters\MaintenanceFilter::class,
+        'permisos'       => \App\Filters\PermisosFilter::class,
+        'cuenta'       => \App\Filters\CuentaFilter::class,
+        'sidebar_permisos' => \App\Filters\SidebarPermisosFilter::class,
+        'sidebar_admin' => \App\Filters\SidebarAdminFilter::class,
+        'sidebar_multi' => \App\Filters\SidebarMultiPermisosFilter::class,
     ];
     public array $globals = [
         'before' => [
@@ -33,6 +38,9 @@ class Filters extends BaseConfig {
         // 'secureheaders',
         ],
     ];
+    
+    // Filters can be applied to specific routes
+    // The cuenta filter is applied to routes in the Routes.php file
     public array $methods = [];
     public $filters = [
         # Rutas en mantenimiento...

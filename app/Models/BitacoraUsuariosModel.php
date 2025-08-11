@@ -7,19 +7,30 @@ class BitacoraUsuariosModel extends Model
 {
     protected $table = 'tbl_bitacora_usuarios';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['fecha_creacion', 'usuario_id', 'ip_address', 'modulo', 'accion', 'detalles'];
+    protected $allowedFields = ['fecha_creacion', 'usuario_id', 'usuario_afectado_id', 'cuenta_id', 'ip_address', 'modulo', 'accion', 'detalles', 'priority', 'file_copy_path'];
 
     /**
      * Devuelve un Query Builder para aplicar paginate() en el controlador.
      */
     public function obtenerBitacorasFiltradas($filtros = [])
     {
-        $builder = $this->select('tbl_bitacora_usuarios.*, tbl_usuarios.nombre as nombre_usuario')
-                        ->join('tbl_usuarios', 'tbl_usuarios.id = tbl_bitacora_usuarios.usuario_id');
+        $builder = $this->select('tbl_bitacora_usuarios.*, tbl_usuarios.nombre as nombre_usuario, ua.nombre as nombre_usuario_afectado')
+                        ->join('tbl_usuarios', 'tbl_usuarios.id = tbl_bitacora_usuarios.usuario_id')
+                        ->join('tbl_usuarios ua', 'ua.id = tbl_bitacora_usuarios.usuario_afectado_id', 'left');
+
+        // Filtrar por cuenta_id basado en la sesión del usuario
+        $cuenta_id_sesion = session('session_data.cuenta_id');
+        $rol_id_sesion = session('session_data.rol_id');
+        
+        // Solo los roles Mega Admin (1) y Master (3) pueden ver todas las cuentas
+        if (!in_array($rol_id_sesion, [1, 3]) && $cuenta_id_sesion) {
+            $builder->where('tbl_bitacora_usuarios.cuenta_id', $cuenta_id_sesion);
+        }
 
         if (!empty($filtros['search'])) {
             $builder->groupStart()
                 ->like('tbl_usuarios.nombre', $filtros['search'])
+                ->orLike('ua.nombre', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.accion', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.detalles', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.modulo', $filtros['search'])
@@ -52,11 +63,22 @@ class BitacoraUsuariosModel extends Model
     {
         $builder = $this->builder()
             ->select('tbl_bitacora_usuarios.id')
-            ->join('tbl_usuarios', 'tbl_usuarios.id = tbl_bitacora_usuarios.usuario_id');
+            ->join('tbl_usuarios', 'tbl_usuarios.id = tbl_bitacora_usuarios.usuario_id')
+            ->join('tbl_usuarios ua', 'ua.id = tbl_bitacora_usuarios.usuario_afectado_id', 'left');
+
+        // Filtrar por cuenta_id basado en la sesión del usuario
+        $cuenta_id_sesion = session('session_data.cuenta_id');
+        $rol_id_sesion = session('session_data.rol_id');
+        
+        // Solo los roles Mega Admin (1) y Master (3) pueden ver todas las cuentas
+        if (!in_array($rol_id_sesion, [1, 3]) && $cuenta_id_sesion) {
+            $builder->where('tbl_bitacora_usuarios.cuenta_id', $cuenta_id_sesion);
+        }
 
         if (!empty($filtros['search'])) {
             $builder->groupStart()
                 ->like('tbl_usuarios.nombre', $filtros['search'])
+                ->orLike('ua.nombre', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.accion', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.detalles', $filtros['search'])
                 ->orLike('tbl_bitacora_usuarios.modulo', $filtros['search'])

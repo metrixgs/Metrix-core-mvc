@@ -164,12 +164,31 @@
                     </small>
                 </div>
             </div>
-            <div class="table-responsive">
+            <style>
+                .bitacora-table-container {
+                    max-height: 600px;
+                    overflow-y: auto;
+                    border: 1px solid #dee2e6;
+                    border-radius: 0.375rem;
+                }
+                .bitacora-table-container .table {
+                    margin-bottom: 0;
+                }
+                .bitacora-table-container thead th {
+                    position: sticky !important;
+                    top: 0 !important;
+                    z-index: 10 !important;
+                    background-color: #f8f9fa !important;
+                    border-bottom: 2px solid #dee2e6 !important;
+                    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+                }
+            </style>
+            <div class="bitacora-table-container">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Usuario</th>
+                            <th scope="col">Usuario Ejecutor</th>
                             <th scope="col">Actividad</th>
                             <th scope="col">Módulo</th>
                             <th scope="col">Detalles</th>
@@ -188,7 +207,13 @@
                                     <td><?= esc($bitacora['nombre_usuario']) ?></td>
                                     <td><?= esc($bitacora['accion']) ?></td>
                                     <td><?= esc($bitacora['modulo']) ?></td>
-                                    <td><?= esc($bitacora['detalles']) ?></td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" 
+                                                data-bitacora='<?= htmlspecialchars(json_encode($bitacora), ENT_QUOTES, 'UTF-8') ?>'
+                                                onclick="mostrarDetalles(this)">
+                                            <i class="bi bi-eye"></i> Ver Detalles
+                                        </button>
+                                    </td>
                                     <td><?= date('d/m/Y', strtotime($bitacora['fecha_creacion'])) ?></td>
                                     <td><?= date('H:i:s', strtotime($bitacora['fecha_creacion'])) ?></td>
                                 </tr>
@@ -256,7 +281,130 @@
     </div>
 </div>
 
+<!-- Modal para mostrar detalles -->
+<div class="modal fade" id="detallesModal" tabindex="-1" aria-labelledby="detallesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detallesModalLabel">
+                    <i class="bi bi-info-circle"></i> Detalles de la Actividad
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary"><i class="bi bi-person"></i> Información del Usuario</h6>
+                        <div class="card bg-light">
+                            <div class="card-body p-3">
+                                <p><strong>Usuario Ejecutor:</strong> <span id="modal-usuario"></span></p>
+                                <p><strong>Usuario Afectado:</strong> <span id="modal-usuario-afectado"></span></p>
+                                <p><strong>IP Address:</strong> <span id="modal-ip"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="bi bi-activity"></i> Información de la Actividad</h6>
+                        <div class="card bg-light">
+                            <div class="card-body p-3">
+                                <p><strong>Módulo:</strong> <span id="modal-modulo"></span></p>
+                                <p><strong>Acción:</strong> <span id="modal-accion"></span></p>
+                                <p><strong>Fecha y Hora:</strong> <span id="modal-fecha"></span></p>
+                                <p><strong>Prioridad:</strong> <span id="modal-prioridad"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6 class="text-info"><i class="bi bi-file-text"></i> Detalles Específicos</h6>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="modal-detalles-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// Función para mostrar detalles en el modal
+function mostrarDetalles(button) {
+    try {
+        const bitacoraJson = button.getAttribute('data-bitacora');
+        const bitacora = JSON.parse(bitacoraJson);
+        
+        // Llenar información básica
+        document.getElementById('modal-usuario').textContent = bitacora.nombre_usuario || 'N/A';
+        document.getElementById('modal-usuario-afectado').textContent = bitacora.nombre_usuario_afectado || 'N/A';
+        document.getElementById('modal-ip').textContent = bitacora.ip_address || 'N/A';
+        document.getElementById('modal-modulo').textContent = bitacora.modulo || 'N/A';
+        document.getElementById('modal-accion').textContent = bitacora.accion || 'N/A';
+        document.getElementById('modal-prioridad').textContent = bitacora.priority || 'info';
+        
+        // Formatear fecha
+        if (bitacora.fecha_creacion) {
+            const fecha = new Date(bitacora.fecha_creacion);
+            document.getElementById('modal-fecha').textContent = fecha.toLocaleString('es-ES');
+        } else {
+            document.getElementById('modal-fecha').textContent = 'N/A';
+        }
+        
+        // Procesar detalles
+        const detallesContainer = document.getElementById('modal-detalles-content');
+        
+        if (bitacora.detalles) {
+            try {
+                // Intentar parsear como JSON
+                const detallesObj = JSON.parse(bitacora.detalles);
+                
+                if (typeof detallesObj === 'object' && detallesObj !== null) {
+                    // Es un objeto JSON, mostrar de forma estructurada
+                    let html = '<div class="row">';
+                    
+                    Object.keys(detallesObj).forEach(key => {
+                        const value = detallesObj[key];
+                        const displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        html += `
+                            <div class="col-md-6 mb-2">
+                                <strong>${displayKey}:</strong>
+                                <span class="text-muted">${value !== null && value !== undefined ? value : 'N/A'}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    detallesContainer.innerHTML = html;
+                } else {
+                    // Es un valor simple
+                    detallesContainer.innerHTML = `<p class="mb-0">${detallesObj}</p>`;
+                }
+            } catch (e) {
+                // No es JSON válido, mostrar como texto plano
+                detallesContainer.innerHTML = `<p class="mb-0">${bitacora.detalles}</p>`;
+            }
+        } else {
+            detallesContainer.innerHTML = '<p class="text-muted mb-0">No hay detalles disponibles</p>';
+        }
+        
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('detallesModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('Error al procesar los detalles:', error);
+        alert('Error al cargar los detalles de la actividad');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('filtrosForm');
     const inputs = form.querySelectorAll('select, input');

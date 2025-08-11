@@ -7,7 +7,7 @@ use App\Models\UsuariosModel;
 use App\Models\TicketsModel;
 use App\Models\AreasModel;
 use App\Models\NotificacionesModel;
-use App\Models\PermisosModel;
+
 
 class Clientes extends BaseController {
 
@@ -15,7 +15,7 @@ class Clientes extends BaseController {
     protected $tickets;
     protected $areas;
     protected $notificaciones;
-    protected $permisos;
+
 
     # Definimos el id del modulo...
     protected $modulo_id = 1;
@@ -26,7 +26,7 @@ class Clientes extends BaseController {
         $this->tickets = new TicketsModel();
         $this->notificaciones = new NotificacionesModel();
         $this->areas = new AreasModel();
-        $this->permisos = new PermisosModel();
+
 
         # Cargar los Helpers
         helper('Alerts');
@@ -48,7 +48,7 @@ class Clientes extends BaseController {
         $data['notificaciones'] = $notificaciones;
 
         # Obtenemos la lista de clientes...
-        $clientes = $this->usuarios->obtenerUsuariosPorRol('cliente');
+        $clientes = $this->usuarios->obtenerUsuariosPorRol(3); // rol_id 3 = Cliente
         $data['clientes'] = $clientes;
 
         return view('incl/head-application', $data)
@@ -123,7 +123,7 @@ class Clientes extends BaseController {
             'correo' => $correo,
             'telefono' => $telefono,
             'contrasena' => $hashedPassword,
-            'rol' => 'cliente',
+            'rol_id' => 2, // rol_id 2 = Administrador
                 # No necesitamos incluir fecha_registro ya que se generará automáticamente por default
         ];
 

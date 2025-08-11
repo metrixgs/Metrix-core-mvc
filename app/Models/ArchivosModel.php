@@ -41,14 +41,53 @@ class ArchivosModel extends Model {
     }
 
     public function crearArchivo($data) {
-        return $this->insert($data);
+        $result = $this->insert($data);
+        if ($result) {
+            helper('bitacora');
+            $usuario_id = session('session_data.id') ?? 999;
+            $descripcion = $data['descripcion'] ?? 'Archivo sin descripción';
+            log_activity($usuario_id, 'Archivos', 'Subir', [
+                'descripcion' => 'Archivo subido',
+                'archivo_descripcion' => $descripcion,
+                'ticket_id' => $data['ticket_id'] ?? 'N/A',
+                'archivo_id' => $result,
+                'accion' => 'Subir archivo'
+            ], 'info');
+        }
+        return $result;
     }
 
     public function actualizarArchivo($id, $data) {
-        return $this->update($id, $data);
+        $archivoAnterior = $this->find($id);
+        $result = $this->update($id, $data);
+        if ($result && $archivoAnterior) {
+            helper('bitacora');
+            $usuario_id = session('session_data.id') ?? 999;
+            $descripcion = $archivoAnterior['descripcion'] ?? 'ID: ' . $id;
+            log_activity($usuario_id, 'Archivos', 'Actualizar', [
+                'descripcion' => 'Archivo actualizado',
+                'archivo_descripcion' => $descripcion,
+                'archivo_id' => $id,
+                'accion' => 'Actualizar archivo'
+            ], 'info');
+        }
+        return $result;
     }
 
     public function eliminarArchivo($id) {
-        return $this->delete($id);
+        $archivo = $this->find($id);
+        $result = $this->delete($id);
+        if ($result && $archivo) {
+            helper('bitacora');
+            $usuario_id = session('session_data.id') ?? 999;
+            $descripcion = $archivo['descripcion'] ?? 'ID: ' . $id;
+            log_activity($usuario_id, 'Archivos', 'Eliminar', [
+                'descripcion' => 'Archivo eliminado',
+                'archivo_descripcion' => $descripcion,
+                'archivo_id' => $id,
+                'accion' => 'Eliminar archivo'
+            ], 'warning');
+        }
+        return $result;
     }
 }

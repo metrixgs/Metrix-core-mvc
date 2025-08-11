@@ -11,7 +11,7 @@
         $rolId = session('session_data.rol_id');
 
         $roles = [
-            1 => 'master/',
+            16 => 'master/',
             2 => 'administrador/',
             3 => 'cliente/',
             4 => 'sistemas/',

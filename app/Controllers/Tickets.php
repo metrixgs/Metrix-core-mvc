@@ -648,7 +648,7 @@ class Tickets extends BaseController {
 
             # Reemplazar las variables dinámicas
             $variables = [
-                '{{area_nombre}}' => $area['nombre'],
+                '{{area_nombre}}' => $area['nombre'] ?? 'No definida', // Add null coalescing operator to handle undefined $area
                 '{{ticket_identificador}}' => $ticket['identificador'],
                 '{{ticket_titulo}}' => $ticket['titulo'],
                 '{{ticket_descripcion}}' => $ticket['descripcion'],
@@ -832,8 +832,12 @@ class Tickets extends BaseController {
                     ]);
                     return redirect()->to("login");
                 }
-                $imagen->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo sin extensión adicional
+                // Generate unique filename before moving the file
+                $newName = uniqid() . '_' . time() . '.' . $extencion;
+                $imagen->move('public/uploads/tickets/archivos/', $newName);
                 # Ahora añadimos la extensión solo una vez
+                // Generate a unique filename using current timestamp and random string
+                $newName = uniqid() . '_' . time() . '.' . $extencion;
                 $rutaConExtension = 'public/uploads/tickets/archivos/' . $newName;
                 $ruta = $rutaConExtension;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
 
@@ -950,7 +954,7 @@ class Tickets extends BaseController {
         }
 
         # validamos si el rol es administrativo...
-        if (session('session_data.rol_id') != 1) {
+        if (session('session_data.rol_id') != 3) {
             # No es administrador...
             $this->session->setFlashdata([
                 'titulo' => "¡Atencion!",

@@ -33,6 +33,7 @@ class Configuracion extends BaseController {
         helper('Email');
         helper('Rol');
         helper('Menu');
+        helper('bitacora');
     }
 
     public function index() {
@@ -87,6 +88,17 @@ class Configuracion extends BaseController {
 
         # Eliminamos el TDR...
         if ($this->sla->eliminarSLA($sla_id)) {
+            # Registro en bitácora
+            log_activity(
+                session('session_data.usuario_id'),
+                'Configuración',
+                'Eliminar SLA',
+                [
+                    'sla_id' => $sla_id,
+                    'titulo' => $sla['titulo']
+                ]
+            );
+            
             # Se elimino el TDR...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -141,6 +153,20 @@ class Configuracion extends BaseController {
 
         # Creamos el TDR...
         if ($this->sla->crearSLA($infoSLA)) {
+            $slaId = $this->sla->insertID();
+            
+            # Registro en bitácora
+            log_activity(
+                session('session_data.usuario_id'),
+                'Configuración',
+                'Crear SLA',
+                [
+                    'sla_id' => $slaId,
+                    'titulo' => $titulo,
+                    'tiempo' => $tiempo
+                ]
+            );
+            
             # Se creo el TDR
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",
@@ -207,6 +233,18 @@ class Configuracion extends BaseController {
 
         # Actualizamos la informacion de la configuracion...
         if ($this->configuracion->actualizarConfiguracion($configuracion_id, $infoConfiguracion)) {
+            # Registro en bitácora
+            log_activity(
+                session('session_data.usuario_id'),
+                'Configuración',
+                'Actualizar Configuración SMTP',
+                [
+                    'configuracion_id' => $configuracion_id,
+                    'smtp_host' => $SMTPHost,
+                    'smtp_user' => $SMTPUser
+                ]
+            );
+            
             # Se actualizo la configuracion...
             $this->session->setFlashdata([
                 'titulo' => "¡Exito!",

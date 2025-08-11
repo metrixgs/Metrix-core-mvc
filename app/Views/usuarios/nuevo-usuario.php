@@ -1,4 +1,4 @@
- <div class="page-content">
+<div class="page-content">
     <div class="container-fluid">
 
         <!-- start page title -->
@@ -39,13 +39,51 @@
                         <div class="alert alert-info">
                             <strong>Usuario actual:</strong> <?= session('session_data.nombre') ?? 'No identificado'; ?><br>
                             <strong>Rol:</strong> <?= isset($nombre_rol) ? $nombre_rol : (session('session_data.rol_id') ? 'Rol ID: ' . session('session_data.rol_id') : 'Sin rol'); ?><br>
-                            <?php if (session('session_data.cuenta_id')): ?>
-                                <strong>Cuenta:</strong> <?= isset($nombre_cuenta) ? $nombre_cuenta : 'Cuenta ID: ' . session('session_data.cuenta_id'); ?>
+                            
+                            <?php if (isset($es_rol_global) && $es_rol_global && in_array(session('session_data.rol_id'), [1, 3, 4])): ?>
+                                <!-- Para roles globales: selector de cuenta -->
+                                <strong>Crear usuario en cuenta:</strong><br>
+                                <select class="form-control mt-2" id="cuenta_destino_info" name="cuenta_destino_info" onchange="actualizarCuentaSeleccionada()">
+                                    <option value="">Seleccione una cuenta</option>
+                                    <?php if (isset($cuentas) && !empty($cuentas)): ?>
+                                        <?php foreach ($cuentas as $cuenta): ?>
+                                            <option value="<?= esc($cuenta['id']) ?>" data-nombre="<?= esc($cuenta['nombre']) ?>">
+                                                <?= esc($cuenta['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            <?php else: ?>
+                                <!-- Para roles no globales: mostrar cuenta actual -->
+                                <?php if (session('session_data.cuenta_id')): ?>
+                                    <strong>Cuenta:</strong> <?= isset($nombre_cuenta) ? $nombre_cuenta : 'Cuenta ID: ' . session('session_data.cuenta_id'); ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
 
                         <!-- Formulario para crear un nuevo usuario -->
-                        <form action="<?= base_url() . "usuarios/crear"; ?>" method="POST">
+
+
+                            <form action="<?= base_url() . "usuarios/crear"; ?>" method="POST">
+                            <?php if (isset($es_rol_global) && $es_rol_global && in_array(session('session_data.rol_id'), [1, 3, 4])): ?>
+                            <!-- Campo de selección de cuenta para roles globales -->
+                            <div class="form-group mb-3">
+                                <label for="cuenta_seleccionada">Cuenta <span class="text-danger">*</span></label>
+                                <select class="form-control js-example-basic-single <?= session('validation.cuenta_seleccionada') ? 'is-invalid' : '' ?>" id="cuenta_seleccionada" name="cuenta_seleccionada" required onchange="sincronizarCuentaInfo()">
+                                    <option value="">Seleccione una cuenta</option>
+                                    <?php if (isset($cuentas) && !empty($cuentas)): ?>
+                                        <?php foreach ($cuentas as $cuenta): ?>
+                                            <option value="<?= esc($cuenta['id']) ?>" <?= old('cuenta_seleccionada') == $cuenta['id'] ? 'selected' : '' ?>>
+                                                <?= esc($cuenta['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                                <?php if (session('validation.cuenta_seleccionada')): ?>
+                                    <div class="text-danger"><?= session('validation.cuenta_seleccionada') ?></div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
                             <!-- No es necesario el campo oculto para ID, ya que es un nuevo usuario -->
 
                             <!-- Rol -->
@@ -169,7 +207,7 @@
 <script>
     function controlarArea() {
         var rolId = document.getElementById('rol_id').value;
-        if (rolId == '1' || rolId == '3') {
+        if (rolId == '1' || rolId == '2' || rolId == '3' || rolId == '4') {
             document.getElementById('area-section').style.display = 'none';
             document.getElementById('area_id').disabled = true;
         } else {
@@ -178,9 +216,37 @@
         }
     }
 
+    // Función para sincronizar el select de información con el select del formulario
+    function sincronizarCuentaInfo() {
+        const cuentaFormulario = document.getElementById('cuenta_seleccionada');
+        const cuentaInfo = document.getElementById('cuenta_destino_info');
+        
+        if (cuentaFormulario && cuentaInfo) {
+            cuentaInfo.value = cuentaFormulario.value;
+        }
+    }
+    
+    // Función para actualizar el select del formulario desde el select de información
+    function actualizarCuentaSeleccionada() {
+        const cuentaInfo = document.getElementById('cuenta_destino_info');
+        const cuentaFormulario = document.getElementById('cuenta_seleccionada');
+        
+        if (cuentaInfo && cuentaFormulario) {
+            cuentaFormulario.value = cuentaInfo.value;
+        }
+    }
+
     window.onload = function () {
-        controlarArea();
-    };
+         controlarArea();
+         
+         // Sincronizar valores iniciales si existen
+         const cuentaFormulario = document.getElementById('cuenta_seleccionada');
+         const cuentaInfo = document.getElementById('cuenta_destino_info');
+         
+         if (cuentaFormulario && cuentaInfo && cuentaFormulario.value) {
+             cuentaInfo.value = cuentaFormulario.value;
+         }
+     };
 
     function togglePasswordVisibility() {
         var passwordField = document.getElementById('contrasena');

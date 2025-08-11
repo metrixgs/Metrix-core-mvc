@@ -1,4 +1,4 @@
- <div class="container mt-5" style="max-width: 600px;">
+<div class="container mt-5" style="max-width: 600px;">
     <h2 class="header-title mb-4 text-center">Crear Perfil y Usuario de Cliente</h2>
 
     <?php if (session()->getFlashdata('message')): ?>
@@ -7,7 +7,7 @@
         </div>
     <?php endif; ?>
 
-    <form action="/cuentas/store" method="post" class="needs-validation" novalidate>
+    <form action="<?= base_url('cuentas/store') ?>" method="post" class="needs-validation" novalidate>
         <h4 class="mb-3">Datos de la Cuenta</h4>
         <div class="mb-3">
             <label for="nombre" class="form-label">Nombre de la Cuenta:</label>
@@ -26,6 +26,12 @@
             <label for="admin_email" class="form-label">Correo:</label>
             <input type="email" class="form-control" id="admin_email" name="admin_email" required>
             <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="admin_telefono" class="form-label">Teléfono:</label>
+            <input type="tel" class="form-control" id="admin_telefono" name="admin_telefono" required>
+            <div class="invalid-feedback">Por favor, ingresa un teléfono válido.</div>
         </div>
 
         <div class="mb-4">

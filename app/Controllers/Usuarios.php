@@ -8,6 +8,7 @@ use App\Models\TicketsModel;
 use App\Models\AreasModel;
 use App\Models\ModulosModel;
 use App\Models\PermisosModel;
+
 use App\Models\NotificacionesModel;
 use App\Models\RolesModel;  
 use App\Models\CuentasModel; 
@@ -18,6 +19,7 @@ class Usuarios extends BaseController {
     protected $tickets;
     protected $areas;
     protected $permisos;
+
     protected $modulos;
     protected $notificaciones;
     protected $roles; 
@@ -31,6 +33,7 @@ class Usuarios extends BaseController {
         $this->areas = new AreasModel();
         $this->modulos = new ModulosModel();
         $this->permisos = new PermisosModel();
+
         $this->roles = new RolesModel(); 
         $this->cuentas = new CuentasModel();
 
@@ -54,6 +57,12 @@ class Usuarios extends BaseController {
         $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
         $data['notificaciones'] = $notificaciones;
 
+        # Validación automática de cuenta_id (solo para administradores)
+        $rolActual = session('session_data.rol_id');
+        if (in_array($rolActual, [1, 2, 3, 4])) {
+            $this->usuarios->validarYCorregirCuentaId();
+        }
+
         # Obtenemos todos los usuarios...
         $cuenta_id = session('session_data.cuenta_id');
         $usuarios = $this->usuarios->obtenerUsuarios($cuenta_id);
@@ -76,14 +85,31 @@ class Usuarios extends BaseController {
         $data['tickets'] = $this->tickets->obtenerTickets();
         $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
         $data['areas'] = $this->areas->obtenerAreas();
-        $data['roles'] = $this->roles->obtenerRoles();
-
+        
         // ✅ Obtener nombre del rol y cuenta actual desde la sesión
         $rolId = session('session_data.rol_id');
+        
+        // ✅ Filtrar roles según el tipo de usuario que está creando
+        if ($rolId == 2) {
+            // ADMINISTRADOR: No puede crear roles globales (1, 2, 3, 4)
+            $data['roles'] = $this->roles->where('id NOT IN (1, 2, 3, 4)')->findAll();
+        } else {
+            // Otros roles: Pueden ver todos los roles
+            $data['roles'] = $this->roles->obtenerRoles();
+        }
         $cuentaId = session('session_data.cuenta_id');
 
         $data['nombre_rol'] = '';
         $data['nombre_cuenta'] = '';
+        
+        // ✅ Verificar si es un rol global (MEGA_ADMIN=1, ADMINISTRADOR=2, MASTER=3, DESARROLLADOR=4)
+        $rolesGlobales = [1, 2, 3, 4];
+        $data['es_rol_global'] = in_array($rolId, $rolesGlobales);
+        
+        // ✅ Si es rol global con permisos de selección de cuenta (excluir ADMINISTRADOR)
+        if ($data['es_rol_global'] && in_array($rolId, [1, 3, 4])) {
+            $data['cuentas'] = $this->cuentas->obtenerCuentasActivas();
+        }
 
         if ($rolId) {
             $rol = $this->roles->obtenerRol($rolId);
@@ -91,7 +117,6 @@ class Usuarios extends BaseController {
         }
 
         if ($cuentaId) {
-            $this->cuentas = new \App\Models\CuentasModel();
             $cuenta = $this->cuentas->obtenerCuenta($cuentaId);
             $data['nombre_cuenta'] = $cuenta['nombre'] ?? 'Cuenta ID: ' . $cuentaId;
         }
@@ -113,8 +138,17 @@ class Usuarios extends BaseController {
         $areas = $this->areas->obtenerAreas();
         $data['areas'] = $areas;
 
-        // 🚀 Agrega esta línea para que la vista tenga acceso a $roles
-        $data['roles'] = $this->roles->obtenerRoles();
+        // ✅ Obtener rol del usuario actual para filtrar roles disponibles
+        $rolActual = session('session_data.rol_id');
+        
+        // ✅ Filtrar roles según el tipo de usuario que está editando
+        if ($rolActual == 2) {
+            // ADMINISTRADOR: No puede asignar roles globales (1, 2, 3, 4)
+            $data['roles'] = $this->roles->where('id NOT IN (1, 2, 3, 4)')->findAll();
+        } else {
+            // Otros roles: Pueden ver todos los roles
+            $data['roles'] = $this->roles->obtenerRoles();
+        }
 
         $usuario = $this->usuarios->obtenerUsuario($usuario_id);
         $data['usuario'] = $usuario;
@@ -123,7 +157,7 @@ class Usuarios extends BaseController {
             return redirect()->to("usuarios/");
         }
 
-        $permisos = $this->permisos->obtenerPermisosPorUsuario($usuario_id);
+        $permisos = $this->permisos->obtenerPermisosUsuario($usuario_id);
         $data['permisos'] = $permisos;
 
         $modulos = $this->modulos->obtenerModulos();
@@ -149,6 +183,14 @@ class Usuarios extends BaseController {
 
         # Definimos inicialmente la variable area_id, que será NULL si no se recibe
         $area_id = $this->request->getPost('area_id') ?? NULL;
+
+        # ✅ Validar permisos de rol según el usuario que está actualizando
+        $rolActual = session('session_data.rol_id');
+        if ($rolActual == 2 && in_array($rol_id, [1, 2, 3, 4])) {
+            # ADMINISTRADOR no puede asignar roles globales
+            session()->setFlashdata('error', 'No tiene permisos para asignar este rol.');
+            return redirect()->to("usuarios/detalle/{$usuario_id}")->withInput();
+        }
 
         # Obtenemos informacion del usuario...
         $usuario = $this->usuarios->obtenerUsuario($usuario_id);
@@ -233,10 +275,24 @@ class Usuarios extends BaseController {
         $telefono = $this->request->getPost('telefono');
         $contrasena = $this->request->getPost('contrasena');
         $area_id = $this->request->getPost('area_id') ?? NULL;
+        $cuenta_seleccionada = $this->request->getPost('cuenta_id') ?? NULL;
 
         # Obtenemos datos de sesión para multitenencia y trazabilidad
         $creador_id = $this->getUserId();
-        $cuenta_id = session('session_data.cuenta_id') ?? NULL;
+        $rolCreadorId = session('session_data.rol_id');
+        
+        # ✅ Verificar si el creador es un rol global
+        $rolesGlobales = [1, 2, 3, 4];
+        $esRolGlobal = in_array($rolCreadorId, $rolesGlobales);
+        
+        # ✅ Asignar cuenta_id según el tipo de rol
+        if ($esRolGlobal && in_array($rolCreadorId, [1, 3, 4]) && $cuenta_seleccionada) {
+            # Si es rol con permisos de selección y seleccionó una cuenta específica
+            $cuenta_id = $cuenta_seleccionada;
+        } else {
+            # Para ADMINISTRADOR y roles no globales, usar la cuenta de la sesión
+            $cuenta_id = session('session_data.cuenta_id') ?? NULL;
+        }
 
         # Definimos las reglas de validación para los campos...
         $validationRules = [
@@ -247,6 +303,11 @@ class Usuarios extends BaseController {
             'telefono' => 'required|numeric|is_unique[tbl_usuarios.telefono]',
             'contrasena' => 'required|min_length[6]',
         ];
+        
+        # ✅ Agregar validación de cuenta_seleccionada para roles con permisos de selección
+        if ($esRolGlobal && in_array($rolCreadorId, [1, 3, 4])) {
+            $validationRules['cuenta_seleccionada'] = 'required|numeric';
+        }
 
         # Validamos los datos del formulario...
         if (!$this->validate($validationRules)) {
