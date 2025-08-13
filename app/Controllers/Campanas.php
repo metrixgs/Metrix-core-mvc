@@ -786,6 +786,11 @@ public function detalle($campana_id)
     ->where('rol_id', 9)
     ->findAll();
 
+        // Cargar tags para el modal Universo
+        $data['catalogo_tags'] = $this->tagsModel->allOrdered();
+        // Si necesitas estadísticas de tags, podrías cargarlas aquí también:
+        // $data['tag_stats'] = $this->tagsModel->getStats();
+
         // Usar función reutilizable de breadcrumb
         $data['breadcrumb'] = $this->generarBreadcrumb([
             ['title' => 'Inicio', 'url' => base_url('/')],
