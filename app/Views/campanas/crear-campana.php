@@ -150,7 +150,7 @@
           <div class="card-body bg-white">
             <div class="mb-3">
               <label class="form-label fw-semibold" style="color: #8bc34a;">Encuesta <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="encuesta" name="encuesta" style="border-color: #8bc34a;">
+              <select class="form-select select2" id="encuesta" name="encuesta[]" multiple="multiple" style="border-color: #8bc34a;">
                 <?php if (!empty($surveys)): ?>
                   <option value="">Seleccione una encuesta</option>
                   <?php foreach ($surveys as $survey): ?>

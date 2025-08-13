@@ -293,7 +293,7 @@ public function detalle($campana_id)
     $descripcion = $this->request->getPost('descripcion');
     $fecha_inicio = $this->request->getPost('fecha_inicio');
     $fecha_fin = $this->request->getPost('fecha_fin');
-    $encuesta = $this->request->getPost('encuesta');
+    $encuesta = $this->request->getPost('encuesta'); // Esto será un array si se seleccionan múltiples
     $entregables = $this->request->getPost('entregables');
     $universo = $this->request->getPost('universo');
     $territorio = $this->request->getPost('territorio');
@@ -310,7 +310,7 @@ public function detalle($campana_id)
         'descripcion' => 'permit_empty|string',
         'fecha_inicio' => 'permit_empty|valid_date',
         'fecha_fin' => 'permit_empty|valid_date',
-        'encuesta' => 'permit_empty|numeric',
+        'encuesta' => 'permit_empty|array',
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
         'territorio' => 'permit_empty|in_list[electorales,geograficos]',
@@ -336,7 +336,7 @@ public function detalle($campana_id)
         'descripcion' => $descripcion,
         'fecha_inicio' => $fecha_inicio,
         'fecha_fin' => $fecha_fin,
-        'encuesta' => $encuesta ?? null,
+        'encuesta' => is_array($encuesta) ? json_encode($encuesta) : ($encuesta ?? null),
         'entregables' => $entregables ?? null,
         'universo' => $universo ?? null,
         'territorio' => $territorio ?? null,
