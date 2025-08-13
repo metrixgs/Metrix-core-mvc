@@ -14,6 +14,7 @@ use App\Models\SubtiposCampanasModel;
 use App\Models\SegmentacionesModel;
 use App\Models\SurveyModel;
 use App\Libraries\Breadcrumb;
+use App\Models\TagModel; 
  
  
 
@@ -43,6 +44,7 @@ class Campanas extends BaseController {
     $this->segmentaciones = new SegmentacionesModel();
     $this->survey = new SurveyModel();
      $this->rolesModel = new \App\Models\RolesModel();  // Cargar el modelo de roles
+     $this->tagsModel = new TagModel();  // Cargar el modelo de tags
 
 
 
@@ -808,5 +810,30 @@ public function detalle($campana_id)
         }
         return $breadcrumb->render();
     }
+
+    public function tagsCatalog()
+{
+    try {
+        // Cargar el modelo
+        $tagModel = new \App\Models\TagModel();
+
+        // Obtener todas las etiquetas ordenadas por nombre
+        $tags = $tagModel->allOrdered(); // Devuelve id, tag, slug
+
+        // Respuesta en formato JSON estándar
+        return $this->response->setJSON([
+            'ok'   => true,
+            'data' => $tags
+        ]);
+    } catch (\Throwable $e) {
+        // Captura errores y responde con mensaje claro
+        return $this->response->setJSON([
+            'ok'        => false,
+            'message'   => 'Error al obtener las etiquetas',
+            'exception' => $e->getMessage()
+        ]);
+    }
+}
+
 }
 

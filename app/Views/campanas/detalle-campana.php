@@ -207,11 +207,26 @@
             </div>
         <?php endif; ?>
 
-    <!-- Estadísticas dinámicas en tarjetas pequeñas y compactas -->
-<div class="row mt-2 mb-3 g-2">
+    <!-- Estadísticas dinámicas en tarjetas pequeñas y compactas --> 
+     
+     <?php 
+$mapUrls = [
+    'Rondas'     => 'relacionados/rondas',
+    'Brigadas'   => 'relacionados/brigadas',
+    'Visitas'    => 'relacionados/visitas',
+    'Incidencias'=> 'relacionados/incidencias',
+    'Encuestas'  => 'relacionados/encuestas',
+    'Entregas'   => 'relacionados/entregas',
+    'Peticiones' => 'relacionados/peticiones',
+];
+?>
+
+ <div class="row mt-2 mb-3 g-2">
     <?php foreach ($stats as $stat): ?>
         <div class="col-6 col-md-3 col-lg-2">
-            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn" style="min-width:0;">
+            <a href="<?= base_url($mapUrls[$stat['label']] . '/' . $campana['id']) ?>" 
+               class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark" 
+               style="min-width:0;">
                 <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
                     <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
                         <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-5"></i>
@@ -221,7 +236,7 @@
                         <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label']); ?></div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     <?php endforeach; ?>
 </div>
@@ -423,6 +438,8 @@
                             <!-- Rondas will be loaded dynamically via JavaScript -->
                         </tbody>
                     </table>
+
+
                 </div>
             </div>
             <div class="modal-footer">

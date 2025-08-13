@@ -199,3 +199,18 @@ $routes->post('export/enviar-correo', 'ExportController::enviarCorreo');
 
 // Rutas de la Bitácora de Usuarios
 $routes->get('bitacora/', 'BitacoraController::index');
+
+
+// targetas 
+
+$routes->group('relacionados', function($routes) {
+    $routes->get('rondas/(:num)', 'CampanasRelacionados::rondas/$1');
+    $routes->get('brigadas/(:num)', 'CampanasRelacionados::brigadas/$1');
+    $routes->get('visitas/(:num)', 'CampanasRelacionados::visitas/$1');
+    $routes->get('incidencias/(:num)', 'CampanasRelacionados::incidencias/$1');
+    $routes->get('encuestas/(:num)', 'CampanasRelacionados::encuestas/$1');
+    $routes->get('entregas/(:num)', 'CampanasRelacionados::entregas/$1');
+    $routes->get('peticiones/(:num)', 'CampanasRelacionados::peticiones/$1');
+    $routes->get('relacionados/(:segment)/(:num)', 'RelacionadosController::listar/$1/$2');
+
+});

@@ -8,6 +8,7 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Config\Database; // 👈 Esto es necesario
 
 /**
  * Class BaseController
@@ -49,6 +50,8 @@ abstract class BaseController extends Controller {
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
+                $this->db = Database::connect();
+
 
         // Preload any models, libraries, etc, here.
         $this->session = \Config\Services::session();
