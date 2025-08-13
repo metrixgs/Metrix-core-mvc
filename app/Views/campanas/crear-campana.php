@@ -273,6 +273,14 @@
   }
 </style>
 
+<style>
+  /* Asegura que el Select2 para selección múltiple se expanda verticalmente */
+  .select2-container--default .select2-selection--multiple {
+    min-height: 38px; /* Altura mínima para que se vea bien */
+    height: auto; /* Permite que la altura se ajuste automáticamente */
+  }
+</style>
+
 <!-- ===== Loader de dependencias (solo si faltan) ===== -->
 <script>
   // Carga jQuery solo si no existe
