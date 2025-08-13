@@ -8,6 +8,6 @@ class SurveyResponseModel extends Model
 {
     protected $table = 'survey_responses';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['survey_id', 'name', 'email', 'answers'];
+    protected $allowedFields = ['survey_id', 'name', 'email', 'answers', 'id_campana', 'id_ronda'];
     protected $useTimestamps = true;
 }

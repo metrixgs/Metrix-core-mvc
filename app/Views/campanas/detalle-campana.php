@@ -54,6 +54,7 @@
                         <a href="<?= base_url('campanas/ficha/' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-warning">Ficha Informativa</a>
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalRondasCampana">Ver Rondas</button>
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalIncidenciasCampana">Incidencias</button>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEncuestasCampana">Ver Encuestas</button>
                     </div>
                 </div>
             </div>
@@ -496,6 +497,60 @@ $mapUrls = [
                             <?php else: ?>
                                 <tr>
                                     <td colspan="5" class="text-center">No hay incidencias disponibles.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver encuestas vinculadas -->
+<div class="modal fade" id="modalEncuestasCampana" tabindex="-1" aria-labelledby="modalEncuestasCampanaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEncuestasCampanaLabel">Encuestas de la Campaña #CAM-<?= str_pad($campana['id'] ?? 0, 6, '0', STR_PAD_LEFT); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <h6>Lista de Encuestas</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="datatable display table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>ID Encuesta</th>
+                                <th>Título</th>
+                                <th>Fecha Creación</th>
+                                <th>Respuestas</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (isset($survey_responses) && !empty($survey_responses)): ?>
+                                <?php foreach ($survey_responses as $response): ?>
+                                    <tr>
+                                        <td><?= esc($response['id'] ?? ''); ?></td>
+                                        <td><?= esc($response['name'] ?? ''); ?></td>
+                                        <td><?= isset($response['created_at']) ? date('d/m/Y H:i', strtotime($response['created_at'])) : ''; ?></td>
+                                        <td><?= esc($response['answers'] ?? ''); ?></td>
+                                        <td class="text-center">
+                                            <a href="<?= base_url('survey/detalle/' . ($response['survey_id'] ?? '')); ?>" class="btn btn-info btn-sm" title="Ver Encuesta Original">
+                                                <i class="ri-eye-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="5" class="text-center">No hay encuestas relacionadas disponibles.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

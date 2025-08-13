@@ -13,8 +13,9 @@ use App\Models\TiposCampanasModel;
 use App\Models\SubtiposCampanasModel;
 use App\Models\SegmentacionesModel;
 use App\Models\SurveyModel;
+use App\Models\SurveyResponseModel; // Añadir este modelo
 use App\Libraries\Breadcrumb;
-use App\Models\TagModel; 
+use App\Models\TagModel;
  
  
 
@@ -30,6 +31,7 @@ class Campanas extends BaseController {
     protected $subtiposCampanas;
     protected $segmentaciones;
     protected $survey;
+    protected $surveyResponseModel; // Declarar la propiedad para el nuevo modelo
 
     public function __construct() {
         // Instanciar los modelos
@@ -43,8 +45,9 @@ class Campanas extends BaseController {
     $this->subtiposCampanas = new SubtiposCampanasModel();
     $this->segmentaciones = new SegmentacionesModel();
     $this->survey = new SurveyModel();
-     $this->rolesModel = new \App\Models\RolesModel();  // Cargar el modelo de roles
-     $this->tagsModel = new TagModel();  // Cargar el modelo de tags
+    $this->surveyResponseModel = new SurveyResponseModel(); // Instanciar el nuevo modelo
+    $this->rolesModel = new \App\Models\RolesModel();  // Cargar el modelo de roles
+    $this->tagsModel = new TagModel();  // Cargar el modelo de tags
 
 
 
@@ -168,6 +171,9 @@ public function detalle($campana_id)
         return redirect()->to("campanas/");
     }
     $data['campana'] = $campana;
+
+    // Obtener encuestas relacionadas con esta campaña
+    $data['survey_responses'] = $this->surveyResponseModel->where('id_campana', $campana_id)->findAll();
 
     // Tickets por campaña
     $data['tickets'] = $this->tickets->obtenerTicketsPorCampana($campana['id']);
