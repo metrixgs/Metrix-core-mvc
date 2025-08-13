@@ -65,26 +65,24 @@
           </div>
           <div class="card-body bg-white">
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Sector Electoral</label>
-              <select class="form-select select2" id="sector_electoral" name="sector_electoral" style="border-color: #8bc34a;">
-                <option value="">Seleccione una opción</option>
-                <option value="distrito">Distrito</option>
-                <option value="seccion">Sección</option>
-              </select>
-            </div>
-            <div class="mb-3">
               <label class="form-label fw-semibold" style="color: #8bc34a;">Territorio Local</label>
               <select class="form-select select2" id="territorio_local" name="territorio_local" style="border-color: #8bc34a;">
-                <option value="">Seleccione una opción</option>
+                 
                 <option value="municipio">Municipio</option>
                 <option value="delegacion">Delegación</option>
               </select>
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="color: #8bc34a;">Sector Electoral</label>
+              <select class="form-select select2" id="sector_electoral" name="sector_electoral" style="border-color: #8bc34a;">
+                
+                <option value="distrito">Distrito</option>
+                <option value="seccion">Sección</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-
-      <!-- IMPACTOS -->
+      </div>     <!-- IMPACTOS -->
       <div class="col-md-6">
         <div class="card shadow" style="border-color: #8bc34a;">
           <div class="card-header text-white" style="background-color: #8bc34a;">
