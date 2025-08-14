@@ -46,7 +46,7 @@
                             <table class="datatable display table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th class="text-center"># consecutivo</th>
+                                        <th class="text-center"># </th>
                                         <th>Fecha de creación</th>
                                         <th># Ticket</th>
                                         <th>Categoría</th>
@@ -55,7 +55,7 @@
                                         <th>Dependencia</th>
                                         <th>Estatus</th>
                                         <th>Operador</th>
-                                        <th>TDR (Horas)</th>
+                                        <th>TDR </th>
                                         <th class="text-center">Opciones</th>
                                     </tr>
                                 </thead>
@@ -69,7 +69,7 @@
                                                 <td><strong><?= $ticket['identificador']; ?></strong></td>
                                                 <td><?= $ticket['nombre_categoria'] ?? 'N/A' ?></td>
                                                 <td><?= $ticket['clasificacion'] ?? 'N/A' ?></td>
-                                                <td style="background-color: <?= htmlspecialchars($ticket['color_sla']) ?>;"><?= $ticket['prioridad'] ?></td>
+                                                <td style="background-color: <?= htmlspecialchars($ticket['color_sla']) ?>;"><?= $ticket['nombre_prioridad'] ?></td>
                                                 <td><?= $ticket['dependencia'] ?? 'N/A' ?></td>
                                                 <td>
                                                     <?php

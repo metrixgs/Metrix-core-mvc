@@ -156,9 +156,9 @@
                                             <tr>
                                                 <td class="text-center"><?= $contador; ?></td>
                                                 <td><?= $ticket['titulo'] ?></td>
-                                                <td><?= $ticket['nombre_area'] ?></td>
+                                                <td><?= $ticket['nombre_categoria'] ?></td>
                                                 <td><?= $ticket['nombre_cliente'] ?></td>
-                                                <td><?= $ticket['prioridad'] ?></td>
+                                                <td><?= $ticket['nombre_prioridad'] ?></td>
                                                 <td>
                                                     <?php
                                                     // Determinamos el color del estado
