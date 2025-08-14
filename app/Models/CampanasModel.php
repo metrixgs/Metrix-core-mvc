@@ -105,12 +105,9 @@ class CampanasModel extends Model {
 
   public function contarEncuestasPorCampana($campana_id)
 {
-    $row = $this->select('encuesta')
-                ->where('id', $campana_id)
-                ->get()
-                ->getRow();
-
-    return (!empty($row) && !empty($row->encuesta)) ? 1 : 0;
+    return $this->db->table('survey_responses')
+        ->where('id_campana', $campana_id)
+        ->countAllResults();
 }
 
     public function contarVisitasPorCampana($campana_id)

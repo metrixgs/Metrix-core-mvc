@@ -72,8 +72,8 @@ class CampanasRelacionados extends BaseController
     // 🔹 Encuestas
     public function encuestas($campana_id)
     {
-        $data['registros'] = $this->db->table('surveys')
-            ->where('campana_id', $campana_id)
+        $data['registros'] = $this->db->table('survey_responses')
+            ->where('id_campana', $campana_id)
             ->get()
             ->getResultArray();
 
