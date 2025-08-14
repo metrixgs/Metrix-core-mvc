@@ -81,7 +81,7 @@
 
                             <div class="card">
                                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0 text-white">Requerimiento ID</h5>
+                                    <h5 class="mb-0 text-white">Ticket ID</h5>
                                     <div class="d-flex align-items-center">
                                         <span class="text-white me-3"><?= $ticket['identificador']; ?></span>
                                         <span class="badge <?= ($ticket['estado'] === 'Cerrado') ? 'bg-danger' : 'bg-success'; ?>">
@@ -94,17 +94,27 @@
                                         <h6 class="text-primary">Información General</h6>
                                         <hr>
                                         <div class="row">
-                                            <div class="col-md-4">
-                                                <label for="cliente_id" class="form-label">¿Quién reporta?</label>
-                                                <input type="text" value="<?= $ticket['nombre_cliente']; ?>" class="form-control" id="cliente_id" readonly disabled>
+                                            <div class="col-md-6">
+                                                <label for="area_id" class="form-label">Categoría</label>
+                                                <input type="text" value="<?= $ticket['nombre_categoria']; ?>" class="form-control" id="area_id" readonly disabled>
                                             </div>
-                                            <div class="col-md-4">
-                                                <label for="area_id" class="form-label">Oficina</label>
-                                                <input type="text" value="<?= $ticket['nombre_area']; ?>" class="form-control" id="area_id" readonly disabled>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label for="usuario_id" class="form-label">Creado por</label>
+                                            <div class="col-md-6">
+                                                <label for="usuario_id" class="form-label">Operador</label>
                                                 <input type="text" value="<?= $ticket['nombre_usuario']; ?>" class="form-control" id="usuario_id" readonly disabled>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-4">
+                                                <label for="clasificacion" class="form-label">Clasificación</label>
+                                                <input type="text" value="<?= $ticket['clasificacion'] ?? 'N/A'; ?>" class="form-control" id="clasificacion" readonly disabled>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="dependencia" class="form-label">Dependencia</label>
+                                                <input type="text" value="<?= $ticket['dependencia'] ?? 'N/A'; ?>" class="form-control" id="dependencia" readonly disabled>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="area_responsable" class="form-label">Área Responsable</label>
+                                                <input type="text" value="<?= $ticket['nombre_area_responsable'] ?? 'N/A'; ?>" class="form-control" id="area_responsable" readonly disabled>
                                             </div>
                                         </div>
                                     </div>

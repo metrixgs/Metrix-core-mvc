@@ -21,12 +21,14 @@ class TicketsModel extends Model {
  public function obtenerTickets() {
     return $this->select('tbl_tickets.*, 
                           u1.nombre AS nombre_usuario, 
-                          u2.nombre AS nombre_cliente, 
+                          u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+               ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+               ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+               ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+               ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                 ->join('tbl_sla', 'LOWER(tbl_tickets.prioridad) = LOWER(tbl_sla.titulo)', 'left')
                 ->orderBy('tbl_tickets.id', 'DESC')
                 ->findAll();
@@ -36,12 +38,14 @@ class TicketsModel extends Model {
     public function obtenerTicketsPorCampana($campana_id) {
         return $this->select('tbl_tickets.*, 
                           u1.nombre AS nombre_usuario, 
-                          u2.nombre AS nombre_cliente, 
+                          u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.campana_id', $campana_id)
                         ->orderBy('id', 'DESC')
@@ -51,12 +55,14 @@ class TicketsModel extends Model {
     public function obtenerTicket($id) {
         return $this->select('tbl_tickets.*, 
                           u1.nombre AS nombre_usuario, 
-                          u2.nombre AS nombre_cliente, 
+                          u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.id', $id)
                         ->first();
@@ -65,12 +71,14 @@ class TicketsModel extends Model {
     public function obtenerTicketsPorCliente($cliente_id) {
         return $this->select('tbl_tickets.*, 
                           u1.nombre AS nombre_usuario, 
-                          u2.nombre AS nombre_cliente, 
+                          u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.cliente_id', $cliente_id)
                         ->orderBy('id', 'DESC')
@@ -82,10 +90,12 @@ class TicketsModel extends Model {
                           u1.nombre AS nombre_usuario,
                           u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.categoria_id', $area_id)
                         ->orderBy('id', 'DESC')
@@ -97,10 +107,12 @@ class TicketsModel extends Model {
                           u1.nombre AS nombre_usuario,
                           u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.categoria_id', $area_id)
                         ->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
@@ -112,12 +124,14 @@ class TicketsModel extends Model {
     public function obtenerTicketsCreadosPorUsuario($usuario_id) {
         return $this->select('tbl_tickets.*, 
                           u1.nombre AS nombre_usuario, 
-                          u2.nombre AS nombre_cliente, 
+                          u2.nombre AS nombre_cliente,
                           tbl_categorias.nombre AS nombre_categoria,
+                          tbl_areas.nombre AS nombre_area_responsable,
                           IFNULL(tbl_sla.color, "") AS color_sla')
-                        ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
-                        ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
-                        ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_usuarios AS u1', 'tbl_tickets.usuario_id = u1.id', 'left')
+                       ->join('tbl_usuarios AS u2', 'tbl_tickets.cliente_id = u2.id', 'left')
+                       ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                       ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
                         ->join('tbl_sla', 'tbl_tickets.prioridad = tbl_sla.titulo', 'left')
                         ->where('tbl_tickets.usuario_id', $usuario_id)
                         ->orderBy('id', 'DESC')
