@@ -67,7 +67,7 @@
                                                 <td class="text-center"><?= $contador; ?></td>
                                                 <td><?= date('d/m/Y H:i', strtotime($ticket['fecha_creacion'])) ?></td>
                                                 <td><strong><?= $ticket['identificador']; ?></strong></td>
-                                                <td><?= $ticket['categoria'] ?? 'N/A' ?></td>
+                                                <td><?= $ticket['nombre_categoria'] ?? 'N/A' ?></td>
                                                 <td><?= $ticket['clasificacion'] ?? 'N/A' ?></td>
                                                 <td style="background-color: <?= htmlspecialchars($ticket['color_sla']) ?>;"><?= $ticket['prioridad'] ?></td>
                                                 <td><?= $ticket['dependencia'] ?? 'N/A' ?></td>
