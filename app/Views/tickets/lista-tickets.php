@@ -78,7 +78,7 @@
                                                     ?>
                                                     <span class="<?= $estado_clase; ?>"><?= $ticket['estado'] ?></span>
                                                 </td>
-                                                <td><?= $ticket['operador'] ?? 'N/A' ?></td>
+                                                <td><?= $ticket['nombre_usuario'] ?? 'N/A' ?></td>
                                                 <td>
                                                     <?php
                                                     // Calculamos la diferencia entre la fecha de creación y la fecha de vencimiento en horas
