@@ -219,21 +219,22 @@
         <div id="tagDebugAlert" class="alert alert-danger d-none"></div>
 
         <!-- Opciones renderizadas desde el servidor -->
-        <select id="selectTagsUniverso" class="form-select" multiple>
-          <?php if (!empty($catalogo_tags)): ?>
-            <?php $stats = $tag_stats ?? []; ?>
-            <?php foreach ($catalogo_tags as $t): ?>
-              <option
+      <select id="selectTagsUniverso" class="form-control" multiple>
+    <?php if (!empty($catalogo_tags)): ?>
+        <?php $stats = $tag_stats ?? []; ?>
+        <?php foreach ($catalogo_tags as $t): ?>
+            <option
                 value="<?= esc($t['slug']) ?>"
                 data-label="<?= esc($t['tag']) ?>"
                 data-count="<?= isset($stats[$t['slug']]) ? (int)$stats[$t['slug']] : '' ?>">
                 <?= esc($t['tag']) ?> (<?= esc($t['slug']) ?>)
-              </option>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <option value="" disabled>(No hay etiquetas registradas)</option>
-          <?php endif; ?>
-        </select>
+            </option>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <option value="" disabled>(No hay etiquetas registradas)</option>
+    <?php endif; ?>
+</select>
+
 
         <!-- Chips con “x” para quitar -->
         <div class="mt-3">
@@ -280,20 +281,15 @@
     height: auto; /* Permite que la altura se ajuste automáticamente */
   }
 </style>
-
-<!-- ===== Loader de dependencias (solo si faltan) ===== -->
+ <!-- ===== Loader de dependencias (solo si faltan) ===== -->
 <script>
-  // Carga jQuery solo si no existe
   if (!window.jQuery) {
     document.write('<script src="https://code.jquery.com/jquery-3.7.1.min.js"><\/script>');
   }
- </script>
+</script>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
-<!-- (Opcional) Si tu layout NO carga Bootstrap JS y el modal no cierra/abre, descomenta: -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
-<!-- ================================================ -->
 
 <script>
 (function($){
@@ -304,43 +300,35 @@
   var $count   = $('#universoCount');
   var $chips   = $('#chipsContainer');
   var $csv     = $('#universoCsv');
-  var select2Init = false;
 
-  // Inicializa Select2 en selects externos
   if ($.fn.select2) {
     $('.select2').select2({ width: '100%' });
   }
 
-  // ===== Fix clave: permitir clic UNO A UNO en el select nativo (sin Ctrl) =====
-  // Funciona como fallback si Select2 no se aplica (verás la lista azul nativa).
+  // Permitir selección uno a uno en select nativo
   $select.on('mousedown', 'option', function (e) {
-    // Si Select2 ya transformó el select, no hacemos nada.
     if ($select.data('select2')) return;
-
-    e.preventDefault(); // evita que el navegador reemplace toda la selección
+    e.preventDefault();
     var $opt = $(this);
     $opt.prop('selected', !$opt.prop('selected'));
-    // Disparar el change para refrescar chips / csv
     $select.trigger('change');
-
-    // Mantener el foco en el select (evita que se cierre en algunos navegadores)
     return false;
   });
 
   // Abrir modal
   $modal.on('shown.bs.modal', function () {
-    // Inicializa Select2 para el modal
-    if (!select2Init && $.fn.select2) {
+    // Reinicializa Select2 siempre para asegurar buscador
+    if ($.fn.select2) {
+      if ($select.data('select2')) {
+        $select.select2('destroy');
+      }
       $select.select2({
         width: '100%',
-        placeholder: 'Selecciona uno o varios tags',
+        placeholder: 'Escribe para buscar y selecciona uno o varios',
         dropdownParent: $modal,
-        closeOnSelect: false // seguir seleccionando sin cerrar
+        closeOnSelect: false
       });
-      select2Init = true;
     }
-
-    // Precargar selección guardada
     var slugs = parseCSV($hidden.val());
     $select.val(slugs).trigger('change');
   });
@@ -374,7 +362,6 @@
     if (window.bootstrap && bootstrap.Modal) {
       bootstrap.Modal.getInstance($modal[0]).hide();
     } else {
-      // Fallback por si no hay Bootstrap JS
       $modal.removeClass('show').attr('aria-hidden','true').hide();
       $('.modal-backdrop').remove();
       document.body.classList.remove('modal-open');
@@ -423,7 +410,7 @@
     $count.text(slugs.length);
   }
 
-  // Pintar estado si el hidden ya trae datos al cargar la página
+  // Cargar estado inicial
   (function initFromHiddenOnLoad(){
     var initial = parseCSV($hidden.val());
     if (initial.length) {
@@ -437,7 +424,6 @@
 </script>
 
 <script>
-/* Fallback AJAX: carga tags si no están en HTML */
 (function(){
   var TAGS_URL = "<?= site_url('campanas/tags') ?>";
   var $ = window.jQuery;

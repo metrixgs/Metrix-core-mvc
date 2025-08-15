@@ -316,7 +316,7 @@ public function detalle($campana_id)
         'descripcion' => 'permit_empty|string',
         'fecha_inicio' => 'permit_empty|valid_date',
         'fecha_fin' => 'permit_empty|valid_date',
-        'encuesta' => 'permit_empty|array',
+        'encuesta' => 'permit_empty',
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
         'territorio' => 'permit_empty|in_list[electorales,geograficos]',
