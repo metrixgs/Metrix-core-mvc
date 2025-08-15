@@ -287,7 +287,7 @@
   if (!window.jQuery) {
     document.write('<script src="https://code.jquery.com/jquery-3.7.1.min.js"><\/script>');
   }
-</script>
+ </script>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
@@ -296,172 +296,148 @@
 <!-- ================================================ -->
 
 <script>
-/* === Script principal: inicialización Select2 + chips + badges === */
-(function attachWhenReady() {
-  if (!window.jQuery) {
-    window.addEventListener('load', attachWhenReady, { once:true });
-    return;
+(function($){
+  var $modal   = $('#modalUniverso');
+  var $select  = $('#selectTagsUniverso');
+  var $hidden  = $('#universo');
+  var $summary = $('#universoSeleccionado');
+  var $count   = $('#universoCount');
+  var $chips   = $('#chipsContainer');
+  var $csv     = $('#universoCsv');
+  var select2Init = false;
+
+  // Inicializa Select2 en selects externos
+  if ($.fn.select2) {
+    $('.select2').select2({ width: '100%' });
   }
 
-  (function($){
-    var $modal   = $('#modalUniverso');
-    var $select  = $('#selectTagsUniverso');
-    var $hidden  = $('#universo');             // input hidden (CSV) del formulario
-    var $summary = $('#universoSeleccionado'); // badges
-    var $count   = $('#universoCount');
-    var $chips   = $('#chipsContainer');
-    var $csv     = $('#universoCsv');
+  // ===== Fix clave: permitir clic UNO A UNO en el select nativo (sin Ctrl) =====
+  // Funciona como fallback si Select2 no se aplica (verás la lista azul nativa).
+  $select.on('mousedown', 'option', function (e) {
+    // Si Select2 ya transformó el select, no hacemos nada.
+    if ($select.data('select2')) return;
 
-    // Inicializa todos los select2 "externos" si los usas
-    if ($.fn.select2) {
-      $('.select2').select2({ width: '100%' });
-    }
+    e.preventDefault(); // evita que el navegador reemplace toda la selección
+    var $opt = $(this);
+    $opt.prop('selected', !$opt.prop('selected'));
+    // Disparar el change para refrescar chips / csv
+    $select.trigger('change');
 
-    var select2Init = false;
+    // Mantener el foco en el select (evita que se cierre en algunos navegadores)
+    return false;
+  });
 
-    // Al abrir el modal
-    $modal.on('shown.bs.modal', function () {
-      // Inicializar Select2 del modal si existe el plugin
-      if (!select2Init && $.fn.select2) {
-        $select.select2({
-          width: '100%',
-          placeholder: 'Selecciona uno o varios tags',
-          dropdownParent: $modal
-        });
-        select2Init = true;
-      }
-
-      // Precargar selección desde el hidden
-      var slugs = parseCSV($hidden.val());
-      $select.val(slugs).trigger('change');
-      renderChips(slugs);
-      $csv.val(slugs.join(','));
-    });
-
-    // Cambios en el select (funciona con o sin select2)
-    $select.on('change', function () {
-      var slugs = unique($select.val() || []);
-      renderChips(slugs);
-      $csv.val(slugs.join(','));
-    });
-
-    // Delegación: quitar con la "x" en un chip
-    $chips.on('click', '.remove', function () {
-      var slug = $(this).closest('.chip').data('slug');
-      var current = unique($select.val() || []);
-      var next = current.filter(function(s){ return s !== slug; });
-      $select.val(next).trigger('change');
-    });
-
-    // Botón Limpiar
-    $('#btnClearUniverso').on('click', function () {
-      $select.val(null).trigger('change');
-      $csv.val('');
-    });
-
-    // Botón Aplicar (intenta cerrar con Bootstrap 5 si está disponible)
-    $('#btnAplicarUniverso').on('click', function () {
-      var slugs = parseCSV($csv.val());
-      setHiddenAndRender(slugs);
-
-      try {
-        if (window.bootstrap && bootstrap.Modal) {
-          var el = document.getElementById('modalUniverso');
-          var inst = bootstrap.Modal.getOrCreateInstance(el);
-          inst.hide();
-        } else {
-          // Fallback
-          $modal.removeClass('show').attr('aria-hidden','true').hide();
-          $('.modal-backdrop').remove();
-          document.body.classList.remove('modal-open');
-          document.body.style.removeProperty('padding-right');
-        }
-      } catch(e) {}
-    });
-
-    // ===== Helpers =====
-    function parseCSV(str) {
-      return (str || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-    }
-    function unique(arr) {
-      var o = Object.create(null), out = [];
-      for (var i=0;i<arr.length;i++){
-        var s = (arr[i] || '').trim();
-        if (s && !o[s]) { o[s]=1; out.push(s); }
-      }
-      return out;
-    }
-    function optionNodeFor(slug) {
-      var safe = String(slug).replace(/"/g, '\\"');
-      return $select.find('option[value="' + safe + '"]').get(0) || null;
-    }
-    function labelFor(slug) {
-      var opt = optionNodeFor(slug);
-      return opt ? (opt.dataset.label || opt.text || slug) : slug;
-    }
-    function countFor(slug) {
-      var opt = optionNodeFor(slug);
-      return opt ? (opt.dataset.count || '') : '';
-    }
-
-    function renderChips(slugs) {
-      $chips.empty();
-      if (!slugs.length) {
-        $chips.append('<span class="text-muted">No hay seleccionados</span>');
-        return;
-      }
-      slugs.forEach(function (slug) {
-        var lbl = labelFor(slug);
-        var cnt = countFor(slug);
-        var text = cnt ? (lbl + ' (' + cnt + ')') : lbl;
-
-        var $chip = $('<span class="chip" data-slug=""></span>');
-        $chip.attr('data-slug', slug).text(text);
-
-        var $x = $('<span class="remove" aria-label="Quitar" title="Quitar">&times;</span>');
-        $chip.append($x);
-        $chips.append($chip);
+  // Abrir modal
+  $modal.on('shown.bs.modal', function () {
+    // Inicializa Select2 para el modal
+    if (!select2Init && $.fn.select2) {
+      $select.select2({
+        width: '100%',
+        placeholder: 'Selecciona uno o varios tags',
+        dropdownParent: $modal,
+        closeOnSelect: false // seguir seleccionando sin cerrar
       });
+      select2Init = true;
     }
 
-    function setHiddenAndRender(slugs) {
-      var uniq = unique(slugs);
-      $hidden.val(uniq.join(','));
-      renderBadges(uniq);
-    }
+    // Precargar selección guardada
+    var slugs = parseCSV($hidden.val());
+    $select.val(slugs).trigger('change');
+  });
 
-    function renderBadges(slugs) {
-      if (!slugs.length) {
-        $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
-        $count.text('0');
-        return;
-      }
-      var html = '';
-      slugs.forEach(function (slug) {
-        var lbl = labelFor(slug);
-        var cnt = countFor(slug);
-        var text = cnt ? (lbl + ' (' + cnt + ')') : lbl;
-        html += '<span class="badge bg-light border text-dark me-1 mb-1">#'
-              + $('<div>').text(text).html()
-              + '</span>';
-      });
-      $summary.removeClass('text-muted').addClass('text-dark').html(html);
-      $count.text(slugs.length);
-    }
+  // Cambio en selección
+  $select.on('change', function () {
+    var slugs = unique($select.val() || []);
+    renderChips(slugs);
+    $csv.val(slugs.join(','));
+  });
 
-    // Al cargar la página: si ya viene algo en el hidden (postback), pintarlo
-    setHiddenAndRender(parseCSV($hidden.val()));
+  // Quitar chip
+  $chips.on('click', '.remove', function () {
+    var slug = $(this).closest('.chip').data('slug');
+    var current = unique($select.val() || []);
+    var next = current.filter(s => s !== slug);
+    $select.val(next).trigger('change');
+  });
 
-    // Logs para depurar rápidamente
-    if (!$.fn.select2) {
-      console.warn('Select2 NO cargado. El selector funciona en modo nativo (sin buscador).');
+  // Limpiar selección
+  $('#btnClearUniverso').on('click', function () {
+    $select.val(null).trigger('change');
+    $csv.val('');
+  });
+
+  // Aplicar y cerrar
+  $('#btnAplicarUniverso').on('click', function () {
+    var slugs = parseCSV($csv.val());
+    $hidden.val(slugs.join(','));
+    renderBadges(slugs);
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getInstance($modal[0]).hide();
+    } else {
+      // Fallback por si no hay Bootstrap JS
+      $modal.removeClass('show').attr('aria-hidden','true').hide();
+      $('.modal-backdrop').remove();
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('padding-right');
     }
-  })(jQuery);
-})();
+  });
+
+  // Helpers
+  function parseCSV(str) {
+    return (str || '').split(',').map(s => s.trim()).filter(Boolean);
+  }
+  function unique(arr) {
+    return [...new Set(arr.map(s => s.trim()).filter(Boolean))];
+  }
+  function labelFor(slug) {
+    var opt = $select.find(`option[value="${slug}"]`);
+    return opt.data('label') || opt.text() || slug;
+  }
+  function renderChips(slugs) {
+    $chips.empty();
+    if (!slugs.length) {
+      $chips.append('<span class="text-muted">No hay seleccionados</span>');
+      return;
+    }
+    slugs.forEach(slug => {
+      var lbl = labelFor(slug);
+      var chip = $(
+        `<span class="chip" data-slug="${slug}">
+           ${$('<div>').text(lbl).html()}
+           <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
+         </span>`
+      );
+      $chips.append(chip);
+    });
+  }
+  function renderBadges(slugs) {
+    if (!slugs.length) {
+      $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
+      $count.text('0');
+      return;
+    }
+    var html = slugs.map(slug =>
+      `<span class="badge bg-light border text-dark me-1 mb-1">#${$('<div>').text(labelFor(slug)).html()}</span>`
+    ).join('');
+    $summary.removeClass('text-muted').addClass('text-dark').html(html);
+    $count.text(slugs.length);
+  }
+
+  // Pintar estado si el hidden ya trae datos al cargar la página
+  (function initFromHiddenOnLoad(){
+    var initial = parseCSV($hidden.val());
+    if (initial.length) {
+      renderChips(initial);
+      renderBadges(initial);
+      $csv.val(initial.join(','));
+    }
+  })();
+
+})(jQuery);
 </script>
 
 <script>
-/* === Fallback AJAX con depuración al abrir el modal === */
+/* Fallback AJAX: carga tags si no están en HTML */
 (function(){
   var TAGS_URL = "<?= site_url('campanas/tags') ?>";
   var $ = window.jQuery;
@@ -474,20 +450,16 @@
 
   $('#modalUniverso').on('shown.bs.modal', function(){
     var $select = $('#selectTagsUniverso');
-
-    // Si ya hay opciones cargadas desde PHP, no hace falta AJAX
     var hasOptions = $select.find('option[value]').length > 0;
     if (hasOptions) return;
 
     $.getJSON(TAGS_URL + '?debug=1')
       .done(function(resp){
-        // Soporta la nueva respuesta {ok, data} o la antigua (array directo)
         if (resp && resp.ok === false) {
           showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
           return;
         }
         var rows = resp && resp.data ? resp.data : resp;
-
         if (!Array.isArray(rows)) {
           showTagError('Respuesta inesperada del servidor.');
           return;
@@ -496,14 +468,12 @@
           showTagError('No hay tags para mostrar.');
           return;
         }
-
         rows.forEach(function(r){
           var text = (r.tag || r.slug) + ' (' + r.slug + ')';
           var opt  = new Option(text, r.slug, false, false);
           opt.setAttribute('data-label', r.tag || r.slug);
           $select.append(opt);
         });
-
         if ($.fn.select2 && $select.data('select2')) {
           $select.trigger('change');
         }
