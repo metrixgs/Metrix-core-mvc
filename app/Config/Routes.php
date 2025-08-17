@@ -214,3 +214,10 @@ $routes->group('relacionados', function($routes) {
     $routes->get('relacionados/(:segment)/(:num)', 'RelacionadosController::listar/$1/$2');
 
 });
+
+// Rutas AJAX del Dashboard
+$routes->post('dashboard/estadisticas', 'DashboardAjax::obtenerEstadisticas');
+$routes->post('dashboard/exportar', 'DashboardAjax::exportarExcel');
+
+// Ruta de prueba del dashboard
+$routes->get('test-dashboard', 'TestDashboard::index');

@@ -170,4 +170,128 @@ class TicketsModel extends Model {
     return $this->where('campana_id', $campana_id)->countAllResults();
 }
 
+    // Métodos para estadísticas del dashboard
+    public function obtenerTicketsPorPrioridad($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('tbl_prioridades.nombre as prioridad, COUNT(*) as total')
+                      ->join('tbl_prioridades', 'tbl_tickets.prioridad = tbl_prioridades.id_prioridad', 'left')
+                      ->groupBy('tbl_prioridades.nombre');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerTicketsPorCategoria($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('tbl_categorias.nombre as categoria, COUNT(*) as total')
+                      ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                      ->groupBy('tbl_categorias.nombre');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerTiempoPromedioPorArea($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('tbl_areas.nombre as area, 
+                               AVG(TIMESTAMPDIFF(HOUR, tbl_tickets.fecha_creacion, 
+                                   COALESCE(tbl_tickets.fecha_cierre, NOW()))) as tiempo_promedio')
+                      ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
+                      ->where('tbl_tickets.fecha_cierre IS NOT NULL OR tbl_tickets.estado !=', 'Cerrado')
+                      ->groupBy('tbl_areas.nombre');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerTendenciaMensual($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('DATE_FORMAT(fecha_creacion, "%Y-%m") as mes, COUNT(*) as total')
+                      ->groupBy('DATE_FORMAT(fecha_creacion, "%Y-%m")')
+                      ->orderBy('mes', 'ASC');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('fecha_creacion >=', $fecha_inicio)
+                  ->where('fecha_creacion <=', $fecha_fin);
+        } else {
+            // Por defecto últimos 6 meses
+            $query->where('fecha_creacion >=', date('Y-m-d', strtotime('-6 months')));
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerTop10Colonias($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('colonia, COUNT(*) as total')
+                      ->where('colonia IS NOT NULL')
+                      ->where('colonia !=', '')
+                      ->groupBy('colonia')
+                      ->orderBy('total', 'DESC')
+                      ->limit(10);
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('fecha_creacion >=', $fecha_inicio)
+                  ->where('fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerTicketsPorAreaResponsable($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('tbl_areas.nombre as area, COUNT(*) as total')
+                      ->join('tbl_areas', 'tbl_tickets.area_id = tbl_areas.id', 'left')
+                      ->groupBy('tbl_areas.nombre')
+                      ->orderBy('total', 'DESC');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->findAll();
+    }
+
+    public function obtenerEstadisticasGenerales($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('COUNT(*) as total,
+                               SUM(CASE WHEN estado = "Abierto" THEN 1 ELSE 0 END) as abiertas,
+                               SUM(CASE WHEN estado = "Cerrado" THEN 1 ELSE 0 END) as cerradas,
+                               AVG(CASE WHEN fecha_cierre IS NOT NULL 
+                                   THEN TIMESTAMPDIFF(HOUR, fecha_creacion, fecha_cierre) 
+                                   ELSE NULL END) as tiempo_promedio');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('fecha_creacion >=', $fecha_inicio)
+                  ->where('fecha_creacion <=', $fecha_fin);
+        }
+        
+        return $query->first();
+    }
+
+    public function obtenerComparativaTemporalPorCategoria($fecha_inicio = null, $fecha_fin = null) {
+        $query = $this->select('DATE_FORMAT(tbl_tickets.fecha_creacion, "%Y-%m") as mes,
+                               tbl_categorias.nombre as categoria,
+                               COUNT(*) as total')
+                      ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                      ->groupBy('DATE_FORMAT(tbl_tickets.fecha_creacion, "%Y-%m"), tbl_categorias.nombre')
+                      ->orderBy('mes', 'ASC');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        } else {
+            // Por defecto últimos 6 meses
+            $query->where('tbl_tickets.fecha_creacion >=', date('Y-m-d', strtotime('-6 months')));
+        }
+        
+        return $query->findAll();
+    }
+
 }

@@ -71,6 +71,28 @@ class Panel extends BaseController {
         $data['incumplidos'] = $incumplidos;
         $data['pendientes'] = $pendientes;
         
+        # Obtener datos estadísticos para el dashboard
+        try {
+            $data['estadisticas_prioridad'] = $this->tickets->obtenerTicketsPorPrioridad();
+            $data['estadisticas_categoria'] = $this->tickets->obtenerTicketsPorCategoria();
+            $data['tiempo_promedio_area'] = $this->tickets->obtenerTiempoPromedioPorArea();
+            $data['tendencia_mensual'] = $this->tickets->obtenerTendenciaMensual();
+            $data['top_colonias'] = $this->tickets->obtenerTop10Colonias();
+            $data['area_responsable'] = $this->tickets->obtenerTicketsPorAreaResponsable();
+            $data['estadisticas_generales'] = $this->tickets->obtenerEstadisticasGenerales();
+            $data['comparativa_temporal'] = $this->tickets->obtenerComparativaTemporalPorCategoria();
+        } catch (\Exception $e) {
+            # En caso de error, usar datos vacíos
+            $data['estadisticas_prioridad'] = [];
+            $data['estadisticas_categoria'] = [];
+            $data['tiempo_promedio_area'] = [];
+            $data['tendencia_mensual'] = [];
+            $data['top_colonias'] = [];
+            $data['area_responsable'] = [];
+            $data['estadisticas_generales'] = [];
+            $data['comparativa_temporal'] = [];
+        }
+        
         # Obtenemos todas las notificaciones por usuario...
         $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
         $data['notificaciones'] = $notificaciones;
