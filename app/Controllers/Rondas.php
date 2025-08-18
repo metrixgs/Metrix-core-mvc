@@ -6,6 +6,7 @@ use App\Models\RondasModel;
 use App\Models\TareasModel;
 use App\Models\TicketsModel;
 use App\Models\UsuariosModel;
+use App\Models\SurveyModel; // Corregido: Cargar SurveyModel (singular)
 use App\Controllers\BaseController;
 use App\Models\SegmentacionesModel;
 use App\Models\RondasSegmentacionesModel;
@@ -27,6 +28,7 @@ class Rondas extends BaseController {
         $this->rondas = new RondasModel();
         $this->rondasSegmentaciones = new RondasSegmentacionesModel();
         $this->segmentaciones = new SegmentacionesModel();
+        $this->survey = new SurveyModel(); // Corregido: Instanciar SurveyModel (singular)
 
         # Cargar los Helpers
         helper('Alerts');
@@ -118,6 +120,7 @@ class Rondas extends BaseController {
 
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
+    $data['surveys'] = $this->survey->findAll(); // Corregido: Obtener todas las encuestas usando $this->survey
     // Obtener solo usuarios con rol_id = 9 (Coordinador) para el campo 'coordinador' (Brigada)
     $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
     // Obtener solo usuarios con rol_id = 5 (Operador) para el campo 'encargado'
@@ -132,7 +135,8 @@ class Rondas extends BaseController {
             'nombre' => $this->request->getPost('nombre'),
             'coordinador' => $this->request->getPost('coordinador'),
             'encargado' => $this->request->getPost('encargado'),
-            'coordinador_campana' => $this->request->getPost('coordinador_campana'), // Nuevo campo
+            'coordinador_campana' => $this->request->getPost('coordinador_campana'),
+            'encuesta_ronda' => $this->request->getPost('encuesta_ronda'), // Nuevo campo
             'fecha_actividad' => $this->request->getPost('fecha_actividad'),
             'hora_actividad' => $this->request->getPost('hora_actividad'),
             'estado' => $this->request->getPost('estado') ?: 'Programada'

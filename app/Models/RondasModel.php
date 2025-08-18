@@ -14,7 +14,8 @@ class RondasModel extends Model {
     protected $useSoftDeletes = false;
     protected $allowedFields = [
         'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 'encargado',
-        'coordinador_campana', // Nuevo campo
+        'coordinador_campana',
+        'encuesta_ronda', // Nuevo campo
         'fecha_actividad', 'hora_actividad', 'estado', 'ronda_id'
     ];
 

@@ -84,6 +84,26 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             </div>
                         </div>
                     </div>
+    
+                    <!-- Nuevo campo para Encuesta de Ronda -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light"><h5 class="card-title mb-0">Encuesta de Ronda</h5></div>
+                            <div class="card-body">
+                                <label class="form-label">Seleccionar encuesta para esta ronda</label>
+                                <select name="encuesta_ronda" class="form-select select2" required>
+                                    <option value="" disabled selected hidden>Seleccione encuesta</option>
+                                    <?php if (!empty($surveys)): ?>
+                                        <?php foreach ($surveys as $survey): ?>
+                                            <option value="<?= esc($survey['id']); ?>">#<?= esc($survey['id']); ?> <?= esc($survey['title']); ?></option>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <option disabled>No hay encuestas registradas</option>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Segmentaciones -->
