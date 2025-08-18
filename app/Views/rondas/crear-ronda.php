@@ -73,6 +73,15 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                            <div class="col-6">
+                                <label class="form-label">Coordinador de Campaña</label>
+                                <select name="coordinador_campana" class="form-select select2" required>
+                                    <option value="">Seleccione coordinador</option>
+                                    <?php foreach($usuarios_coordinador as $usuario): ?>
+                                        <option value="<?= esc($usuario['id']) ?>"><?= esc($usuario['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -13,9 +13,10 @@ class RondasModel extends Model {
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 'encargado', 
+        'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 'encargado',
+        'coordinador_campana', // Nuevo campo
         'fecha_actividad', 'hora_actividad', 'estado', 'ronda_id'
-    ]; 
+    ];
 
     protected $useTimestamps = false;
     protected $createdField = 'created_at';

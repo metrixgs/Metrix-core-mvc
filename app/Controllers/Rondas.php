@@ -119,6 +119,8 @@ class Rondas extends BaseController {
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
     $data['usuarios'] = $this->usuarios->findAll(); // Listar todos los usuarios
+    // Obtener solo usuarios con rol_id = 9 (Coordinador)
+    $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
 
     if ($this->request->getMethod() === 'post') {
         // Recoger los datos del formulario
@@ -127,6 +129,7 @@ class Rondas extends BaseController {
             'nombre' => $this->request->getPost('nombre'),
             'coordinador' => $this->request->getPost('coordinador'),
             'encargado' => $this->request->getPost('encargado'),
+            'coordinador_campana' => $this->request->getPost('coordinador_campana'), // Nuevo campo
             'fecha_actividad' => $this->request->getPost('fecha_actividad'),
             'hora_actividad' => $this->request->getPost('hora_actividad'),
             'estado' => $this->request->getPost('estado') ?: 'Programada'
