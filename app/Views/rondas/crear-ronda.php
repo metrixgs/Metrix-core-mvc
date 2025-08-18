@@ -58,7 +58,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="col-6">
                                 <label class="form-label">Coordinador (Brigada)</label>
                                 <select name="coordinador" class="form-select select2" required>
-                                    <option value="">Seleccione brigada</option>
+                                    <option value="" disabled selected hidden>Seleccione brigada</option>
                                     <?php foreach($brigadas as $brigada): ?>
                                         <option value="<?= esc($brigada['id']) ?>"><?= esc($brigada['nombre']) ?></option>
                                     <?php endforeach; ?>
@@ -67,7 +67,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="col-6">
                                 <label class="form-label">Encargado (Operador)</label>
                                 <select name="encargado" class="form-select select2" required>
-                                    <option value="">Seleccione operador</option>
+                                    <option value="" disabled selected hidden>Seleccione operador</option>
                                     <?php foreach($operadores as $op): ?>
                                         <option value="<?= esc($op['id']) ?>"><?= esc($op['nombre']) ?></option>
                                     <?php endforeach; ?>
@@ -76,7 +76,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="col-6">
                                 <label class="form-label">Coordinador de Campaña</label>
                                 <select name="coordinador_campana" class="form-select select2" required>
-                                    <option value="">Seleccione coordinador</option>
+                                    <option value="" disabled selected hidden>Seleccione coordinador</option>
                                     <?php foreach($usuarios_coordinador as $usuario): ?>
                                         <option value="<?= esc($usuario['id']) ?>"><?= esc($usuario['nombre']) ?></option>
                                     <?php endforeach; ?>
