@@ -1,6 +1,6 @@
 <?php
-$brigadas = $brigadas ?? [['id' => 1, 'nombre' => 'Brigada Temporal']];
-$operadores = $operadores ?? [['id' => 1, 'nombre' => 'Operador Temporal']];
+// $brigadas se pasa desde el controlador ahora, no necesita inicialización temporal aquí
+// $operadores se pasa desde el controlador ahora, no necesita inicialización temporal aquí
 $segmentaciones = $segmentaciones ?? [['id' => 1, 'descripcion' => 'Segmentación Temporal']];
 $territorios = $territorios ?? [['id' => 1, 'nombre' => 'Territorio Temporal']];
 $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]];

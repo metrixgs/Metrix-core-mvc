@@ -118,8 +118,11 @@ class Rondas extends BaseController {
 
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
-    $data['usuarios'] = $this->usuarios->findAll(); // Listar todos los usuarios
-    // Obtener solo usuarios con rol_id = 9 (Coordinador)
+    // Obtener solo usuarios con rol_id = 9 (Coordinador) para el campo 'coordinador' (Brigada)
+    $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
+    // Obtener solo usuarios con rol_id = 5 (Operador) para el campo 'encargado'
+    $data['operadores'] = $this->usuarios->where('rol_id', 5)->findAll();
+    // Obtener solo usuarios con rol_id = 9 (Coordinador) para el campo 'coordinador_campana'
     $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
 
     if ($this->request->getMethod() === 'post') {
