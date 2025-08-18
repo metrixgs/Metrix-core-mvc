@@ -225,9 +225,15 @@ $mapUrls = [
  <div class="row mt-2 mb-3 g-2">
     <?php foreach ($stats as $stat): ?>
         <div class="col-6 col-md-3 col-lg-2">
-            <a href="<?= base_url($mapUrls[$stat['label']] . '/' . $campana['id']) ?>" 
-               class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark" 
+            <?php if ($stat['label'] === 'Rondas'): ?>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#modalRondasCampana"
+               class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
                style="min-width:0;">
+            <?php else: ?>
+            <a href="<?= base_url($mapUrls[$stat['label']] . '/' . $campana['id']) ?>"
+               class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
+               style="min-width:0;">
+            <?php endif; ?>
                 <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
                     <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
                         <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-5"></i>
