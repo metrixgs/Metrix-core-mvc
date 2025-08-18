@@ -240,7 +240,7 @@ $mapUrls = [
                     </div>
                     <div>
                         <div class="fw-bold" style="font-size:1rem;"><?= esc($stat['value']); ?></div>
-                        <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label']); ?></div>
+                        <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label'] === 'Encuestas' ? 'Encuestas contestadas' : $stat['label']); ?></div>
                     </div>
                 </div>
             </a>
