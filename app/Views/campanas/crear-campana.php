@@ -152,7 +152,7 @@
               <label class="form-label fw-semibold" style="color: #8bc34a;">Encuesta <span class="text-danger">*</span></label>
               <select class="form-select select2" id="encuesta" name="encuesta[]" multiple="multiple" style="border-color: #8bc34a;">
                 <?php if (!empty($surveys)): ?>
-                  <option value="">Seleccione una encuesta</option>
+                  <option value="" disabled selected hidden>Seleccione una encuesta</option>
                   <?php foreach ($surveys as $survey): ?>
                     <option value="<?= $survey['id']; ?>">#<?= $survey['id']; ?> <?= htmlspecialchars($survey['title']); ?></option>
                   <?php endforeach; ?>
