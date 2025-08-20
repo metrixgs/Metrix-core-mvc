@@ -10,20 +10,11 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     <div class="container-fluid">
 
         <!-- Título de página -->
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0">Crear Nueva Ronda</h4>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="<?= base_url() ?>">Inicio</a></li>
-                            <li class="breadcrumb-item"><a href="<?= base_url('rondas') ?>">Rondas</a></li>
-                            <li class="breadcrumb-item active">Crear Ronda</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="row">
+    <div class="col-12">
+        <!-- No hay título de página aquí según la imagen, solo breadcrumbs abajo -->
+    </div>
+</div>
 
         <!-- Mensajes de alerta -->
         <?php if (session()->has('success')): ?>
@@ -49,132 +40,195 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
             </div>
         <?php endif; ?>
 
-        <!-- Formulario principal con diseño mejorado -->
         <form action="<?= base_url('rondas/crear') ?>" method="post" id="form-crear-ronda" class="needs-validation" novalidate>
             <div class="row">
+                <!-- Datos Generales -->
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header align-items-center d-flex">
-                            <h4 class="card-title mb-0 flex-grow-1"><i class="ri-add-circle-fill me-1"></i> Detalles de la Nueva Ronda</h4>
+                            <h4 class="card-title mb-0 flex-grow-1">Datos Generales <i class="ri-information-fill text-muted align-bottom"></i></h4>
+                            <div class="flex-shrink-0">
+                                <span class="text-muted">(ID Ronda: #RDA-29302-102)</span>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="nombre" class="form-label">Nombre de la Ronda <span class="text-danger">*</span></label>
-                                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ej: Ronda de Verificación QRO" required value="<?= old('nombre') ?>">
-                                    <div class="invalid-feedback">Por favor, ingrese un nombre para la ronda.</div>
+                                    <label for="nombre_campana" class="form-label">Nombre de la Campaña:</label>
+                                    <input type="text" id="nombre_campana" class="form-control" value="Entrega de Tarjeta de Salud (+60)" readonly>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="fecha_actividad" class="form-label">Fecha <span class="text-danger">*</span></label>
-                                    <input type="date" name="fecha_actividad" id="fecha_actividad" class="form-control" required value="<?= old('fecha_actividad') ?>">
-                                    <div class="invalid-feedback">Por favor, seleccione una fecha.</div>
+                                    <label for="fecha_actividad" class="form-label">Fecha:</label>
+                                    <input type="text" name="fecha_actividad" id="fecha_actividad" class="form-control" placeholder="(Día Semana) (DD/MM/AAAA)" value="<?= old('fecha_actividad') ?>">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="hora_actividad" class="form-label">Horario <span class="text-danger">*</span></label>
-                                    <input type="time" name="hora_actividad" id="hora_actividad" class="form-control" required value="<?= old('hora_actividad') ?>">
-                                    <div class="invalid-feedback">Por favor, seleccione un horario.</div>
+                                    <label for="hora_actividad" class="form-label">Horario:</label>
+                                    <input type="text" name="hora_actividad" id="hora_actividad" class="form-control" placeholder="(Formato 24 horas)" value="<?= old('hora_actividad') ?>">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Responsables -->
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header align-items-center d-flex">
-                            <h4 class="card-title mb-0 flex-grow-1"><i class="ri-user-fill me-1"></i> Responsables</h4>
+                            <h4 class="card-title mb-0 flex-grow-1">Responsables</h4>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-12">
-                                    <label for="coordinador" class="form-label">Coordinador (Brigada) <span class="text-danger">*</span></label>
-                                    <select name="coordinador" id="coordinador" class="form-select select2" required>
-                                        <option value="" disabled selected hidden>Seleccione brigada</option>
+                                <div class="col-md-6">
+                                    <label for="brigadas" class="form-label">Brigada(s):</label>
+                                    <select name="brigadas[]" id="brigadas" class="form-select select2" multiple>
                                         <?php foreach($brigadas as $brigada): ?>
-                                            <option value="<?= esc($brigada['id']) ?>" <?= old('coordinador') == $brigada['id'] ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?></option>
+                                            <option value="<?= esc($brigada['id']) ?>" <?= in_array($brigada['id'], old('brigadas', [])) ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?> (# Interno de Brigada(s))</option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <div class="invalid-feedback">Por favor, seleccione un coordinador de brigada.</div>
                                 </div>
-                                <div class="col-md-12">
-                                    <label for="encargado" class="form-label">Encargado (Operador) <span class="text-danger">*</span></label>
-                                    <select name="encargado" id="encargado" class="form-select select2" required>
-                                        <option value="" disabled selected hidden>Seleccione operador</option>
+                                <div class="col-md-6">
+                                    <label for="operadores" class="form-label">Operadores:</label>
+                                    <select name="operadores[]" id="operadores" class="form-select select2" multiple>
                                         <?php foreach($operadores as $op): ?>
-                                            <option value="<?= esc($op['id']) ?>" <?= old('encargado') == $op['id'] ? 'selected' : '' ?>><?= esc($op['nombre']) ?></option>
+                                            <option value="<?= esc($op['id']) ?>" <?= in_array($op['id'], old('operadores', [])) ? 'selected' : '' ?>><?= esc($op['nombre']) ?> (# integrantes)</option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <div class="invalid-feedback">Por favor, seleccione un encargado.</div>
-                                </div>
-                                <div class="col-md-12">
-                                    <label for="coordinador_campana" class="form-label">Coordinador de Campaña <span class="text-danger">*</span></label>
-                                    <select name="coordinador_campana" id="coordinador_campana" class="form-select select2" required>
-                                        <option value="" disabled selected hidden>Seleccione coordinador</option>
-                                        <?php foreach($usuarios_coordinador as $usuario): ?>
-                                            <option value="<?= esc($usuario['id']) ?>" <?= old('coordinador_campana') == $usuario['id'] ? 'selected' : '' ?>><?= esc($usuario['nombre']) ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="invalid-feedback">Por favor, seleccione un coordinador de campaña.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Interacciones -->
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header align-items-center d-flex">
-                            <h4 class="card-title mb-0 flex-grow-1"><i class="ri-file-text-line me-1"></i> Encuesta y Segmentación</h4>
+                            <h4 class="card-title mb-0 flex-grow-1">Interacciones</h4>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <label for="encuesta_ronda" class="form-label">Seleccionar encuesta para esta ronda <span class="text-danger">*</span></label>
-                                <select name="encuesta_ronda" id="encuesta_ronda" class="form-select select2" required>
-                                    <option value="" disabled selected hidden>Seleccione encuesta</option>
-                                    <?php if (!empty($surveys)): ?>
-                                        <?php foreach ($surveys as $survey): ?>
-                                            <option value="<?= esc($survey['id']); ?>" <?= old('encuesta_ronda') == $survey['id'] ? 'selected' : '' ?>>#<?= esc($survey['id']); ?> <?= esc($survey['title']); ?></option>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <option disabled>No hay encuestas registradas</option>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback">Por favor, seleccione una encuesta.</div>
-                            </div>
-                            <div>
-                                <label for="segmentaciones" class="form-label">Seleccionar Segmentaciones</label>
-                                <select name="segmentaciones[]" id="segmentaciones" class="form-select select2" multiple>
-                                    <?php foreach($segmentaciones as $seg): ?>
-                                        <option value="<?= esc($seg['id']) ?>" <?= in_array($seg['id'], old('segmentaciones', [])) ? 'selected' : '' ?>><?= esc($seg['descripcion']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="universo" class="form-label">Universo:</label>
+                                    <input type="text" id="universo" class="form-control" value="(# de resultados)" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="entregable" class="form-label">Entregable:</label>
+                                    <input type="text" id="entregable" class="form-control" value="(# de orden de trabajo)" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-12">
+                <!-- Delimitación Territorial -->
+                <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header align-items-center d-flex">
-                            <h4 class="card-title mb-0 flex-grow-1"><i class="ri-map-pin-line me-1"></i> Distribución de Puntos</h4>
-                            <button type="button" class="btn btn-success btn-sm" id="btnGenerarAsignacion"><i class="ri-refresh-line me-1"></i> Generar Asignación</button>
+                            <h4 class="card-title mb-0 flex-grow-1">Delimitación Territorial</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="territorio" class="form-label">Territorio:</label>
+                                    <select id="territorio" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione</option>
+                                        <option value="1">Territorio 1</option>
+                                        <option value="2">Territorio 2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nombre_territorio" class="form-label">Nombre:</label>
+                                    <select id="nombre_territorio" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione</option>
+                                        <option value="1">Nombre T1</option>
+                                        <option value="2">Nombre T2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sectorizacion" class="form-label">Sectorización:</label>
+                                    <select id="sectorizacion" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione</option>
+                                        <option value="1">Sectorización 1</option>
+                                        <option value="2">Sectorización 2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nombre_sectorizacion" class="form-label">Nombre:</label>
+                                    <select id="nombre_sectorizacion" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione</option>
+                                        <option value="1">Nombre S1</option>
+                                        <option value="2">Nombre S2</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribución de Puntos -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header align-items-center d-flex">
+                            <h4 class="card-title mb-0 flex-grow-1">Distribución de Puntos</h4>
+                            <button type="button" class="btn btn-success btn-sm" id="btnGenerarAsignacion">Generar Asignación</button>
                         </div>
                         <div class="card-body">
                             <div class="row g-2" id="distribucion-container">
-                                <?php if (!empty($distribucion)): ?>
-                                    <?php foreach($distribucion as $item): ?>
-                                        <div class="col-md-4">
-                                            <div class="input-group">
-                                                <span class="input-group-text"><?= esc($item['nombre']) ?></span>
-                                                <input type="number" class="form-control" value="<?= esc($item['puntos']) ?>" readonly>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="col-12">
-                                        <p class="text-muted">No hay puntos de distribución generados. Haga clic en "Generar Asignación".</p>
+                                <!-- Datos quemados de la imagen -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Juan Gómez</span>
+                                        <input type="text" class="form-control" value="(34)" readonly>
                                     </div>
-                                <?php endif; ?>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Pilar Nava</span>
+                                        <input type="text" class="form-control" value="(41)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rodolfo Zárate</span>
+                                        <input type="text" class="form-control" value="(36)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Adrián Pacheco</span>
+                                        <input type="text" class="form-control" value="(38)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Mauricio Vega</span>
+                                        <input type="text" class="form-control" value="(37)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Dario Calafate</span>
+                                        <input type="text" class="form-control" value="(35)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Saúl Venegas</span>
+                                        <input type="text" class="form-control" value="(39)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Paula Agoitia</span>
+                                        <input type="text" class="form-control" value="(42)" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Sandra Herrera</span>
+                                        <input type="text" class="form-control" value="(38)" readonly>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -219,33 +273,9 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
             }, false);
         });
 
-        // Lógica para el botón "Generar Asignación" (ejemplo básico)
+        // Lógica para el botón "Generar Asignación" (ahora los datos están quemados en el HTML)
         document.getElementById('btnGenerarAsignacion').addEventListener('click', function() {
-            const container = document.getElementById('distribucion-container');
-            container.innerHTML = ''; // Limpiar contenido existente
-
-            // Ejemplo de datos de distribución (puedes obtenerlos de una API o lógica más compleja)
-            const ejemploDistribucion = [
-                { nombre: 'Zona A', puntos: 15 },
-                { nombre: 'Zona B', puntos: 20 },
-                { nombre: 'Zona C', puntos: 10 }
-            ];
-
-            if (ejemploDistribucion.length > 0) {
-                ejemploDistribucion.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'col-md-4';
-                    div.innerHTML = `
-                        <div class="input-group">
-                            <span class="input-group-text">${item.nombre}</span>
-                            <input type="number" class="form-control" value="${item.puntos}" readonly>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } else {
-                container.innerHTML = '<div class="col-12"><p class="text-muted">No se pudieron generar puntos de distribución.</p></div>';
-            }
+            alert('La asignación de puntos ya está quemada en el HTML.');
         });
     });
 </script>
