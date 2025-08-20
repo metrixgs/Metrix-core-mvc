@@ -55,15 +55,16 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="nombre_campana" class="form-label">Nombre de la Campaña:</label>
-                                    <input type="text" id="nombre_campana" class="form-control" value="Entrega de Tarjeta de Salud (+60)" readonly>
+                                    <input type="text" id="nombre_campana" class="form-control" value="<?= esc($campana['nombre'] ?? 'Campaña no encontrada') ?>" readonly>
+                                    <input type="hidden" name="campana_id" value="<?= esc($campana['id'] ?? '') ?>">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="fecha_actividad" class="form-label">Fecha:</label>
-                                    <input type="text" name="fecha_actividad" id="fecha_actividad" class="form-control" placeholder="(Día Semana) (DD/MM/AAAA)" value="<?= old('fecha_actividad') ?>">
+                                    <input type="date" name="fecha_actividad" id="fecha_actividad" class="form-control" value="<?= old('fecha_actividad') ?>">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="hora_actividad" class="form-label">Horario:</label>
-                                    <input type="text" name="hora_actividad" id="hora_actividad" class="form-control" placeholder="(Formato 24 horas)" value="<?= old('hora_actividad') ?>">
+                                    <input type="time" name="hora_actividad" id="hora_actividad" class="form-control" value="<?= old('hora_actividad') ?>">
                                 </div>
                             </div>
                         </div>
@@ -109,11 +110,11 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="universo" class="form-label">Universo:</label>
-                                    <input type="text" id="universo" class="form-control" value="(# de resultados)" readonly>
+                                    <input type="number" name="universo" id="universo" class="form-control" placeholder="# de resultados" value="<?= old('universo') ?>">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="entregable" class="form-label">Entregable:</label>
-                                    <input type="text" id="entregable" class="form-control" value="(# de orden de trabajo)" readonly>
+                                    <input type="number" name="entregable" id="entregable" class="form-control" placeholder="# de orden de trabajo" value="<?= old('entregable') ?>">
                                 </div>
                             </div>
                         </div>
@@ -130,35 +131,29 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="territorio" class="form-label">Territorio:</label>
-                                    <select id="territorio" class="form-select select2">
-                                        <option value="" disabled selected hidden>Seleccione</option>
-                                        <option value="1">Territorio 1</option>
-                                        <option value="2">Territorio 2</option>
+                                    <select name="territorio" id="territorio" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione territorio</option>
+                                        <?php foreach($territorios as $terr): ?>
+                                            <option value="<?= esc($terr['id']) ?>" <?= old('territorio') == $terr['id'] ? 'selected' : '' ?>><?= esc($terr['nombre']) ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nombre_territorio" class="form-label">Nombre:</label>
-                                    <select id="nombre_territorio" class="form-select select2">
-                                        <option value="" disabled selected hidden>Seleccione</option>
-                                        <option value="1">Nombre T1</option>
-                                        <option value="2">Nombre T2</option>
-                                    </select>
+                                    <input type="text" name="nombre_territorio" id="nombre_territorio" class="form-control" placeholder="Nombre del Territorio" value="<?= old('nombre_territorio') ?>">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="sectorizacion" class="form-label">Sectorización:</label>
-                                    <select id="sectorizacion" class="form-select select2">
-                                        <option value="" disabled selected hidden>Seleccione</option>
-                                        <option value="1">Sectorización 1</option>
-                                        <option value="2">Sectorización 2</option>
+                                    <select name="sectorizacion" id="sectorizacion" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione sectorización</option>
+                                        <?php foreach($segmentaciones as $seg): ?>
+                                            <option value="<?= esc($seg['id']) ?>" <?= old('sectorizacion') == $seg['id'] ? 'selected' : '' ?>><?= esc($seg['descripcion']) ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nombre_sectorizacion" class="form-label">Nombre:</label>
-                                    <select id="nombre_sectorizacion" class="form-select select2">
-                                        <option value="" disabled selected hidden>Seleccione</option>
-                                        <option value="1">Nombre S1</option>
-                                        <option value="2">Nombre S2</option>
-                                    </select>
+                                    <input type="text" name="nombre_sectorizacion" id="nombre_sectorizacion" class="form-control" placeholder="Nombre de la Sectorización" value="<?= old('nombre_sectorizacion') ?>">
                                 </div>
                             </div>
                         </div>
@@ -175,58 +170,74 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         <div class="card-body">
                             <div class="row g-2" id="distribucion-container">
                                 <!-- Datos quemados de la imagen -->
+                                <!-- La distribución de puntos se mantiene quemada según la imagen, pero se puede hacer editable si se requiere -->
+                                <?php if (!empty($distribucion)): ?>
+                                    <?php foreach($distribucion as $item): ?>
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><?= esc($item['nombre']) ?></span>
+                                                <input type="number" class="form-control" value="<?= esc($item['puntos']) ?>" readonly>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="col-12">
+                                        <p class="text-muted">No hay puntos de distribución generados. Haga clic en "Generar Asignación".</p>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Datos quemados de la imagen (se mantienen para la estructura visual) -->
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Juan Gómez</span>
-                                        <input type="text" class="form-control" value="(34)" readonly>
+                                        <input type="number" class="form-control" value="34" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Pilar Nava</span>
-                                        <input type="text" class="form-control" value="(41)" readonly>
+                                        <input type="number" class="form-control" value="41" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Rodolfo Zárate</span>
-                                        <input type="text" class="form-control" value="(36)" readonly>
+                                        <input type="number" class="form-control" value="36" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Adrián Pacheco</span>
-                                        <input type="text" class="form-control" value="(38)" readonly>
+                                        <input type="number" class="form-control" value="38" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Mauricio Vega</span>
-                                        <input type="text" class="form-control" value="(37)" readonly>
+                                        <input type="number" class="form-control" value="37" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Dario Calafate</span>
-                                        <input type="text" class="form-control" value="(35)" readonly>
+                                        <input type="number" class="form-control" value="35" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Saúl Venegas</span>
-                                        <input type="text" class="form-control" value="(39)" readonly>
+                                        <input type="number" class="form-control" value="39" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Paula Agoitia</span>
-                                        <input type="text" class="form-control" value="(42)" readonly>
+                                        <input type="number" class="form-control" value="42" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <span class="input-group-text">Sandra Herrera</span>
-                                        <input type="text" class="form-control" value="(38)" readonly>
+                                        <input type="number" class="form-control" value="38" readonly>
                                     </div>
                                 </div>
                             </div>

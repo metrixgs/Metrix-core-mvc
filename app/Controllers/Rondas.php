@@ -163,28 +163,41 @@ class Rondas extends BaseController {
      public function crear() {
     $data['titulo_pagina'] = 'Metrix | Crear Ronda';
 
+    // Obtener el campana_id de la URL
+    $campanaId = $this->request->getGet('campana_id');
+    $campana = null;
+
+    if ($campanaId) {
+        $campanaModel = new \App\Models\CampanasModel();
+        $campana = $campanaModel->find($campanaId);
+    }
+    $data['campana'] = $campana; // Pasar la información de la campaña a la vista
+
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
-    $data['surveys'] = $this->survey->findAll(); // Corregido: Obtener todas las encuestas usando $this->survey
-    // Obtener solo usuarios con rol_id = 9 (Coordinador) para el campo 'coordinador' (Brigada)
+    $data['surveys'] = $this->survey->findAll();
     $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
-    // Obtener solo usuarios con rol_id = 5 (Operador) para el campo 'encargado'
     $data['operadores'] = $this->usuarios->where('rol_id', 5)->findAll();
-    // Obtener solo usuarios con rol_id = 9 (Coordinador) para el campo 'coordinador_campana'
     $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
 
     if ($this->request->getMethod() === 'post') {
         // Recoger los datos del formulario
         $datosRonda = [
-            'campana_id' => $this->request->getPost('campana_id') ?: 1,
-            'nombre' => $this->request->getPost('nombre'),
+            'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1), // Usar campanaId de la URL si existe
+            'nombre' => $this->request->getPost('nombre_campana'), // Usar nombre_campana del formulario
             'coordinador' => $this->request->getPost('coordinador'),
             'encargado' => $this->request->getPost('encargado'),
             'coordinador_campana' => $this->request->getPost('coordinador_campana'),
-            'encuesta_ronda' => $this->request->getPost('encuesta_ronda'), // Nuevo campo
+            'encuesta_ronda' => $this->request->getPost('encuesta_ronda'),
             'fecha_actividad' => $this->request->getPost('fecha_actividad'),
             'hora_actividad' => $this->request->getPost('hora_actividad'),
-            'estado' => $this->request->getPost('estado') ?: 'Programada'
+            'estado' => $this->request->getPost('estado') ?: 'Programada',
+            'universo' => $this->request->getPost('universo'),
+            'entregable' => $this->request->getPost('entregable'),
+            'territorio' => $this->request->getPost('territorio'),
+            'nombre_territorio' => $this->request->getPost('nombre_territorio'),
+            'sectorizacion' => $this->request->getPost('sectorizacion'),
+            'nombre_sectorizacion' => $this->request->getPost('nombre_sectorizacion')
         ];
 
         // Crear la ronda
