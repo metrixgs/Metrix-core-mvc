@@ -222,19 +222,19 @@ $mapUrls = [
 ];
 ?>
 
- <div class="row mt-2 mb-3 flex-nowrap overflow-auto pb-2 g-2">
+ <div class="row mt-2 mb-3 flex-nowrap overflow-auto pb-2 g-2 justify-content-between">
     <?php foreach ($stats as $stat): ?>
-        <div class="col-auto">
+        <div class="col">
             <a href="<?= base_url($mapUrls[$stat['label']] . '/' . ($campana['id'] ?? 0)) ?>"
                class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
-               style="min-width: 120px; max-width: 150px;">
+               style="min-width: 140px;">
                 <div class="card-body py-2 px-2 d-flex flex-column align-items-center text-center">
-                    <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px;">
-                        <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-4"></i>
+                    <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style="width:45px;height:45px;">
+                        <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-3"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <div class="fw-bold" style="font-size:1.1rem;"><?= esc($stat['value']); ?></div>
-                        <div class="text-muted" style="font-size:0.75rem;"><?= esc($stat['label'] === 'Encuestas' ? 'Encuestas contestadas' : $stat['label']); ?></div>
+                        <div class="fw-bold" style="font-size:1.2rem;"><?= esc($stat['value']); ?></div>
+                        <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label'] === 'Encuestas' ? 'Encuestas contestadas' : $stat['label']); ?></div>
                     </div>
                 </div>
             </a>
