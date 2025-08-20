@@ -184,7 +184,7 @@ class Rondas extends BaseController {
     // Obtener todas las dependencias para el campo 'Brigada(s)'
     $data['dependencias'] = $this->areas->obtenerAreas();
     $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
-    $data['operadores'] = $this->usuarios->where('rol_id', 5)->findAll();
+    $data['operadores'] = []; // Inicialmente vacío, se llenará dinámicamente
     $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
 
     if ($this->request->getMethod() === 'post') {
@@ -539,6 +539,11 @@ public function zonas()
 
     return $this->response->setJSON($rondas);
 }
+
+    public function obtenerOperadoresPorBrigada($brigada_id) {
+        $operadores = $this->usuarios->obtenerUsuariosPorArea($brigada_id);
+        return $this->response->setJSON($operadores);
+    }
 
 public function finalizarRondaWeb($id = null)
 {

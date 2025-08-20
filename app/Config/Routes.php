@@ -48,6 +48,7 @@ $routes->get('rondas/cambiar_estado/(:num)/(:any)', 'Rondas::cambiar_estado/$1/$
  $routes->get('rondas/puntos', 'Rondas::puntos');
 $routes->get('rondas/zonas', 'Rondas::zonas');
 $routes->get('rondas/listar/(:num)', 'Rondas::listar/$1');
+$routes->get('rondas/obtenerOperadoresPorBrigada/(:num)', 'Rondas::obtenerOperadoresPorBrigada/$1');
 
 
 #Rutas de Rondas por Segmentación...

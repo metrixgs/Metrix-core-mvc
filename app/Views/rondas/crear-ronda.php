@@ -91,9 +91,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                 <div class="col-md-6">
                                     <label for="operadores" class="form-label">Operadores:</label>
                                     <select name="operadores[]" id="operadores" class="form-select select2" multiple>
-                                        <?php foreach($operadores as $op): ?>
-                                            <option value="<?= esc($op['id']) ?>" <?= in_array($op['id'], old('operadores', [])) ? 'selected' : '' ?>><?= esc($op['nombre']) ?> (# integrantes)</option>
-                                        <?php endforeach; ?>
+                                        <!-- Los operadores se cargarán dinámicamente vía AJAX -->
                                     </select>
                                 </div>
                             </div>
@@ -224,6 +222,41 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
             console.log('Botón Generar Asignación clickeado.');
         });
 
+        // Lógica para cargar operadores al seleccionar una brigada
+        $('#brigadas').on('change', function() {
+            var selectedBrigadas = $(this).val(); // Obtener los IDs de las brigadas seleccionadas
+            var operadoresSelect = $('#operadores');
+            operadoresSelect.empty(); // Limpiar el selector de operadores
+
+            if (selectedBrigadas && selectedBrigadas.length > 0) {
+                // Iterar sobre cada brigada seleccionada y hacer una llamada AJAX
+                selectedBrigadas.forEach(function(brigadaId) {
+                    $.ajax({
+                        url: '<?= base_url('rondas/obtenerOperadoresPorBrigada/') ?>' + brigadaId,
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data.length > 0) {
+                                data.forEach(function(operador) {
+                                    // Añadir solo si no existe ya para evitar duplicados si se seleccionan múltiples brigadas
+                                    if (!operadoresSelect.find('option[value="' + operador.id + '"]').length) {
+                                        operadoresSelect.append(new Option(operador.nombre, operador.id, false, false));
+                                    }
+                                });
+                            }
+                            operadoresSelect.trigger('change'); // Notificar a Select2 que las opciones han cambiado
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error al obtener operadores:", error);
+                        }
+                    });
+                });
+            } else {
+                // Si no hay brigadas seleccionadas, limpiar y notificar a Select2
+                operadoresSelect.trigger('change');
+            }
+        });
+
         // Lógica para actualizar la distribución de puntos al seleccionar operadores
         $('#operadores').on('change', function() {
             var selectedOperators = $(this).select2('data');
@@ -248,6 +281,12 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                 });
             }
         }).trigger('change'); // Disparar el evento al cargar la página para mostrar los operadores preseleccionados
+
+        // Disparar el evento change en #brigadas al cargar la página si hay brigadas preseleccionadas
+        // Esto es útil si se está editando una ronda y ya hay brigadas seleccionadas
+        if ($('#brigadas').val() && $('#brigadas').val().length > 0) {
+            $('#brigadas').trigger('change');
+        }
 
     });
 </script>
