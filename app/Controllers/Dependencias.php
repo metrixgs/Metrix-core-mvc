@@ -10,6 +10,7 @@ use App\Models\TareasModel;
 use App\Models\AreasModel;
 use App\Models\AccionesTicketsModel;
 use App\Models\DocumentosTareasModel;
+use App\Models\RolesModel;
 
 class Dependencias extends BaseController {
 
@@ -20,6 +21,7 @@ class Dependencias extends BaseController {
     protected $areas;
     protected $acciones;
     protected $documentos;
+    protected $roles; // Añadir propiedad para RolesModel
 
     public function __construct() {
         # Instanciar los modelos
@@ -30,6 +32,7 @@ class Dependencias extends BaseController {
         $this->areas = new AreasModel();
         $this->acciones = new AccionesTicketsModel();
         $this->documentos = new DocumentosTareasModel();
+        $this->roles = new RolesModel(); // Instanciar RolesModel
 
         # Cargar los Helpers
         helper('Alerts');
@@ -79,6 +82,26 @@ class Dependencias extends BaseController {
         # Obtenemos todos los usuarios por dependencia...
         $usuarios = $this->usuarios->obtenerUsuariosPorArea($dependencia_id);
         $data['usuarios'] = $usuarios;
+
+        # Obtenemos el ID del rol "Operador"
+        $rolOperador = $this->roles->obtenerRolPorNombre('Operador');
+        $rolOperadorId = $rolOperador ? $rolOperador['id'] : null;
+
+        # Obtenemos todos los usuarios con rol "Operador" que no están asignados a esta dependencia
+        $usuariosOperadoresDisponibles = [];
+        if ($rolOperadorId) {
+            $todosOperadores = $this->usuarios->obtenerUsuariosPorRol($rolOperadorId);
+            $usuariosAsignadosIds = array_column($usuarios, 'id'); // IDs de usuarios ya asignados
+            
+            foreach ($todosOperadores as $operador) {
+                // Solo añadir si el usuario no tiene un area_id o si su area_id no es la actual
+                // y no está ya en la lista de usuarios asignados a esta dependencia
+                if (empty($operador['area_id']) || ($operador['area_id'] != $dependencia_id && !in_array($operador['id'], $usuariosAsignadosIds))) {
+                    $usuariosOperadoresDisponibles[] = $operador;
+                }
+            }
+        }
+        $data['usuarios_operadores_disponibles'] = $usuariosOperadoresDisponibles;
 
         return view('incl/head-application', $data)
                 . view('incl/header-application', $data)
@@ -228,5 +251,100 @@ class Dependencias extends BaseController {
 
             return redirect()->to("dependencias/detalle/{$dependencia_id}");
         }
+    }
+    public function asignarUsuarioADependencia() {
+        # Obtenemos los datos del formulario
+        $dependencia_id = $this->request->getPost('dependencia_id');
+        $usuario_id = $this->request->getPost('usuario_id');
+
+        # Validamos que ambos IDs existan
+        if (empty($dependencia_id) || empty($usuario_id)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "Datos incompletos para la asignación.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->back();
+        }
+
+        # Obtenemos información del usuario y la dependencia
+        $usuario = $this->usuarios->obtenerUsuario($usuario_id);
+        $dependencia = $this->areas->obtenerArea($dependencia_id);
+
+        # Validamos que el usuario y la dependencia existan
+        if (empty($usuario) || empty($dependencia)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "Usuario o dependencia no encontrados.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->back();
+        }
+
+        # Actualizamos el campo area_id del usuario
+        $dataUsuario = ['area_id' => $dependencia_id];
+        if ($this->usuarios->actualizarUsuario($usuario_id, $dataUsuario)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Exito!",
+                'mensaje' => "El usuario <strong>{$usuario['nombre']}</strong> ha sido asignado a la dependencia <strong>{$dependencia['nombre']}</strong> de forma exitosa.",
+                'tipo' => "success"
+            ]);
+        } else {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "No se pudo asignar el usuario a la dependencia. Inténtalo nuevamente.",
+                'tipo' => "danger"
+            ]);
+        }
+
+        return redirect()->to("dependencias/detalle/{$dependencia_id}");
+    }
+
+    public function desasignarUsuarioDeDependencia() {
+        # Obtenemos los datos del formulario
+        $dependencia_id = $this->request->getPost('dependencia_id');
+        $usuario_id = $this->request->getPost('usuario_id');
+
+        # Validamos que ambos IDs existan
+        if (empty($dependencia_id) || empty($usuario_id)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "Datos incompletos para la desasignación.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->back();
+        }
+
+        # Obtenemos información del usuario y la dependencia
+        $usuario = $this->usuarios->obtenerUsuario($usuario_id);
+        $dependencia = $this->areas->obtenerArea($dependencia_id);
+
+        # Validamos que el usuario y la dependencia existan
+        if (empty($usuario) || empty($dependencia)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "Usuario o dependencia no encontrados.",
+                'tipo' => "danger"
+            ]);
+            return redirect()->back();
+        }
+
+        # Actualizamos el campo area_id del usuario a NULL para desasignarlo
+        $dataUsuario = ['area_id' => null];
+        if ($this->usuarios->actualizarUsuario($usuario_id, $dataUsuario)) {
+            $this->session->setFlashdata([
+                'titulo' => "¡Exito!",
+                'mensaje' => "El usuario <strong>{$usuario['nombre']}</strong> ha sido desasignado de la dependencia <strong>{$dependencia['nombre']}</strong> de forma exitosa.",
+                'tipo' => "success"
+            ]);
+        } else {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "No se pudo desasignar el usuario de la dependencia. Inténtalo nuevamente.",
+                'tipo' => "danger"
+            ]);
+        }
+
+        return redirect()->to("dependencias/detalle/{$dependencia_id}");
     }
 }

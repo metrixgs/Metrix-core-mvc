@@ -146,8 +146,8 @@
                                 <!-- Botón para abrir el modal -->
                                 <div class="d-flex justify-content-sm-end">
                                     <div class="search-box ms-2">
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
-                                            <i class="ri-user-add-line align-middle me-1"></i>Nuevo Usuario
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignarUsuario">
+                                            <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
                                         </button>
                                     </div>
                                 </div>
@@ -164,6 +164,7 @@
                                         <th>Correo</th>
                                         <th>Registro</th>
                                         <th class="text-center">Acciones</th>
+                                        <th class="text-center">Asignación</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -176,8 +177,15 @@
                                                 <td><?= $usuario['fecha_registro']; ?></td>
                                                 <td class="text-center">
                                                     <a href="<?= base_url() . 'usuarios/detalle/' . $usuario['id']; ?>" class="btn btn-primary">Detalle</a>
-                                                </td>
-                                            </tr>
+                                                  </td>
+                                                  <td class="text-center">
+                                                      <form action="<?= base_url() . 'dependencias/desasignarUsuarioDeDependencia'; ?>" method="POST" onsubmit="return confirm('¿Estás seguro de desasignar a este usuario de la dependencia?');">
+                                                          <input type="hidden" name="dependencia_id" value="<?= $dependencia['id']; ?>">
+                                                          <input type="hidden" name="usuario_id" value="<?= $usuario['id']; ?>">
+                                                          <button type="submit" class="btn btn-danger btn-sm">Desasignar</button>
+                                                      </form>
+                                                  </td>
+                                              </tr>
                                         <?php endforeach; ?>
                                     <?php else : ?>
                                         <tr>
@@ -255,152 +263,43 @@
 </div>
 
 
-<!-- Modal Nuevo Usuario -->
-<div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-labelledby="modalNuevoUsuarioLabel" aria-hidden="true">
+<!-- Modal Asignar Usuario -->
+<div class="modal fade" id="modalAsignarUsuario" tabindex="-1" aria-labelledby="modalAsignarUsuarioLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalNuevoUsuarioLabel">Crear Nuevo Usuario</h5>
+                <h5 class="modal-title" id="modalAsignarUsuarioLabel">Asignar Usuario Existente</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="<?= base_url() . 'usuarios/crear'; ?>" method="POST">
+            <form action="<?= base_url() . 'dependencias/asignarUsuarioADependencia'; ?>" method="POST">
                 <div class="modal-body">
-                    <!-- Campos ocultos requeridos -->
-                    <input type="hidden" name="rol_id" id="rol_id" value="2" required="">
-                    <input type="hidden" name="area_id" id="area_id" value="<?= $dependencia['id']; ?>" required="">
-
-                    <div class="row g-3">
-                        <!-- Nombre -->
-                        <div class="col-md-6">
-                            <label for="nombre" class="form-label">Nombre Completo</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required 
-                                   maxlength="100" placeholder="Ingrese el nombre completo">
-                        </div>
-
-                        <!-- Correo -->
-                        <div class="col-md-6">
-                            <label for="correo" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="correo" name="correo" required 
-                                   maxlength="150" placeholder="correo@ejemplo.com">
-                        </div>
-
-                        <!-- Contraseña -->
-                        <div class="col-md-6">
-                            <label for="contrasena" class="form-label">Contraseña</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="contrasena" name="contrasena" 
-                                       required minlength="8" placeholder="Ingrese la contraseña">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="ri-eye-line"></i>
-                                </button>
-                            </div>
-                            <div class="form-text">La contraseña debe tener al menos 8 caracteres</div>
-                        </div>
-
-                        <!-- Confirmar Contraseña -->
-                        <div class="col-md-6">
-                            <label for="confirmar_contrasena" class="form-label">Confirmar Contraseña</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="confirmar_contrasena" 
-                                       name="confirmar_contrasena" required minlength="8" 
-                                       placeholder="Confirme la contraseña">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                                    <i class="ri-eye-line"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <input type="hidden" name="dependencia_id" value="<?= $dependencia['id']; ?>">
+                    <div class="mb-3">
+                        <label for="usuario_id" class="form-label">Seleccionar Usuario Operador</label>
+                        <select class="form-select" id="usuario_id" name="usuario_id" required>
+                            <option value="">-- Seleccione un usuario --</option>
+                            <?php if (!empty($usuarios_operadores_disponibles)) : ?>
+                                <?php foreach ($usuarios_operadores_disponibles as $usuario_disponible) : ?>
+                                    <option value="<?= $usuario_disponible['id']; ?>">
+                                        <?= $usuario_disponible['nombre']; ?> (<?= $usuario_disponible['correo']; ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <option value="" disabled>No hay usuarios operadores disponibles para asignar.</option>
+                            <?php endif; ?>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="ri-save-line align-middle me-1"></i>Guardar Usuario
+                        <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Función para alternar visibilidad de contraseña
-        function togglePasswordVisibility(inputId, buttonId) {
-            const input = document.getElementById(inputId);
-            const button = document.getElementById(buttonId);
-            button.addEventListener('click', function () {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                button.querySelector('i').className = type === 'password' ? 'ri-eye-line' : 'ri-eye-off-line';
-            });
-        }
-
-        // Función para validar contraseñas y manejar estado del botón
-        function validarContrasenas() {
-            const password = document.getElementById('contrasena');
-            const confirmPassword = document.getElementById('confirmar_contrasena');
-
-            // Crear o obtener el div de mensaje de error
-            let mensajeError = document.getElementById('mensaje-error-password');
-            if (!mensajeError) {
-                mensajeError = document.createElement('div');
-                mensajeError.id = 'mensaje-error-password';
-                mensajeError.className = 'text-danger mt-2 small';
-                confirmPassword.parentNode.parentNode.appendChild(mensajeError);
-            }
-
-            // Función de validación
-            function validar() {
-                // Inhabilitar el botón por defecto
-                submitButton.disabled = true;
-
-                // Si ambos campos están vacíos, mantener el botón deshabilitado
-                if (password.value === '' && confirmPassword.value === '') {
-                    mensajeError.textContent = 'Por favor, ingrese una contraseña';
-                    mensajeError.className = 'text-muted mt-2 small';
-                    return;
-                }
-
-                // Si solo uno de los campos está lleno
-                if ((password.value === '' && confirmPassword.value !== '') ||
-                        (password.value !== '' && confirmPassword.value === '')) {
-                    mensajeError.textContent = 'Por favor, complete ambos campos de contraseña';
-                    mensajeError.className = 'text-warning mt-2 small';
-                    return;
-                }
-
-                // Si ambos campos están llenos, verificar si coinciden
-                if (password.value !== '' && confirmPassword.value !== '') {
-                    if (password.value === confirmPassword.value) {
-                        mensajeError.textContent = '✓ Las contraseñas coinciden';
-                        mensajeError.className = 'text-success mt-2 small';
-                        submitButton.disabled = false; // Habilitar solo si coinciden
-                    } else {
-                        mensajeError.textContent = '✗ Las contraseñas no coinciden';
-                        mensajeError.className = 'text-danger mt-2 small';
-                    }
-                }
-            }
-
-            // Eventos para validación en tiempo real
-            password.addEventListener('input', validar);
-            confirmPassword.addEventListener('input', validar);
-
-            // Validación inicial
-            validar();
-        }
-
-        // Aplicar visibilidad de contraseñas
-        togglePasswordVisibility('contrasena', 'togglePassword');
-        togglePasswordVisibility('confirmar_contrasena', 'toggleConfirmPassword');
-
-        // Iniciar validación de contraseñas
-        validarContrasenas();
-
-        // Ya no necesitamos el event listener del submit porque el botón estará
-        // deshabilitado si las contraseñas no coinciden
-    });
-</script>
 
 
 
