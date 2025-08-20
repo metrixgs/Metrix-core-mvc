@@ -170,76 +170,8 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         </div>
                         <div class="card-body">
                             <div class="row g-2" id="distribucion-container">
-                                <!-- Datos quemados de la imagen -->
-                                <!-- La distribución de puntos se mantiene quemada según la imagen, pero se puede hacer editable si se requiere -->
-                                <?php if (!empty($distribucion)): ?>
-                                    <?php foreach($distribucion as $item): ?>
-                                        <div class="col-md-4">
-                                            <div class="input-group">
-                                                <span class="input-group-text"><?= esc($item['nombre']) ?></span>
-                                                <input type="number" class="form-control" value="<?= esc($item['puntos']) ?>" readonly>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="col-12">
-                                        <p class="text-muted">No hay puntos de distribución generados. Haga clic en "Generar Asignación".</p>
-                                    </div>
-                                <?php endif; ?>
-                                <!-- Datos quemados de la imagen (se mantienen para la estructura visual) -->
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Juan Gómez</span>
-                                        <input type="number" class="form-control" value="34" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Pilar Nava</span>
-                                        <input type="number" class="form-control" value="41" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Rodolfo Zárate</span>
-                                        <input type="number" class="form-control" value="36" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Adrián Pacheco</span>
-                                        <input type="number" class="form-control" value="38" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Mauricio Vega</span>
-                                        <input type="number" class="form-control" value="37" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Dario Calafate</span>
-                                        <input type="number" class="form-control" value="35" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Saúl Venegas</span>
-                                        <input type="number" class="form-control" value="39" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Paula Agoitia</span>
-                                        <input type="number" class="form-control" value="42" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">Sandra Herrera</span>
-                                        <input type="number" class="form-control" value="38" readonly>
-                                    </div>
+                                <div class="col-12" id="no-operadores-message">
+                                    <p class="text-muted">Seleccione operadores para ver la distribución de puntos.</p>
                                 </div>
                             </div>
                         </div>
@@ -285,9 +217,37 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
             }, false);
         });
 
-        // Lógica para el botón "Generar Asignación" (ahora los datos están quemados en el HTML)
+        // Lógica para el botón "Generar Asignación" (se mantiene sin funcionalidad específica por ahora)
         document.getElementById('btnGenerarAsignacion').addEventListener('click', function() {
-            alert('La asignación de puntos ya está quemada en el HTML.');
+            // Aquí se podría añadir lógica para recalcular o reasignar puntos si fuera necesario
+            // Por ahora, la tarea se enfoca en la aparición dinámica al seleccionar operadores.
+            console.log('Botón Generar Asignación clickeado.');
         });
+
+        // Lógica para actualizar la distribución de puntos al seleccionar operadores
+        $('#operadores').on('change', function() {
+            var selectedOperators = $(this).select2('data');
+            var distribucionContainer = $('#distribucion-container');
+            distribucionContainer.empty(); // Limpiar el contenedor actual
+
+            if (selectedOperators.length === 0) {
+                distribucionContainer.append('<div class="col-12" id="no-operadores-message"><p class="text-muted">Seleccione operadores para ver la distribución de puntos.</p></div>');
+            } else {
+                selectedOperators.forEach(function(operator) {
+                    var operatorName = operator.text.split(' (#')[0]; // Obtener solo el nombre
+                    var operatorId = operator.id;
+                    var html = `
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">${operatorName}</span>
+                                <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="0">
+                            </div>
+                        </div>
+                    `;
+                    distribucionContainer.append(html);
+                });
+            }
+        }).trigger('change'); // Disparar el evento al cargar la página para mostrar los operadores preseleccionados
+
     });
 </script>
