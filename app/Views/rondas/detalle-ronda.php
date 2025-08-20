@@ -188,7 +188,7 @@
                             </div>
                             <span class="fw-bold"><?= esc($ronda['progreso'] ?? 0); ?>%</span>
                         </div>
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-end gap-2">
                             <a href="#" class="btn btn-sm btn-light"><i class="ri-file-list-3-line me-1"></i> Registro de Actividad</a>
                             <a href="#" class="btn btn-sm btn-light"><i class="ri-add-line me-1"></i> Indicadores</a>
                         </div>

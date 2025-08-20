@@ -109,7 +109,11 @@ class Rondas extends BaseController {
         $ronda['nombre_campana'] = $campana['nombre'] ?? 'N/A';
 
         // Obtener título de la encuesta de ronda
-        $survey = $this->survey->find($ronda['encuesta_ronda']);
+        $ronda['encuesta_ronda_id'] = $ronda['encuesta_ronda'] ?? null; // Asegurar que el ID de la encuesta esté disponible
+        $survey = null;
+        if (!empty($ronda['encuesta_ronda_id'])) {
+            $survey = $this->survey->find($ronda['encuesta_ronda_id']);
+        }
         $ronda['encuesta_ronda_titulo'] = $survey['title'] ?? 'N/A';
 
         # Obtener segmentaciones de la ronda
@@ -126,14 +130,27 @@ class Rondas extends BaseController {
         $ronda['segmentaciones'] = $segmentacionesRonda;
         $data['ronda'] = $ronda;
 
-        // Datos de ejemplo para indicadores (reemplazar con datos reales de la BD)
-        $data['ronda']['progreso'] = 64; // Ejemplo: 64%
-        $data['ronda']['brigadas_activas'] = 2;
-        $data['ronda']['visitas_realizadas'] = 13;
-        $data['ronda']['incidencias_reportadas'] = 135;
-        $data['ronda']['entregas_realizadas'] = 47;
-        $data['ronda']['botagos_registrados'] = 45;
-        $data['ronda']['peticiones_recibidas'] = 453;
+        // Obtener datos reales para indicadores
+        $brigadas_activas = $this->rondas->contarBrigadasActivas($id);
+        $visitas_realizadas = $this->rondas->contarVisitasRealizadas($id);
+        $universo = $ronda['universo'] ?? 0; // Obtener el universo de la ronda, si existe
+
+        $progreso = 0;
+        if ($universo > 0) {
+            $progreso = round(($visitas_realizadas / $universo) * 100);
+        }
+
+        $data['ronda']['progreso'] = $progreso;
+        $data['ronda']['brigadas_activas'] = $brigadas_activas;
+        $data['ronda']['visitas_realizadas'] = $visitas_realizadas;
+        $data['ronda']['universo'] = $universo; // Asegurarse de que el universo esté disponible en la vista
+
+        // Los siguientes indicadores se inicializan a 0 ya que no hay una fuente de datos clara vinculada a ronda_id
+        // Si se requiere que sean reales, se necesita implementar la lógica de obtención de datos.
+        $data['ronda']['incidencias_reportadas'] = 0;
+        $data['ronda']['entregas_realizadas'] = 0;
+        $data['ronda']['botagos_registrados'] = 0;
+        $data['ronda']['peticiones_recibidas'] = 0;
 
         return view('incl/head-application', $data)
                 . view('incl/header-application', $data)
