@@ -212,7 +212,7 @@
      
      <?php 
 $mapUrls = [
-    'Rondas'     => 'relacionados/rondas',
+    'Rondas'     => 'campanas/rondas',
     'Brigadas'   => 'relacionados/brigadas',
     'Visitas'    => 'relacionados/visitas',
     'Incidencias'=> 'relacionados/incidencias',
@@ -222,19 +222,19 @@ $mapUrls = [
 ];
 ?>
 
- <div class="row mt-2 mb-3 g-2">
+ <div class="row mt-2 mb-3 flex-nowrap overflow-auto pb-2 g-2">
     <?php foreach ($stats as $stat): ?>
-        <div class="col-6 col-md-3 col-lg-2">
-            <a href="<?= base_url('campanas/rondas/' . ($campana['id'] ?? 0)); ?>"
+        <div class="col-auto">
+            <a href="<?= base_url($mapUrls[$stat['label']] . '/' . ($campana['id'] ?? 0)) ?>"
                class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
-               style="min-width:0;">
-                <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
-                    <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
-                        <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-5"></i>
+               style="min-width: 120px; max-width: 150px;">
+                <div class="card-body py-2 px-2 d-flex flex-column align-items-center text-center">
+                    <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px;">
+                        <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-4"></i>
                     </div>
-                    <div>
-                        <div class="fw-bold" style="font-size:1rem;"><?= esc($stat['value']); ?></div>
-                        <div class="text-muted" style="font-size:0.8rem;"><?= esc($stat['label'] === 'Encuestas' ? 'Encuestas contestadas' : $stat['label']); ?></div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold" style="font-size:1.1rem;"><?= esc($stat['value']); ?></div>
+                        <div class="text-muted" style="font-size:0.75rem;"><?= esc($stat['label'] === 'Encuestas' ? 'Encuestas contestadas' : $stat['label']); ?></div>
                     </div>
                 </div>
             </a>

@@ -260,8 +260,18 @@ public function rondas($campana_id)
     }
     $data['campana'] = $campana;
 
-    // Obtener rondas vinculadas a la campaña
-    $data['rondas'] = $this->campanas->obtenerRondasPorCampana($campana_id);
+    // Obtener rondas vinculadas a la campaña con nombres de brigada y encargado
+    $rondas = $this->campanas->obtenerRondasPorCampana($campana_id);
+
+    // Iterar sobre las rondas para obtener los nombres de brigada y encargado
+    foreach ($rondas as &$ronda) {
+        $brigada = $this->usuarios->find($ronda['coordinador']); // Asumiendo que 'coordinador' es el ID de la brigada
+        $ronda['brigada_nombre'] = $brigada['nombre'] ?? 'N/A';
+
+        $encargado = $this->usuarios->find($ronda['encargado']);
+        $ronda['encargado_nombre'] = $encargado['nombre'] ?? 'N/A';
+    }
+    $data['rondas'] = $rondas;
 
     // Breadcrumb
     $data['breadcrumb'] = $this->generarBreadcrumb([

@@ -93,6 +93,25 @@ class Rondas extends BaseController {
             return redirect()->to('/rondas')->with('error', 'Ronda no encontrada');
         }
 
+        // Obtener nombres de coordinador, encargado y coordinador de campaña
+        $coordinador = $this->usuarios->find($ronda['coordinador']);
+        $ronda['coordinador_nombre'] = $coordinador['nombre'] ?? 'N/A';
+
+        $encargado = $this->usuarios->find($ronda['encargado']);
+        $ronda['encargado_nombre'] = $encargado['nombre'] ?? 'N/A';
+
+        $coordinador_campana = $this->usuarios->find($ronda['coordinador_campana']);
+        $ronda['coordinador_campana_nombre'] = $coordinador_campana['nombre'] ?? 'N/A';
+
+        // Obtener nombre de la campaña
+        $campanaModel = new \App\Models\CampanasModel();
+        $campana = $campanaModel->find($ronda['campana_id']);
+        $ronda['nombre_campana'] = $campana['nombre'] ?? 'N/A';
+
+        // Obtener título de la encuesta de ronda
+        $survey = $this->survey->find($ronda['encuesta_ronda']);
+        $ronda['encuesta_ronda_titulo'] = $survey['title'] ?? 'N/A';
+
         # Obtener segmentaciones de la ronda
         $relaciones = $this->rondasSegmentaciones->obtenerRelacionesPorRonda($id);
         $segmentacionesRonda = [];
@@ -106,6 +125,15 @@ class Rondas extends BaseController {
 
         $ronda['segmentaciones'] = $segmentacionesRonda;
         $data['ronda'] = $ronda;
+
+        // Datos de ejemplo para indicadores (reemplazar con datos reales de la BD)
+        $data['ronda']['progreso'] = 64; // Ejemplo: 64%
+        $data['ronda']['brigadas_activas'] = 2;
+        $data['ronda']['visitas_realizadas'] = 13;
+        $data['ronda']['incidencias_reportadas'] = 135;
+        $data['ronda']['entregas_realizadas'] = 47;
+        $data['ronda']['botagos_registrados'] = 45;
+        $data['ronda']['peticiones_recibidas'] = 453;
 
         return view('incl/head-application', $data)
                 . view('incl/header-application', $data)
