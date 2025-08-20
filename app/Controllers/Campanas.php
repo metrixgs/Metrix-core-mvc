@@ -245,6 +245,41 @@ public function detalle($campana_id)
         . view('incl/scripts-application', $data);
 }
 
+public function rondas($campana_id)
+{
+    // Título de la página
+    $data['titulo_pagina'] = 'Metrix | Rondas de Campaña';
+
+    // Notificaciones
+    $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+
+    // Información de la campaña
+    $campana = $this->campanas->obtenerCampana($campana_id);
+    if (empty($campana)) {
+        return redirect()->to("campanas/");
+    }
+    $data['campana'] = $campana;
+
+    // Obtener rondas vinculadas a la campaña
+    $data['rondas'] = $this->campanas->obtenerRondasPorCampana($campana_id);
+
+    // Breadcrumb
+    $data['breadcrumb'] = $this->generarBreadcrumb([
+        ['title' => 'Inicio', 'url' => base_url('/')],
+        ['title' => 'Campañas', 'url' => base_url('campanas')],
+        ['title' => 'Detalle Campaña', 'url' => base_url('campanas/detalle/' . ($campana['id'] ?? 0))],
+        ['title' => 'Rondas'],
+    ]);
+
+    // Renderizar vistas
+    return view('incl/head-application', $data)
+        . view('incl/header-application', $data)
+        . view('incl/menu-admin', $data)
+        . view('campanas/rondas-campana', $data)
+        . view('incl/footer-application', $data)
+        . view('incl/scripts-application', $data);
+}
+
 
  public function detalle_tipo($tipo_id) {
     // Título de la página

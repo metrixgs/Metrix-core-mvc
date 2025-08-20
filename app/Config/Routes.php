@@ -22,6 +22,7 @@ $routes->get('panel', 'Panel::index'); // admin
 #Rutas de las Campañas
 $routes->get('campanas/', 'Campanas::index');
 $routes->get('campanas/detalle/(:num)', 'Campanas::detalle/$1');
+$routes->get('campanas/rondas/(:num)', 'Campanas::rondas/$1');
 
  $routes->post('campanas/crear', 'Campanas::crear');
 $routes->post('campanas/actualizar', 'Campanas::actualizar');

@@ -52,7 +52,7 @@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-sm btn-light" id="btnExportar">Exportar</button>
                         <a href="<?= base_url('campanas/ficha/' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-warning">Ficha Informativa</a>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalRondasCampana">Ver Rondas</button>
+                        <a href="<?= base_url('campanas/rondas/' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-primary">Ver Rondas</a>
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalIncidenciasCampana">Incidencias</button>
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEncuestasCampana">Ver Encuestas</button>
                     </div>
@@ -225,15 +225,9 @@ $mapUrls = [
  <div class="row mt-2 mb-3 g-2">
     <?php foreach ($stats as $stat): ?>
         <div class="col-6 col-md-3 col-lg-2">
-            <?php if ($stat['label'] === 'Rondas'): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#modalRondasCampana"
+            <a href="<?= base_url('campanas/rondas/' . ($campana['id'] ?? 0)); ?>"
                class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
                style="min-width:0;">
-            <?php else: ?>
-            <a href="<?= base_url($mapUrls[$stat['label']] . '/' . $campana['id']) ?>"
-               class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn text-decoration-none text-dark"
-               style="min-width:0;">
-            <?php endif; ?>
                 <div class="card-body py-2 px-2 d-flex align-items-center" style="gap:10px;">
                     <div class="rounded-circle bg-<?= esc($stat['color']); ?> bg-opacity-10 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
                         <i class="<?= esc($stat['icon']); ?> text-<?= esc($stat['color']); ?> fs-5"></i>
@@ -415,46 +409,6 @@ $mapUrls = [
     </div>
 </div>
 
-<!-- Modal para ver y gestionar rondas vinculadas -->
-<div class="modal fade" id="modalRondasCampana" tabindex="-1" aria-labelledby="modalRondasCampanaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalRondasCampanaLabel">Rondas Vinculadas a la Campaña #CAM-<?= str_pad($campana['id'] ?? 0, 6, '0', STR_PAD_LEFT); ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex justify-content-between mb-3">
-                    <h6>Lista de Rondas</h6>
-                    <a href="<?= base_url('rondas/crear?campana_id=' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-success">Crear Nueva Ronda</a>
-                </div>
-                <div class="table-responsive">
-                    <table class="datatable display table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th>ID Ronda</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Brigada</th>
-                                <th>Enlace</th>
-                                <th>Estado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rondasTableBody">
-                            <!-- Rondas will be loaded dynamically via JavaScript -->
-                        </tbody>
-                    </table>
-
-
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal para ver incidencias vinculadas -->
 <div class="modal fade" id="modalIncidenciasCampana" tabindex="-1" aria-labelledby="modalIncidenciasCampanaLabel" aria-hidden="true">
@@ -676,91 +630,5 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Error al cargar datos del mapa:', error);
     });
 
-    // Función para cargar las rondas vinculadas
-    function cargarRondas() {
-        const campanaId = <?= json_encode($campana['id'] ?? 0); ?>;
-        fetch('<?= base_url('rondas/listar/'); ?>' + campanaId, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Error al cargar rondas: ' + response.status);
-            return response.json();
-        })
-        .then(data => {
-            const rondasTableBody = document.getElementById('rondasTableBody');
-            rondasTableBody.innerHTML = '';
-            if (data && data.length > 0) {
-                data.forEach(ronda => {
-                    const estadoClase = ronda.estado === 'Cerrada' ? 'text-danger' : 'text-success';
-                    const row = `
-                        <tr>
-                            <td>#RDA-${ronda.id.toString().padStart(6, '0')}</td>
-                            <td>${ronda.fecha_actividad || 'N/A'}</td>
-                            <td>${ronda.hora_actividad || 'N/A'}</td>
-                            <td>${ronda.brigada_nombre || 'N/A'}</td>
-                            <td>${ronda.encargado || 'N/A'}</td>
-                            <td><span class="${estadoClase}">${ronda.estado || 'N/A'}</span></td>
-                            <td class="text-center">
-                                <a href="<?= base_url(obtener_rol() . 'rondas/detalle/'); ?>${ronda.id}" class="btn btn-info btn-sm" title="Ver">
-                                    <i class="ri-eye-line"></i>
-                                </a>
-                                <a href="<?= base_url(obtener_rol() . 'rondas/editar/'); ?>${ronda.id}" class="btn btn-warning btn-sm" title="Editar">
-                                    <i class="ri-pencil-fill"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm btn-eliminar-ronda" data-id="${ronda.id}" title="Eliminar">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    rondasTableBody.insertAdjacentHTML('beforeend', row);
-                });
-            } else {
-                rondasTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No hay rondas vinculadas.</td></tr>';
-            }
-        })
-        .catch(error => {
-            console.error('Error al cargar rondas:', error);
-            document.getElementById('rondasTableBody').innerHTML = '<tr><td colspan="7" class="text-center">Error al cargar las rondas.</td></tr>';
-        });
-    }
-
-    // Cargar rondas cuando se abre el modal
-    const modalRondasCampana = document.getElementById('modalRondasCampana');
-    modalRondasCampana.addEventListener('shown.bs.modal', cargarRondas);
-
-    // Asignar evento al botón de eliminar ronda
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-eliminar-ronda')) {
-            const rondaId = e.target.closest('.btn-eliminar-ronda').dataset.id;
-            if (confirm('¿Estás seguro de que deseas eliminar esta ronda?')) {
-                fetch('<?= base_url('rondas/eliminar/'); ?>' + rondaId, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al eliminar ronda: ' + response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('Ronda eliminada correctamente.');
-                        cargarRondas();
-                    } else {
-                        alert('Error al eliminar la ronda: ' + (data.error || 'Desconocido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al eliminar ronda:', error);
-                    alert('Error al eliminar la ronda.');
-                });
-            }
-        }
-    });
 });
 </script>
