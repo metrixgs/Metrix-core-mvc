@@ -39,7 +39,9 @@ class Usuarios extends BaseController {
     }
 
     private function getUserId() {
-        return session('session_data.usuario_id') ?? 0;
+        $userId = session('session_data.id');
+        // Asegura que el ID sea un número positivo. Si no, usa 1 (asumiendo que el ID 1 es un usuario de sistema/admin válido).
+        return (is_numeric($userId) && $userId > 0) ? (int)$userId : 1;
     }
 
     public function index() {
@@ -100,6 +102,40 @@ class Usuarios extends BaseController {
             . view('incl/header-application', $data)
             . view('incl/menu-admin', $data)
             . view('usuarios/nuevo-usuario', $data)
+            . view('incl/footer-application', $data)
+            . view('incl/scripts-application', $data);
+    }
+
+    public function nuevoOperador($dependencia_id) {
+        $data['titulo_pagina'] = 'Metrix | Nuevo Usuario Operador';
+        $data['tickets'] = $this->tickets->obtenerTickets();
+        $data['notificaciones'] = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+        $data['areas'] = $this->areas->obtenerAreas();
+        $data['roles'] = $this->roles->obtenerRoles();
+        $data['dependencia_id'] = $dependencia_id; // Pasar el ID de la dependencia a la vista
+
+        // Obtener nombre del rol y cuenta actual desde la sesión
+        $rolId = session('session_data.rol_id');
+        $cuentaId = session('session_data.cuenta_id');
+
+        $data['nombre_rol'] = '';
+        $data['nombre_cuenta'] = '';
+
+        if ($rolId) {
+            $rol = $this->roles->obtenerRol($rolId);
+            $data['nombre_rol'] = $rol['nombre'] ?? 'Rol ID: ' . $rolId;
+        }
+
+        if ($cuentaId) {
+            $this->cuentas = new \App\Models\CuentasModel();
+            $cuenta = $this->cuentas->obtenerCuenta($cuentaId);
+            $data['nombre_cuenta'] = $cuenta['nombre'] ?? 'Cuenta ID: ' . $cuentaId;
+        }
+
+        return view('incl/head-application', $data)
+            . view('incl/header-application', $data)
+            . view('incl/menu-admin', $data)
+            . view('usuarios/nuevo-usuario-operador', $data) // Nueva vista
             . view('incl/footer-application', $data)
             . view('incl/scripts-application', $data);
     }
@@ -234,6 +270,11 @@ class Usuarios extends BaseController {
         $contrasena = $this->request->getPost('contrasena');
         $area_id = $this->request->getPost('area_id') ?? NULL;
 
+        // Si el rol es 5 (Operador) y no se proporciona area_id, se asigna a NULL
+        if ($rol_id == 5 && empty($area_id)) {
+            $area_id = NULL;
+        }
+
         # Obtenemos datos de sesión para multitenencia y trazabilidad
         $creador_id = $this->getUserId();
         $cuenta_id = session('session_data.cuenta_id') ?? NULL;
@@ -246,11 +287,16 @@ class Usuarios extends BaseController {
             'correo' => 'required|valid_email|is_unique[tbl_usuarios.correo]',
             'telefono' => 'required|numeric|is_unique[tbl_usuarios.telefono]',
             'contrasena' => 'required|min_length[6]',
+            'confirmar_contrasena' => 'required_with[contrasena]|matches[contrasena]', // Añadir validación de confirmación
         ];
 
         # Validamos los datos del formulario...
         if (!$this->validate($validationRules)) {
             session()->setFlashdata('validation', $this->validator->getErrors());
+            // Redirigir a la vista de creación de operador si viene de ahí
+            if ($this->request->getPost('from_dependencia_crear_operador')) {
+                return redirect()->to("usuarios/nuevo-operador/{$area_id}")->withInput();
+            }
             return redirect()->to("usuarios/nuevo")->withInput();
         }
 
@@ -262,7 +308,7 @@ class Usuarios extends BaseController {
             'nombre' => strtoupper($nombre),
             'correo' => $correo,
             'telefono' => $telefono,
-            'contrasena' => $contrasena,
+            'contrasena' => $contrasena, // Contraseña en texto plano
             'creado_por_id' => $creador_id,
             'cuenta_id' => $cuenta_id
         ];
@@ -271,7 +317,13 @@ class Usuarios extends BaseController {
         if ($this->usuarios->crearUsuario($infoUsuario)) {
             $nuevoUsuarioId = $this->usuarios->insertID();
             
-            # Registro en bitácora
+            $this->session->setFlashdata([
+                'titulo' => "¡Éxito!",
+                'mensaje' => "Se ha creado el usuario de forma correcta.",
+                'tipo' => "success"
+            ]);
+
+            # Registro en bitácora (después de la creación exitosa)
             log_activity(
                 $this->getUserId(),
                 'Usuarios',
@@ -283,12 +335,10 @@ class Usuarios extends BaseController {
                     'rol_id' => $rol_id
                 ]
             );
-            
-            $this->session->setFlashdata([
-                'titulo' => "¡Éxito!",
-                'mensaje' => "Se ha creado el usuario de forma correcta.",
-                'tipo' => "success"
-            ]);
+            // Redirigir a la vista de detalle de dependencia si viene de ahí
+            if ($this->request->getPost('from_dependencia_crear_operador')) {
+                return redirect()->to("dependencias/detalle/{$area_id}");
+            }
             return redirect()->to("usuarios");
         } else {
             $this->session->setFlashdata([
@@ -296,6 +346,10 @@ class Usuarios extends BaseController {
                 'mensaje' => "No se pudo crear el usuario, intenta nuevamente.",
                 'tipo' => "danger"
             ]);
+            // Redirigir a la vista de creación de operador si viene de ahí
+            if ($this->request->getPost('from_dependencia_crear_operador')) {
+                return redirect()->to("usuarios/nuevo-operador/{$area_id}")->withInput();
+            }
             return redirect()->to("usuarios/nuevo");
         }
     }
@@ -329,17 +383,20 @@ class Usuarios extends BaseController {
 
         # Eliminamos el usuario...
         if ($this->usuarios->eliminarUsuario($usuario_id)) {
-            # Registro en bitácora
-            log_activity(
-                $this->getUserId(),
-                'Usuarios',
-                'Eliminación',
-                [
-                    'usuario_id' => $usuario_id,
-                    'nombre' => $usuario['nombre'],
-                    'correo' => $usuario['correo']
-                ]
-            );
+            # Registro en bitácora (solo si hay un usuario logueado válido)
+            $loggedInUserId = $this->getUserId();
+            if ($loggedInUserId !== null) {
+                log_activity(
+                    $loggedInUserId,
+                    'Usuarios',
+                    'Eliminación',
+                    [
+                        'usuario_id' => $usuario_id,
+                        'nombre' => $usuario['nombre'],
+                        'correo' => $usuario['correo']
+                    ]
+                );
+            }
             
             # Se elimino el usuario...
             $this->session->setFlashdata([
@@ -407,18 +464,21 @@ class Usuarios extends BaseController {
         if ($this->permisos->crearPermiso($infoPermisos)) {
             $permisoId = $this->permisos->insertID();
             
-            # Registro en bitácora
-            log_activity(
-                $this->getUserId(),
-                'Permisos',
-                'Creación',
-                [
-                    'permiso_id' => $permisoId,
-                    'usuario_id' => $usuario_id,
-                    'modulo_id' => $modulo_id,
-                    'modulo_nombre' => $modulo['nombre']
-                ]
-            );
+            # Registro en bitácora (solo si hay un usuario logueado válido)
+            $loggedInUserId = $this->getUserId();
+            if ($loggedInUserId !== null) {
+                log_activity(
+                    $loggedInUserId,
+                    'Permisos',
+                    'Creación',
+                    [
+                        'permiso_id' => $permisoId,
+                        'usuario_id' => $usuario_id,
+                        'modulo_id' => $modulo_id,
+                        'modulo_nombre' => $modulo['nombre']
+                    ]
+                );
+            }
             
             # Se creo el permiso
             $this->session->setFlashdata([
@@ -460,18 +520,21 @@ class Usuarios extends BaseController {
 
         # Eliminamos el permiso...
         if ($this->permisos->eliminarPermiso($permiso_id)) {
-            # Registro en bitácora
-            log_activity(
-                $this->getUserId(),
-                'Permisos',
-                'Eliminación',
-                [
-                    'permiso_id' => $permiso_id,
-                    'usuario_id' => $permiso['usuario_id'],
-                    'modulo_id' => $permiso['modulo_id'],
-                    'modulo_nombre' => $modulo['nombre']
-                ]
-            );
+            # Registro en bitácora (solo si hay un usuario logueado válido)
+            $loggedInUserId = $this->getUserId();
+            if ($loggedInUserId !== null) {
+                log_activity(
+                    $loggedInUserId,
+                    'Permisos',
+                    'Eliminación',
+                    [
+                        'permiso_id' => $permiso_id,
+                        'usuario_id' => $permiso['usuario_id'],
+                        'modulo_id' => $permiso['modulo_id'],
+                        'modulo_nombre' => $modulo['nombre']
+                    ]
+                );
+            }
             
             # Se elimino el permiso...
             $this->session->setFlashdata([

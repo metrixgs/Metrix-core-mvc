@@ -150,6 +150,11 @@
                                             <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
                                         </button>
                                     </div>
+                                    <div class="search-box ms-2">
+                                        <a href="<?= base_url() . 'usuarios/nuevo-operador/' . $dependencia['id']; ?>" class="btn btn-success">
+                                            <i class="ri-user-add-line align-middle me-1"></i>Crear Nuevo Usuario
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -296,10 +301,7 @@
                         <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
                     </button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
+                
 
 
 

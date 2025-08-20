@@ -127,6 +127,7 @@ $routes->get('clientes/eliminar/(:num)', 'Clientes::eliminar/$1');
 $routes->get('usuarios', 'Usuarios::index');
 $routes->get('usuarios/detalle/(:num)', 'Usuarios::detalle/$1');
 $routes->get('usuarios/nuevo', 'Usuarios::nuevo');
+$routes->get('usuarios/nuevo-operador/(:num)', 'Usuarios::nuevoOperador/$1'); // Nueva ruta para crear operador
 $routes->get('usuarios/eliminar-permiso/(:num)', 'Usuarios::eliminarPermiso/$1');
 $routes->post('usuarios/actualizar', 'Usuarios::actualizar');
 $routes->post('usuarios/crear', 'Usuarios::crear');
