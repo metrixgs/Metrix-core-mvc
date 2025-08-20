@@ -229,6 +229,16 @@ class Rondas extends BaseController {
             return redirect()->to('/rondas')->with('error', 'Ronda no encontrada');
         }
 
+        // Cargar datos para los selects
+        $campanaModel = new \App\Models\CampanasModel();
+        $data['campanas'] = $campanaModel->findAll(); // O un método más específico si existe
+
+        $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll(); // Coordinadores de Brigada
+        $data['operadores'] = $this->usuarios->where('rol_id', 5)->findAll(); // Operadores
+        $data['usuarios_coordinador_campana'] = $this->usuarios->where('rol_id', 9)->findAll(); // Coordinadores de Campaña
+
+        $data['surveys'] = $this->survey->findAll(); // Todas las encuestas
+
         # Obtener todas las segmentaciones para el formulario
         $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
 
@@ -247,13 +257,16 @@ class Rondas extends BaseController {
         if ($this->request->getMethod() === 'post') {
             # Recoger datos del formulario
             $datosRonda = [
-                'campana_id' => $this->request->getPost('campana_id') ? $this->request->getPost('campana_id') : 1,
+                'campana_id' => $this->request->getPost('campana_id'),
                 'nombre' => $this->request->getPost('nombre'),
                 'coordinador' => $this->request->getPost('coordinador'),
                 'encargado' => $this->request->getPost('encargado'),
+                'coordinador_campana' => $this->request->getPost('coordinador_campana'), // Nuevo campo
+                'encuesta_ronda' => $this->request->getPost('encuesta_ronda'), // Nuevo campo
                 'fecha_actividad' => $this->request->getPost('fecha_actividad'),
                 'hora_actividad' => $this->request->getPost('hora_actividad'),
-                'estado' => $this->request->getPost('estado')
+                'estado' => $this->request->getPost('estado'),
+                'universo' => $this->request->getPost('universo') // Nuevo campo
             ];
 
             # Actualizar la ronda
