@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Inicializar el mapa
-    const map = L.map('campaignMap').setView([19.4326, -99.1332], 10); // Centro por defecto
+    const map = L.map('campaignMap').setView([20.5880, -100.3881], 12); // Centro en Querétaro
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
