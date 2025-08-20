@@ -200,47 +200,47 @@
                         <h4 class="card-title mb-0 flex-grow-1"><i class="ri-dashboard-line me-1"></i> Indicadores Clave</h4>
                     </div>
                     <div class="card-body">
-                        <div class="row text-center g-3">
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-team-fill fs-4 text-primary"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['brigadas_activas'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Brigadas Activas</p>
+                        <div class="row text-center g-2 flex-nowrap overflow-auto pb-2">
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-team-fill fs-3 text-primary"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['brigadas_activas'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Brigadas Activas</p>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-eye-line fs-4 text-success"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['visitas_realizadas'] ?? 0); ?> / <?= esc($ronda['universo'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Visitas Realizadas</p>
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-eye-line fs-3 text-success"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['visitas_realizadas'] ?? 0); ?> / <?= esc($ronda['universo'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Visitas Realizadas</p>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-error-warning-line fs-4 text-warning"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['incidencias_reportadas'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Incidencias</p>
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-error-warning-line fs-3 text-warning"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['incidencias_reportadas'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Incidencias</p>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-truck-line fs-4 text-danger"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['entregas_realizadas'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Entregas</p>
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-truck-line fs-3 text-danger"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['entregas_realizadas'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Entregas</p>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-archive-line fs-4 text-info"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['botagos_registrados'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Botagos</p>
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-archive-line fs-3 text-info"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['botagos_registrados'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Botagos</p>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded">
-                                    <i class="ri-heart-line fs-4 text-purple"></i>
-                                    <h6 class="mt-1 mb-0"><?= esc($ronda['peticiones_recibidas'] ?? 0); ?></h6>
-                                    <p class="text-muted mb-0">Peticiones</p>
+                            <div class="col">
+                                <div class="p-2 border rounded" style="min-width: 120px;">
+                                    <i class="ri-heart-line fs-3 text-purple"></i>
+                                    <h6 class="mt-1 mb-0 fs-5"><?= esc($ronda['peticiones_recibidas'] ?? 0); ?></h6>
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Peticiones</p>
                                 </div>
                             </div>
                         </div>
