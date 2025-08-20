@@ -81,10 +81,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="brigadas" class="form-label">Brigada(s):</label>
-                                    <select name="brigadas[]" id="brigadas" class="form-select select2" multiple>
-                                        <option value="" disabled selected hidden>Seleccione una opción</option>
+                                    <select name="brigadas" id="brigadas" class="form-select select2">
+                                        <!-- El placeholder se maneja con Select2 -->
                                         <?php foreach($dependencias as $dep): ?>
-                                            <option value="<?= esc($dep['id']) ?>" <?= in_array($dep['id'], old('brigadas', [])) ? 'selected' : '' ?>><?= esc($dep['nombre']) ?></option>
+                                            <option value="<?= esc($dep['id']) ?>" <?= (old('brigadas') == $dep['id']) ? 'selected' : '' ?>><?= esc($dep['nombre']) ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -196,11 +196,27 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Inicializar Select2
-        $('.select2').select2({
+        // Inicializar Select2 para Brigadas (selección única)
+        $('#brigadas').select2({
             width: '100%',
             placeholder: 'Seleccione una opción',
             allowClear: true // Permite deseleccionar
+        });
+
+        // Inicializar Select2 para Operadores (selección múltiple)
+        $('#operadores').select2({
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true, // Permite deseleccionar
+            multiple: true // Habilita la selección múltiple
+        });
+
+        // Inicializar Select2 para otros selectores genéricos (si los hay y necesitan configuración por defecto)
+        // Por ejemplo, para 'territorio' y 'sectorizacion'
+        $('#territorio, #sectorizacion').select2({
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true
         });
 
         // Validación de formulario Bootstrap
@@ -224,35 +240,29 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 
         // Lógica para cargar operadores al seleccionar una brigada
         $('#brigadas').on('change', function() {
-            var selectedBrigadas = $(this).val(); // Obtener los IDs de las brigadas seleccionadas
+            var selectedBrigadaId = $(this).val(); // Obtener el ID de la brigada seleccionada
             var operadoresSelect = $('#operadores');
             operadoresSelect.empty(); // Limpiar el selector de operadores
 
-            if (selectedBrigadas && selectedBrigadas.length > 0) {
-                // Iterar sobre cada brigada seleccionada y hacer una llamada AJAX
-                selectedBrigadas.forEach(function(brigadaId) {
-                    $.ajax({
-                        url: '<?= base_url('rondas/obtenerOperadoresPorBrigada/') ?>' + brigadaId,
-                        method: 'GET',
-                        dataType: 'json',
-                        success: function(data) {
-                            if (data.length > 0) {
-                                data.forEach(function(operador) {
-                                    // Añadir solo si no existe ya para evitar duplicados si se seleccionan múltiples brigadas
-                                    if (!operadoresSelect.find('option[value="' + operador.id + '"]').length) {
-                                        operadoresSelect.append(new Option(operador.nombre, operador.id, false, false));
-                                    }
-                                });
-                            }
-                            operadoresSelect.trigger('change'); // Notificar a Select2 que las opciones han cambiado
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error al obtener operadores:", error);
+            if (selectedBrigadaId) {
+                $.ajax({
+                    url: '<?= base_url('rondas/obtenerOperadoresPorBrigada/') ?>' + selectedBrigadaId,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.length > 0) {
+                            data.forEach(function(operador) {
+                                operadoresSelect.append(new Option(operador.nombre, operador.id, false, false));
+                            });
                         }
-                    });
+                        operadoresSelect.trigger('change'); // Notificar a Select2 que las opciones han cambiado
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error al obtener operadores:", error);
+                    }
                 });
             } else {
-                // Si no hay brigadas seleccionadas, limpiar y notificar a Select2
+                // Si no hay brigada seleccionada, limpiar y notificar a Select2
                 operadoresSelect.trigger('change');
             }
         });
