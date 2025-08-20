@@ -111,6 +111,52 @@ class Dependencias extends BaseController {
                 . view('incl/scripts-application', $data);
     }
 
+    public function asignarUsuario($dependencia_id) {
+        # Creamos el titulo de la pagina...
+        $data['titulo_pagina'] = 'Metrix | Asignar Usuario a Dependencia';
+
+        # Obtenemos informacion de la dependencia...
+        $dependencia = $this->areas->obtenerArea($dependencia_id);
+        $data['dependencia'] = $dependencia;
+
+        # Validamos si existe la dependencia...
+        if (empty($dependencia)) {
+            # No existe la dependencia...
+            return redirect()->to("dependencias/");
+        }
+
+        # Obtenemos todas las notificaciones por usuario...
+        $notificaciones = $this->notificaciones->obtenerNotificacionesPorUsuario(session('session_data.id'));
+        $data['notificaciones'] = $notificaciones;
+
+        # Obtenemos el ID del rol "Operador"
+        $rolOperador = $this->roles->obtenerRolPorNombre('Operador');
+        $rolOperadorId = $rolOperador ? $rolOperador['id'] : null;
+
+        # Obtenemos todos los usuarios con rol "Operador" que no están asignados a esta dependencia
+        $usuariosOperadoresDisponibles = [];
+        if ($rolOperadorId) {
+            $todosOperadores = $this->usuarios->obtenerUsuariosPorRol($rolOperadorId);
+            $usuariosAsignadosIds = array_column($this->usuarios->obtenerUsuariosPorArea($dependencia_id), 'id'); // IDs de usuarios ya asignados
+            
+            foreach ($todosOperadores as $operador) {
+                // Solo añadir si el usuario no tiene un area_id o si su area_id no es la actual
+                // y no está ya en la lista de usuarios asignados a esta dependencia
+                if (empty($operador['area_id']) || ($operador['area_id'] != $dependencia_id && !in_array($operador['id'], $usuariosAsignadosIds))) {
+                    $usuariosOperadoresDisponibles[] = $operador;
+                }
+            }
+        }
+        $data['usuarios_operadores_disponibles'] = $usuariosOperadoresDisponibles;
+
+        return view('incl/head-application', $data)
+                . view('incl/header-application', $data)
+                . view('incl/menu-admin', $data)
+                . view('dependencias/asignar-usuario', $data)
+                . view('incl/footer-application', $data)
+                . view('incl/scripts-application', $data);
+    }
+
     public function crear() {
         # Obtenemos los datos del formulario...
         $nombre = $this->request->getPost('nombre');

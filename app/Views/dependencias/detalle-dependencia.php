@@ -146,9 +146,9 @@
                                 <!-- Botón para abrir el modal -->
                                 <div class="d-flex justify-content-sm-end">
                                     <div class="search-box ms-2">
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignarUsuario">
+                                        <a href="<?= base_url() . 'dependencias/asignar-usuario/' . $dependencia['id']; ?>" class="btn btn-primary">
                                             <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
-                                        </button>
+                                        </a>
                                     </div>
                                     <div class="search-box ms-2">
                                         <a href="<?= base_url() . 'usuarios/nuevo-operador/' . $dependencia['id']; ?>" class="btn btn-success">
@@ -266,43 +266,6 @@
         </div>
     </div>
 </div>
-
-
-<!-- Modal Asignar Usuario -->
-<div class="modal fade" id="modalAsignarUsuario" tabindex="-1" aria-labelledby="modalAsignarUsuarioLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalAsignarUsuarioLabel">Asignar Usuario Existente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="<?= base_url() . 'dependencias/asignarUsuarioADependencia'; ?>" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="dependencia_id" value="<?= $dependencia['id']; ?>">
-                    <div class="mb-3">
-                        <label for="usuario_id" class="form-label">Seleccionar Usuario Operador</label>
-                        <select class="form-select" id="usuario_id" name="usuario_id" required>
-                            <option value="">-- Seleccione un usuario --</option>
-                            <?php if (!empty($usuarios_operadores_disponibles)) : ?>
-                                <?php foreach ($usuarios_operadores_disponibles as $usuario_disponible) : ?>
-                                    <option value="<?= $usuario_disponible['id']; ?>">
-                                        <?= $usuario_disponible['nombre']; ?> (<?= $usuario_disponible['correo']; ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php else : ?>
-                                <option value="" disabled>No hay usuarios operadores disponibles para asignar.</option>
-                            <?php endif; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="ri-user-add-line align-middle me-1"></i>Asignar Usuario
-                    </button>
-                </div>
-                
-
 
 
 

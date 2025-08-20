@@ -74,6 +74,7 @@ $routes->post('dependencias/actualizar/(:num)', 'Dependencias::actualizar/$1');
 $routes->post('dependencias/eliminar', 'Dependencias::eliminar');
 $routes->post('dependencias/asignarUsuarioADependencia', 'Dependencias::asignarUsuarioADependencia');
 $routes->post('dependencias/desasignarUsuarioDeDependencia', 'Dependencias::desasignarUsuarioDeDependencia');
+$routes->get('dependencias/asignar-usuario/(:num)', 'Dependencias::asignarUsuario/$1');
 
 #Rutas de los Tickets
 $routes->get('tickets/', 'Tickets::index');
