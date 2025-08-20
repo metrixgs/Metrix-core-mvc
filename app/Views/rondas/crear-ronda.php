@@ -82,8 +82,9 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                 <div class="col-md-6">
                                     <label for="brigadas" class="form-label">Brigada(s):</label>
                                     <select name="brigadas[]" id="brigadas" class="form-select select2" multiple>
-                                        <?php foreach($brigadas as $brigada): ?>
-                                            <option value="<?= esc($brigada['id']) ?>" <?= in_array($brigada['id'], old('brigadas', [])) ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?> (# Interno de Brigada(s))</option>
+                                        <option value="" disabled selected hidden>Seleccione una opción</option>
+                                        <?php foreach($dependencias as $dep): ?>
+                                            <option value="<?= esc($dep['id']) ?>" <?= in_array($dep['id'], old('brigadas', [])) ? 'selected' : '' ?>><?= esc($dep['nombre']) ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>

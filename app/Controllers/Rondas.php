@@ -10,6 +10,7 @@ use App\Models\SurveyModel; // Corregido: Cargar SurveyModel (singular)
 use App\Controllers\BaseController;
 use App\Models\SegmentacionesModel;
 use App\Models\RondasSegmentacionesModel;
+use App\Models\AreasModel; // Añadir el modelo de Áreas (Dependencias)
 
 class Rondas extends BaseController {
 
@@ -19,6 +20,7 @@ class Rondas extends BaseController {
     protected $rondas;
     protected $segmentaciones;
     protected $rondasSegmentaciones;
+    protected $areas; // Añadir propiedad para AreasModel
 
     public function __construct() {
         // Instanciar los modelos
@@ -28,7 +30,8 @@ class Rondas extends BaseController {
         $this->rondas = new RondasModel();
         $this->rondasSegmentaciones = new RondasSegmentacionesModel();
         $this->segmentaciones = new SegmentacionesModel();
-        $this->survey = new SurveyModel(); // Corregido: Instanciar SurveyModel (singular)
+        $this->areas = new AreasModel(); // Instanciar AreasModel
+        $this->survey = new SurveyModel();
 
         # Cargar los Helpers
         helper('Alerts');
@@ -176,6 +179,10 @@ class Rondas extends BaseController {
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
     $data['surveys'] = $this->survey->findAll();
+    // Obtener todas las dependencias para el campo 'Brigada(s)'
+    $data['dependencias'] = $this->areas->obtenerAreas();
+    // Obtener todas las dependencias para el campo 'Brigada(s)'
+    $data['dependencias'] = $this->areas->obtenerAreas();
     $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
     $data['operadores'] = $this->usuarios->where('rol_id', 5)->findAll();
     $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
