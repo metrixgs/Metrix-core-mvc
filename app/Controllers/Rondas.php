@@ -329,13 +329,21 @@ class Rondas extends BaseController {
             return redirect()->to('/rondas')->with('error', 'ID de ronda no especificado');
         }
 
+        // Obtener la ronda antes de eliminarla para obtener el campana_id
+        $ronda = $this->rondas->find($id);
+
+        if (!$ronda) {
+            return redirect()->to('/rondas')->with('error', 'Ronda no encontrada');
+        }
+
         # Primero eliminar las relaciones con segmentaciones
         $this->rondasSegmentaciones->eliminarRelacionesPorRonda($id);
 
         # Luego eliminar la ronda
         $this->rondas->eliminarRonda($id);
 
-        return redirect()->to('/rondas')->with('success', 'Ronda eliminada correctamente');
+        // Redirigir a la lista de rondas de la campaña
+        return redirect()->to('/campanas/rondas/' . $ronda['campana_id'])->with('success', 'Ronda eliminada correctamente');
     }
 
     /**
