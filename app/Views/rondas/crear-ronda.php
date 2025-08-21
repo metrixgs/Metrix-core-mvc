@@ -58,6 +58,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                     <input type="text" id="nombre_campana" class="form-control" value="<?= esc($campana['nombre'] ?? 'Campaña no encontrada') ?>" readonly>
                                     <input type="hidden" name="campana_id" value="<?= esc($campana['id'] ?? '') ?>">
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="nombre_ronda" class="form-label">Nombre de la Ronda:</label>
+                                    <input type="text" name="nombre_ronda" id="nombre_ronda" class="form-control" placeholder="Ingrese el nombre de la ronda" value="<?= old('nombre_ronda') ?>">
+                                </div>
                                 <div class="col-md-3">
                                     <label for="fecha_actividad" class="form-label">Fecha:</label>
                                     <input type="date" name="fecha_actividad" id="fecha_actividad" class="form-control" value="<?= old('fecha_actividad') ?>">

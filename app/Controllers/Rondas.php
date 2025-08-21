@@ -193,7 +193,7 @@ class Rondas extends BaseController {
         // Recoger los datos del formulario
         $datosRonda = [
             'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1),
-            'nombre' => $this->request->getPost('nombre_campana'), // Usar nombre_campana del formulario
+            'nombre' => $this->request->getPost('nombre_ronda') ?? ($this->request->getPost('nombre_campana') ?? ''), // Usar nombre_ronda si existe, sino nombre_campana, sino cadena vacía
             'coordinador' => $this->request->getPost('coordinador'),
             'encargado' => $this->request->getPost('encargado'),
             'coordinador_campana' => $this->request->getPost('coordinador_campana'),
