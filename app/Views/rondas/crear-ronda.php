@@ -55,7 +55,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="nombre_campana" class="form-label">Nombre de la Campaña:</label>
-                                    <input type="text" id="nombre_campana" class="form-control" value="<?= esc($campana['nombre'] ?? 'Campaña no encontrada') ?>" readonly>
+                                    <p class="form-control-plaintext" id="nombre_campana"><?= esc($campana['nombre'] ?? 'Campaña no encontrada') ?></p>
                                     <input type="hidden" name="campana_id" value="<?= esc($campana['id'] ?? '') ?>">
                                 </div>
                                 <div class="col-md-3">
