@@ -133,6 +133,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formEliminarRonda" method="post" action="">
+                <input type="hidden" name="_method" value="DELETE">
                 <div class="modal-body">
                     ¿Estás seguro de que deseas eliminar esta ronda? Esta acción es irreversible.
                     <input type="hidden" name="ronda_id_to_delete" id="ronda_id_to_delete">

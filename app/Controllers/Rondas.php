@@ -227,7 +227,7 @@ class Rondas extends BaseController {
             }
         }
 
-        return redirect()->to('/rondas')->with('success', 'Ronda creada correctamente');
+        return redirect()->to('/campanas/rondas/' . $datosRonda['campana_id'])->with('success', 'Ronda creada correctamente');
     }
 
     return view('incl/head-application', $data)

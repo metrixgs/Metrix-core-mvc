@@ -43,7 +43,7 @@ $routes->get('rondas/', 'Rondas::index');
 $routes->get('rondas/detalle/(:num)', 'Rondas::detalle/$1');
 $routes->match(['get', 'post'], 'rondas/crear', 'Rondas::crear');
 $routes->match(['get', 'post'], 'rondas/editar/(:num)', 'Rondas::editar/$1');
-$routes->get('rondas/eliminar/(:num)', 'Rondas::eliminar/$1');
+$routes->delete('rondas/eliminar/(:num)', 'Rondas::eliminar/$1');
 $routes->get('rondas/cambiar_estado/(:num)/(:any)', 'Rondas::cambiar_estado/$1/$2');
  $routes->get('rondas/puntos', 'Rondas::puntos');
 $routes->get('rondas/zonas', 'Rondas::zonas');
