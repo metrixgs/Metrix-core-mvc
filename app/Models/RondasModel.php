@@ -13,10 +13,11 @@ class RondasModel extends Model {
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'campana_id', 'segmentacion_id', 'nombre', 'coordinador', 'encargado',
+        'campana_id', 'nombre', 'coordinador', 'encargado',
         'coordinador_campana',
-        'encuesta_ronda', // Nuevo campo
-        'fecha_actividad', 'hora_actividad', 'estado', 'ronda_id', 'universo' // Añadido 'universo'
+        'encuesta_ronda',
+        'fecha_actividad', 'hora_actividad', 'estado', 'universo', // Eliminado 'segmentacion_id' y 'ronda_id' si no son directos de la tabla
+        'entregable', 'territorio', 'nombre_territorio', 'sectorizacion', 'nombre_sectorizacion' // Añadidos campos de delimitación territorial
     ];
 
     protected $useTimestamps = false;

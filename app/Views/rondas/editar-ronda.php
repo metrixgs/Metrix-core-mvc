@@ -70,8 +70,21 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
-                                                <label for="universo" class="form-label">Universo:</label>
-                                                <input type="number" class="form-control" id="universo" name="universo" value="<?= esc($ronda['universo'] ?? 0); ?>">
+                                                <label class="form-label fw-semibold">
+                                                    Universo (<span id="universoCount">0</span>)
+                                                </label>
+                                                <button type="button"
+                                                        class="btn btn-outline-primary w-100"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalUniverso">
+                                                    Seleccionar Universo
+                                                </button>
+                                                <!-- Valor final CSV (slugs) -->
+                                                <input type="hidden" id="universo" name="universo" value="<?= esc($universo_ronda ?? ''); ?>">
+                                                <!-- Resumen visual -->
+                                                <div id="universoSeleccionado" class="mt-2 text-muted small">
+                                                    Ningún universo seleccionado
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -279,12 +292,27 @@
     </div>
 </div>
 </div>
+<!-- ===== Loader de dependencias (solo si faltan) ===== -->
+<script>
+  if (!window.jQuery) {
+    document.write('<script src="https://code.jquery.com/jquery-3.7.1.min.js"><\/script>');
+  }
+</script>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
+
 <!-- Incluir Leaflet.js -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar Select2 para los selectores que lo necesiten
+        // Por ejemplo, si hay selectores que no son parte del modal Universo
+        // y necesitan Select2, se inicializarían aquí.
+        // $('#some_other_select').select2({ width: '100%' });
+
         const mapError = document.getElementById('mapError');
         const mapElement = document.getElementById('map');
 
@@ -357,4 +385,240 @@
             }
         });
     });
+</script>
+
+<!-- ===================== MODAL UNIVERSO ===================== -->
+<div class="modal fade" id="modalUniverso" tabindex="-1" aria-labelledby="modalUniversoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalUniversoLabel">Seleccionar Universo (Tags)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <label class="form-label fw-semibold">Escribe para buscar y selecciona uno o varios</label>
+
+        <!-- Avisos -->
+        <div id="tagDebugAlert" class="alert alert-danger d-none"></div>
+
+        <!-- Opciones renderizadas desde el servidor -->
+        <select id="selectTagsUniverso" class="form-control" multiple>
+            <!-- Los tags se cargarán dinámicamente vía AJAX -->
+        </select>
+
+        <!-- Chips con “x” para quitar -->
+        <div class="mt-3">
+          <label class="form-label mb-1">Seleccionados</label>
+          <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
+        </div>
+
+        <!-- CSV de slugs (solo lectura) -->
+        <div class="mt-2">
+          <label class="form-label">Slugs (separados por comas)</label>
+          <input id="universoCsv" class="form-control" type="text" readonly>
+        </div>
+
+        <small class="text-muted d-block mt-2">
+          Al pulsar “Aplicar”, el valor se guarda en el formulario (input hidden) y verás los badges en la tarjeta.
+        </small>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnClearUniverso" class="btn btn-outline-secondary">Limpiar</button>
+        <button type="button" id="btnAplicarUniverso" class="btn btn-primary">Aplicar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ========================================================= -->
+
+<style>
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: .25rem .5rem; margin: .2rem;
+    border: 1px solid #ced4da; border-radius: 20px;
+    background: #f8f9fa; font-size: .85rem;
+  }
+  .chip .remove {
+    margin-left: .4rem; cursor: pointer; font-weight: bold;
+  }
+</style>
+
+<style>
+  /* Asegura que el Select2 para selección múltiple se expanda verticalmente */
+  .select2-container--default .select2-selection--multiple {
+    min-height: 38px; /* Altura mínima para que se vea bien */
+    height: auto; /* Permite que la altura se ajuste automáticamente */
+  }
+</style>
+
+<script>
+(function($){
+  var $modal   = $('#modalUniverso');
+  var $select  = $('#selectTagsUniverso');
+  var $hidden  = $('#universo');
+  var $summary = $('#universoSeleccionado');
+  var $count   = $('#universoCount');
+  var $chips   = $('#chipsContainer');
+  var $csv     = $('#universoCsv');
+
+  // Abrir modal
+  $modal.on('shown.bs.modal', function () {
+    // Reinicializa Select2 siempre para asegurar buscador
+    if ($.fn.select2) {
+      if ($select.data('select2')) {
+        $select.select2('destroy');
+      }
+      $select.select2({
+        width: '100%',
+        placeholder: 'Escribe para buscar y selecciona uno o varios',
+        dropdownParent: $modal,
+        closeOnSelect: false
+      });
+    }
+    var slugs = parseCSV($hidden.val());
+    $select.val(slugs).trigger('change');
+  });
+
+  // Cambio en selección
+  $select.on('change', function () {
+    var slugs = unique($select.val() || []);
+    renderChips(slugs);
+    $csv.val(slugs.join(','));
+  });
+
+  // Quitar chip
+  $chips.on('click', '.remove', function () {
+    var slug = $(this).closest('.chip').data('slug');
+    var current = unique($select.val() || []);
+    var next = current.filter(s => s !== slug);
+    $select.val(next).trigger('change');
+  });
+
+  // Limpiar selección
+  $('#btnClearUniverso').on('click', function () {
+    $select.val(null).trigger('change');
+    $csv.val('');
+  });
+
+  // Aplicar y cerrar
+  $('#btnAplicarUniverso').on('click', function () {
+    var slugs = parseCSV($csv.val());
+    $hidden.val(slugs.join(','));
+    renderBadges(slugs);
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getInstance($modal[0]).hide();
+    } else {
+      $modal.removeClass('show').attr('aria-hidden','true').hide();
+      $('.modal-backdrop').remove();
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('padding-right');
+    }
+  });
+
+  // Helpers
+  function parseCSV(str) {
+    return (str || '').split(',').map(s => s.trim()).filter(Boolean);
+  }
+  function unique(arr) {
+    return [...new Set(arr.map(s => s.trim()).filter(Boolean))];
+  }
+  function labelFor(slug) {
+    var opt = $select.find(`option[value="${slug}"]`);
+    return opt.data('label') || opt.text() || slug;
+  }
+  function renderChips(slugs) {
+    $chips.empty();
+    if (!slugs.length) {
+      $chips.append('<span class="text-muted">No hay seleccionados</span>');
+      return;
+    }
+    slugs.forEach(slug => {
+      var lbl = labelFor(slug);
+      var chip = $(
+        `<span class="chip" data-slug="${slug}">
+           ${$('<div>').text(lbl).html()}
+           <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
+         </span>`
+      );
+      $chips.append(chip);
+    });
+  }
+  function renderBadges(slugs) {
+    if (!slugs.length) {
+      $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
+      $count.text('0');
+      return;
+    }
+    var html = slugs.map(slug =>
+      `<span class="badge bg-light border text-primary me-1 mb-1">#${$('<div>').text(labelFor(slug)).html()}</span>`
+    ).join('');
+    $summary.removeClass('text-muted').addClass('text-primary').html(html);
+    $count.text(slugs.length);
+  }
+
+  // Cargar estado inicial
+  (function initFromHiddenOnLoad(){
+    var initial = parseCSV($hidden.val());
+    if (initial.length) {
+      renderChips(initial);
+      renderBadges(initial);
+      $csv.val(initial.join(','));
+    }
+  })();
+
+})(jQuery);
+</script>
+
+<script>
+(function(){
+  var TAGS_URL = "<?= site_url('rondas/tags') ?>"; // Cambiado a la ruta de rondas
+  var $ = window.jQuery;
+  if (!$) return;
+
+  function showTagError(msg) {
+    var $alert = $('#tagDebugAlert');
+    $alert.text(msg).removeClass('d-none');
+  }
+
+  $('#modalUniverso').on('shown.bs.modal', function(){
+    var $select = $('#selectTagsUniverso');
+    // var hasOptions = $select.find('option[value]').length > 0; // Eliminado para forzar recarga
+    // if (hasOptions) return; // Eliminado para forzar recarga
+
+    $.getJSON(TAGS_URL + '?debug=1')
+      .done(function(resp){
+        if (resp && resp.ok === false) {
+          showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
+          return;
+        }
+        var rows = resp && resp.data ? resp.data : resp;
+        if (!Array.isArray(rows)) {
+          showTagError('Respuesta inesperada del servidor.');
+          return;
+        }
+        if (rows.length === 0) {
+          showTagError('No hay tags para mostrar.');
+          return;
+        }
+        rows.forEach(function(r){
+          var text = (r.tag || r.slug) + ' (' + r.slug + ')';
+          var opt  = new Option(text, r.slug, false, false);
+          opt.setAttribute('data-label', r.tag || r.slug);
+          $select.append(opt);
+        });
+        if ($.fn.select2 && $select.data('select2')) {
+          $select.trigger('change');
+        }
+      })
+      .fail(function(xhr){
+        var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
+        if (xhr.responseJSON && xhr.responseJSON.exception) {
+          msg += ' ' + xhr.responseJSON.exception;
+        }
+        showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
+      });
+  });
+})();
 </script>

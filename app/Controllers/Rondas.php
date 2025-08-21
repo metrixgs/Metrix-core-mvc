@@ -11,6 +11,7 @@ use App\Controllers\BaseController;
 use App\Models\SegmentacionesModel;
 use App\Models\RondasSegmentacionesModel;
 use App\Models\AreasModel; // Añadir el modelo de Áreas (Dependencias)
+use App\Models\TagModel; // Añadir el modelo de Tags
 
 class Rondas extends BaseController {
 
@@ -32,6 +33,7 @@ class Rondas extends BaseController {
         $this->segmentaciones = new SegmentacionesModel();
         $this->areas = new AreasModel(); // Instanciar AreasModel
         $this->survey = new SurveyModel();
+        $this->tagsModel = new TagModel(); // Instanciar TagModel
 
         # Cargar los Helpers
         helper('Alerts');
@@ -190,7 +192,7 @@ class Rondas extends BaseController {
     if ($this->request->getMethod() === 'post') {
         // Recoger los datos del formulario
         $datosRonda = [
-            'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1), // Usar campanaId de la URL si existe
+            'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1),
             'nombre' => $this->request->getPost('nombre_campana'), // Usar nombre_campana del formulario
             'coordinador' => $this->request->getPost('coordinador'),
             'encargado' => $this->request->getPost('encargado'),
@@ -209,6 +211,10 @@ class Rondas extends BaseController {
 
         // Crear la ronda
         $rondaId = $this->rondas->crearRonda($datosRonda);
+
+        if (!$rondaId) {
+            return redirect()->back()->withInput()->with('error', 'No se pudo crear la ronda. Por favor, intente de nuevo.');
+        }
 
         // Relacionar segmentaciones
         $segmentacionesIds = $this->request->getPost('segmentaciones');
@@ -272,6 +278,7 @@ class Rondas extends BaseController {
 
         $data['segmentaciones_asignadas'] = $segmentacionesAsignadas;
         $data['ronda'] = $ronda;
+        $data['universo_ronda'] = $ronda['universo'] ?? ''; // Pasar el valor del universo a la vista
 
         # Verificar si es una solicitud POST
         if ($this->request->getMethod() === 'post') {
@@ -562,4 +569,24 @@ public function finalizarRondaWeb($id = null)
     }
 }
 
+    public function tags()
+    {
+        try {
+            // Obtener todas las etiquetas ordenadas por nombre
+            $tags = $this->tagsModel->allOrdered(); // Devuelve id, tag, slug
+
+            // Respuesta en formato JSON estándar
+            return $this->response->setJSON([
+                'ok'   => true,
+                'data' => $tags
+            ]);
+        } catch (\Throwable $e) {
+            // Captura errores y responde con mensaje claro
+            return $this->response->setJSON([
+                'ok'        => false,
+                'message'   => 'Error al obtener las etiquetas',
+                'exception' => $e->getMessage()
+            ]);
+        }
+    }
 }
