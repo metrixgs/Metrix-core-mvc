@@ -58,10 +58,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                     <input type="text" id="nombre_campana" class="form-control" value="<?= esc($campana['nombre'] ?? 'Campaña no encontrada') ?>" readonly>
                                     <input type="hidden" name="campana_id" value="<?= esc($campana['id'] ?? '') ?>">
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="nombre_ronda" class="form-label">Nombre de la Ronda:</label>
-                                    <input type="text" name="nombre_ronda" id="nombre_ronda" class="form-control" placeholder="Ingrese el nombre de la ronda" value="<?= old('nombre_ronda') ?>">
-                                </div>
                                 <div class="col-md-3">
                                     <label for="fecha_actividad" class="form-label">Fecha:</label>
                                     <input type="date" name="fecha_actividad" id="fecha_actividad" class="form-control" value="<?= old('fecha_actividad') ?>">
@@ -155,10 +151,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="nombre_territorio" class="form-label">Nombre:</label>
-                                    <input type="text" name="nombre_territorio" id="nombre_territorio" class="form-control" placeholder="Nombre del Territorio" value="<?= old('nombre_territorio') ?>">
-                                </div>
-                                <div class="col-md-6">
                                     <label for="sectorizacion" class="form-label">Sectorización:</label>
                                     <select name="sectorizacion" id="sectorizacion" class="form-select select2">
                                         <option value="" disabled selected hidden>Seleccione sectorización</option>
@@ -166,10 +158,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                             <option value="<?= esc($seg['id']) ?>" <?= old('sectorizacion') == $seg['id'] ? 'selected' : '' ?>><?= esc($seg['descripcion']) ?></option>
                                         <?php endforeach; ?>
                                     </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="nombre_sectorizacion" class="form-label">Nombre:</label>
-                                    <input type="text" name="nombre_sectorizacion" id="nombre_sectorizacion" class="form-control" placeholder="Nombre de la Sectorización" value="<?= old('nombre_sectorizacion') ?>">
                                 </div>
                             </div>
                         </div>
