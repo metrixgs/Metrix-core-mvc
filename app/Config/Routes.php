@@ -228,3 +228,13 @@ $routes->post('dashboard/exportar', 'DashboardAjax::exportarExcel');
 
 // Ruta de prueba del dashboard
 $routes->get('test-dashboard', 'TestDashboard::index');
+
+// Rutas del Dashboard de Métricas (incidencias)
+$routes->get('dashboard-metrix', 'DashboardMetrix::index');
+$routes->post('dashboard-metrix/update-metrics', 'DashboardMetrix::updateMetrics');
+$routes->post('dashboard-metrix/comparativa-dfs', 'DashboardMetrix::comparativaDFs');
+$routes->post('dashboard-metrix/comparativa-dls', 'DashboardMetrix::comparativaDLs');
+$routes->post('dashboard-metrix/comparativa-liderazgos', 'DashboardMetrix::comparativaLiderazgos');
+$routes->post('dashboard-metrix/comparativa-secciones', 'DashboardMetrix::comparativaSecciones');
+$routes->post('dashboard-metrix/selectors-data', 'DashboardMetrix::getSelectorsData');
+

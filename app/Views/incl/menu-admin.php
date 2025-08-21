@@ -156,7 +156,9 @@
                             <a href="#sidebarIncidencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Incidencias</a>
                             <div class="collapse menu-dropdown" id="sidebarIncidencias" data-bs-parent="#sidebarModulos">
                                 <ul class="nav nav-sm flex-column">
-                                    
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'dashboard-metrix'; ?>" class="nav-link">Dashboard</a>
+                                    </li>
                                     <li class="nav-item">
                                         <a href="<?= base_url() . 'tickets'; ?>" class="nav-link">Todas las Incidencias</a>
                                     </li>
