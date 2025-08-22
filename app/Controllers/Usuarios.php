@@ -9,8 +9,9 @@ use App\Models\AreasModel;
 use App\Models\ModulosModel;
 use App\Models\PermisosModel;
 use App\Models\NotificacionesModel;
-use App\Models\RolesModel;  
-use App\Models\CuentasModel; 
+use App\Models\RolesModel;
+use App\Models\CuentasModel;
+use App\Models\TagModel; // Añadir el modelo de tags
 
 class Usuarios extends BaseController {
 
@@ -20,8 +21,9 @@ class Usuarios extends BaseController {
     protected $permisos;
     protected $modulos;
     protected $notificaciones;
-    protected $roles; 
+    protected $roles;
     protected $cuentas;
+    protected $tagsModel; // Declarar la propiedad para el modelo de tags
 
     public function __construct() {
         // Instanciar los modelos
@@ -31,8 +33,9 @@ class Usuarios extends BaseController {
         $this->areas = new AreasModel();
         $this->modulos = new ModulosModel();
         $this->permisos = new PermisosModel();
-        $this->roles = new RolesModel(); 
+        $this->roles = new RolesModel();
         $this->cuentas = new CuentasModel();
+        $this->tagsModel = new TagModel(); // Instanciar el modelo de tags
 
         # Cargar los Helpers
         helper(['Alerts', 'Email', 'Rol', 'Menu', 'bitacora']);
@@ -165,12 +168,96 @@ class Usuarios extends BaseController {
         $modulos = $this->modulos->obtenerModulos();
         $data['modulos'] = $modulos;
 
+        // Cargar tags para el modal de asignación
+        $data['catalogo_tags'] = $this->tagsModel->allOrdered();
+        $data['tag_stats'] = $this->tagsModel->getUsersCountByTag();
+        $data['usuario_tags'] = $this->usuarios->getTagsForUser($usuario_id);
+
         return view('incl/head-application', $data)
                 . view('incl/header-application', $data)
                 . view('incl/menu-admin', $data)
                 . view('usuarios/detalle-usuario', $data)
                 . view('incl/footer-application', $data)
                 . view('incl/scripts-application', $data);
+    }
+
+    /**
+     * Asigna tags a un usuario.
+     *
+     * @param int $usuario_id
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function assignTags($usuario_id)
+    {
+        if ($this->request->getMethod() !== 'post') {
+            return redirect()->back();
+        }
+
+        $tagSlugs = $this->request->getPost('tags_seleccionados'); // Viene como CSV
+        $tagSlugsArray = array_filter(array_map('trim', explode(',', $tagSlugs)));
+
+        // Obtener los IDs de los tags a partir de los slugs
+        $tagIds = [];
+        if (!empty($tagSlugsArray)) {
+            $tags = $this->tagsModel->whereIn('slug', $tagSlugsArray)->findAll();
+            $tagIds = array_column($tags, 'id');
+        }
+
+        if ($this->usuarios->assignTagsToUser($usuario_id, $tagIds)) {
+            log_activity(
+                $this->getUserId(),
+                'Usuarios',
+                'Asignación de Tags',
+                [
+                    'usuario_id' => $usuario_id,
+                    'tags_asignados' => $tagSlugsArray
+                ]
+            );
+            $this->session->setFlashdata([
+                'titulo' => "¡Éxito!",
+                'mensaje' => "Tags asignados correctamente al usuario.",
+                'tipo' => "success"
+            ]);
+        } else {
+            $this->session->setFlashdata([
+                'titulo' => "¡Error!",
+                'mensaje' => "No se pudieron asignar los tags al usuario.",
+                'tipo' => "danger"
+            ]);
+        }
+
+        return redirect()->to("usuarios/detalle/{$usuario_id}");
+    }
+
+    /**
+     * Devuelve el catálogo de tags con el conteo de usuarios asociados.
+     * Utilizado por AJAX en el modal de selección de tags.
+     *
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function tagsCatalog()
+    {
+        try {
+            $tags = $this->tagsModel->allOrdered();
+            $tagStats = $this->tagsModel->getUsersCountByTag();
+
+            // Añadir el conteo de usuarios a cada tag
+            foreach ($tags as &$tag) {
+                $tag['user_count'] = $tagStats[$tag['slug']] ?? 0;
+            }
+            unset($tag); // Romper la referencia del último elemento
+
+            return $this->response->setJSON([
+                'ok'   => true,
+                'data' => $tags
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON([
+                'ok'        => false,
+                'message'   => 'Error al obtener las etiquetas',
+                'exception' => $e->getMessage()
+            ]);
+        }
     }
 
     public function actualizar() {

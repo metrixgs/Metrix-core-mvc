@@ -226,8 +226,8 @@
             <option
                 value="<?= esc($t['slug']) ?>"
                 data-label="<?= esc($t['tag']) ?>"
-                data-count="<?= isset($stats[$t['slug']]) ? (int)$stats[$t['slug']] : '' ?>">
-                <?= esc($t['tag']) ?> (<?= esc($t['slug']) ?>)
+                data-count="<?= isset($stats[$t['slug']]) ? (int)$stats[$t['slug']] : 0 ?>">
+                <?= esc($t['tag']) ?> (<?= esc($t['slug']) ?>) [<?= isset($stats[$t['slug']]) ? (int)$stats[$t['slug']] : 0 ?> usuarios]
             </option>
         <?php endforeach; ?>
     <?php else: ?>
@@ -282,152 +282,210 @@
   }
 </style>
  <!-- ===== Loader de dependencias (solo si faltan) ===== -->
-<script>
-  if (!window.jQuery) {
-    document.write('<script src="https://code.jquery.com/jquery-3.7.1.min.js"><\/script>');
-  }
-</script>
+ <!-- Carga de jQuery de forma estándar -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Carga de Select2 CSS y JS -->
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
 
+<!-- Comentado temporalmente debido a SyntaxError en la consola -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script> -->
+<!-- <script src="path/to/choices.min.js"></script> -->
+<!-- <script src="path/to/flatpickr.min.js"></script> -->
+
 <script>
-(function($){
-  var $modal   = $('#modalUniverso');
-  var $select  = $('#selectTagsUniverso');
-  var $hidden  = $('#universo');
-  var $summary = $('#universoSeleccionado');
-  var $count   = $('#universoCount');
-  var $chips   = $('#chipsContainer');
-  var $csv     = $('#universoCsv');
+jQuery(document).ready(function($) {
+  try {
+    var $modal   = $('#modalUniverso');
+    var $select  = $('#selectTagsUniverso');
+    var $hidden  = $('#universo');
+    var $summary = $('#universoSeleccionado');
+    var $count   = $('#universoCount');
+    var $chips   = $('#chipsContainer');
+    var $csv     = $('#universoCsv');
+    var COUNT_USERS_URL = "<?= site_url('campanas/countUsersBySelectedTags') ?>"; // Nuevo endpoint
 
-  if ($.fn.select2) {
-    $('.select2').select2({ width: '100%' });
-  }
-
-  // Permitir selección uno a uno en select nativo
-  $select.on('mousedown', 'option', function (e) {
-    if ($select.data('select2')) return;
-    e.preventDefault();
-    var $opt = $(this);
-    $opt.prop('selected', !$opt.prop('selected'));
-    $select.trigger('change');
-    return false;
-  });
-
-  // Abrir modal
-  $modal.on('shown.bs.modal', function () {
-    // Reinicializa Select2 siempre para asegurar buscador
     if ($.fn.select2) {
-      if ($select.data('select2')) {
-        $select.select2('destroy');
+      $('.select2').select2({ width: '100%' });
+    }
+
+    // Permitir selección uno a uno en select nativo
+    $select.on('mousedown', 'option', function (e) {
+      if ($select.data('select2')) return;
+      e.preventDefault();
+      var $opt = $(this);
+      $opt.prop('selected', !$opt.prop('selected'));
+      $select.trigger('change');
+      return false;
+    });
+
+    // Abrir modal
+    $modal.on('shown.bs.modal', function () {
+      // Reinicializa Select2 siempre para asegurar buscador
+      if ($.fn.select2) {
+        if ($select.data('select2')) {
+          $select.select2('destroy');
+        }
+        // Usar setTimeout para asegurar que el DOM esté completamente renderizado
+        // antes de inicializar Select2 y establecer los valores.
+        setTimeout(() => {
+          $select.select2({
+            width: '100%',
+            placeholder: 'Escribe para buscar y selecciona uno o varios',
+            dropdownParent: $modal,
+            closeOnSelect: false
+          });
+          var slugs = parseCSV($hidden.val());
+          $select.val(slugs).trigger('change');
+        }, 100); // Pequeño retraso para asegurar la inicialización
+      } else {
+        var slugs = parseCSV($hidden.val());
+        $select.val(slugs).trigger('change');
       }
-      $select.select2({
-        width: '100%',
-        placeholder: 'Escribe para buscar y selecciona uno o varios',
-        dropdownParent: $modal,
-        closeOnSelect: false
+    });
+
+    // Cambio en selección
+    $select.on('change', function () {
+      var slugs = unique($select.val() || []);
+      renderChips(slugs);
+      $csv.val(slugs.join(','));
+      updateUniversoCount(slugs); // Llamar a la función para actualizar el conteo de usuarios
+    });
+
+    // Quitar chip
+    $chips.on('click', '.remove', function () {
+      var slug = $(this).closest('.chip').data('slug');
+      var current = unique($select.val() || []);
+      var next = current.filter(s => s !== slug);
+      $select.val(next).trigger('change');
+    });
+
+    // Limpiar selección
+    $('#btnClearUniverso').on('click', function () {
+      $select.val(null).trigger('change');
+      $csv.val('');
+    });
+
+    // Aplicar y cerrar
+    $('#btnAplicarUniverso').on('click', function () {
+      var slugs = parseCSV($csv.val());
+      $hidden.val(slugs.join(','));
+      renderBadges(slugs);
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getInstance($modal[0]).hide();
+      } else {
+        $modal.removeClass('show').attr('aria-hidden','true').hide();
+        $('.modal-backdrop').remove();
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+      }
+    });
+
+    // Helpers
+    function parseCSV(str) {
+      return (str || '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+    function unique(arr) {
+      return [...new Set(arr.map(s => s.trim()).filter(Boolean))];
+    }
+    function labelFor(slug) {
+      var opt = $select.find(`option[value="${slug}"]`);
+      return opt.data('label') || opt.text().split(' (')[0] || slug; // Ajuste para obtener solo el nombre del tag
+    }
+
+    function userCountFor(slug) {
+      var opt = $select.find(`option[value="${slug}"]`);
+      var count = opt.data('count') || 0;
+      console.log(`userCountFor(${slug}): ${count}`); // Depuración
+      return count;
+    }
+
+    function renderChips(slugs) {
+      $chips.empty();
+      if (!slugs.length) {
+        $chips.append('<span class="text-muted">No hay seleccionados</span>');
+        return;
+      }
+      slugs.forEach(slug => {
+        var lbl = labelFor(slug);
+        var count = userCountFor(slug);
+        var chip = $(
+          `<span class="chip" data-slug="${slug}">
+             ${$('<div>').text(lbl).html()} (${count})
+             <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
+           </span>`
+        );
+        $chips.append(chip);
       });
     }
-    var slugs = parseCSV($hidden.val());
-    $select.val(slugs).trigger('change');
-  });
-
-  // Cambio en selección
-  $select.on('change', function () {
-    var slugs = unique($select.val() || []);
-    renderChips(slugs);
-    $csv.val(slugs.join(','));
-  });
-
-  // Quitar chip
-  $chips.on('click', '.remove', function () {
-    var slug = $(this).closest('.chip').data('slug');
-    var current = unique($select.val() || []);
-    var next = current.filter(s => s !== slug);
-    $select.val(next).trigger('change');
-  });
-
-  // Limpiar selección
-  $('#btnClearUniverso').on('click', function () {
-    $select.val(null).trigger('change');
-    $csv.val('');
-  });
-
-  // Aplicar y cerrar
-  $('#btnAplicarUniverso').on('click', function () {
-    var slugs = parseCSV($csv.val());
-    $hidden.val(slugs.join(','));
-    renderBadges(slugs);
-    if (window.bootstrap && bootstrap.Modal) {
-      bootstrap.Modal.getInstance($modal[0]).hide();
-    } else {
-      $modal.removeClass('show').attr('aria-hidden','true').hide();
-      $('.modal-backdrop').remove();
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('padding-right');
+    function renderBadges(slugs) {
+      if (!slugs.length) {
+        $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
+        // No tocar $count aquí, ya se maneja en updateUniversoCount
+        return;
+      }
+      var html = slugs.map(slug => {
+        var lbl = labelFor(slug);
+        var count = userCountFor(slug); // Obtener el conteo de usuarios para este tag
+        return `<span class="badge bg-light border text-dark me-1 mb-1">#${$('<div>').text(lbl).html()} (${count})</span>`;
+      }).join('');
+      $summary.removeClass('text-muted').addClass('text-dark').html(html);
+      // No tocar $count aquí, ya se maneja en updateUniversoCount
     }
-  });
 
-  // Helpers
-  function parseCSV(str) {
-    return (str || '').split(',').map(s => s.trim()).filter(Boolean);
-  }
-  function unique(arr) {
-    return [...new Set(arr.map(s => s.trim()).filter(Boolean))];
-  }
-  function labelFor(slug) {
-    var opt = $select.find(`option[value="${slug}"]`);
-    return opt.data('label') || opt.text() || slug;
-  }
-  function renderChips(slugs) {
-    $chips.empty();
-    if (!slugs.length) {
-      $chips.append('<span class="text-muted">No hay seleccionados</span>');
-      return;
-    }
-    slugs.forEach(slug => {
-      var lbl = labelFor(slug);
-      var chip = $(
-        `<span class="chip" data-slug="${slug}">
-           ${$('<div>').text(lbl).html()}
-           <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
-         </span>`
-      );
-      $chips.append(chip);
-    });
-  }
-  function renderBadges(slugs) {
-    if (!slugs.length) {
-      $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
-      $count.text('0');
-      return;
-    }
-    var html = slugs.map(slug =>
-      `<span class="badge bg-light border text-dark me-1 mb-1">#${$('<div>').text(labelFor(slug)).html()}</span>`
-    ).join('');
-    $summary.removeClass('text-muted').addClass('text-dark').html(html);
-    $count.text(slugs.length);
-  }
+    // Función para actualizar el conteo de usuarios del universo
+    function updateUniversoCount(selectedSlugs) {
+      if (selectedSlugs.length === 0) {
+        $count.text('0');
+        return;
+      }
 
-  // Cargar estado inicial
-  (function initFromHiddenOnLoad(){
-    var initial = parseCSV($hidden.val());
-    if (initial.length) {
-      renderChips(initial);
-      renderBadges(initial);
-      $csv.val(initial.join(','));
+      console.log('Llamando a COUNT_USERS_URL con tags:', selectedSlugs.join(',')); // Depuración
+      $.getJSON(COUNT_USERS_URL, { tags: selectedSlugs.join(',') })
+        .done(function(resp) {
+          console.log('Respuesta de COUNT_USERS_URL:', resp); // Depuración
+          if (resp && resp.ok) {
+            $count.text(resp.count);
+          } else {
+            console.error('Error al obtener el conteo de usuarios:', resp.message || 'Error desconocido');
+            $count.text('?');
+          }
+        })
+        .fail(function(xhr) {
+          console.error('Falló la llamada AJAX para contar usuarios:', xhr.status, xhr.responseText);
+          $count.text('?');
+        });
     }
-  })();
 
-})(jQuery);
+    // Cargar estado inicial
+    (function initFromHiddenOnLoad(){
+      var initial = parseCSV($hidden.val());
+      if (initial.length) {
+        renderChips(initial);
+        renderBadges(initial);
+        $csv.val(initial.join(','));
+        updateUniversoCount(initial); // Actualizar el conteo al cargar la página
+      }
+    })();
+
+  } catch (e) {
+    console.error("Error en el script de modalUniverso:", e);
+  }
+});
 </script>
 
+<!-- Script para cargar tags vía AJAX si es necesario -->
 <script>
-(function(){
-  var TAGS_URL = "<?= site_url('campanas/tags') ?>";
-  var $ = window.jQuery;
-  if (!$) return;
+jQuery(document).ready(function($) {
+  try {
+    var TAGS_URL = "<?= site_url('campanas/tags') ?>";
+    // Asegurarse de que jQuery esté disponible
+    if (typeof $ === 'undefined' || !$) {
+      console.error("jQuery no está disponible. El script de tags AJAX no se ejecutará.");
+      return;
+    }
 
   function showTagError(msg) {
     var $alert = $('#tagDebugAlert');
@@ -455,10 +513,15 @@
           return;
         }
         rows.forEach(function(r){
-          var text = (r.tag || r.slug) + ' (' + r.slug + ')';
-          var opt  = new Option(text, r.slug, false, false);
-          opt.setAttribute('data-label', r.tag || r.slug);
-          $select.append(opt);
+          // Solo añadir tags si tienen al menos un usuario asociado
+          if (r.user_count > 0) {
+            var userCount = r.user_count !== undefined ? r.user_count : 0;
+            var text = (r.tag || r.slug) + ' (' + r.slug + ')' + (userCount > 0 ? ' [' + userCount + ' usuarios]' : '');
+            var opt  = new Option(text, r.slug, false, false);
+            opt.setAttribute('data-label', r.tag || r.slug);
+            opt.setAttribute('data-count', userCount);
+            $select.append(opt);
+          }
         });
         if ($.fn.select2 && $select.data('select2')) {
           $select.trigger('change');
@@ -471,6 +534,8 @@
         }
         showTagError(msg + ' Revisa la ruta <?= site_url('campanas/tags') ?> y el acceso a la DB.');
       });
-  });
-})();
+  } catch (e) {
+    console.error("Error en el script de carga de tags AJAX:", e);
+  }
+});
 </script>
