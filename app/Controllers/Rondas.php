@@ -12,6 +12,7 @@ use App\Models\SegmentacionesModel;
 use App\Models\RondasSegmentacionesModel;
 use App\Models\AreasModel; // Añadir el modelo de Áreas (Dependencias)
 use App\Models\TagModel; // Añadir el modelo de Tags
+use App\Models\BrigadasModel; // Añadir el modelo de Brigadas
 
 class Rondas extends BaseController {
 
@@ -22,6 +23,7 @@ class Rondas extends BaseController {
     protected $segmentaciones;
     protected $rondasSegmentaciones;
     protected $areas; // Añadir propiedad para AreasModel
+    protected $brigadasModel; // Añadir propiedad para BrigadasModel
 
     public function __construct() {
         // Instanciar los modelos
@@ -34,6 +36,7 @@ class Rondas extends BaseController {
         $this->areas = new AreasModel(); // Instanciar AreasModel
         $this->survey = new SurveyModel();
         $this->tagsModel = new TagModel(); // Instanciar TagModel
+        $this->brigadasModel = new BrigadasModel(); // Instanciar BrigadasModel
 
         # Cargar los Helpers
         helper('Alerts');
@@ -181,13 +184,10 @@ class Rondas extends BaseController {
     // Cargar usuarios y segmentaciones
     $data['segmentaciones'] = $this->segmentaciones->obtenerSegmentaciones();
     $data['surveys'] = $this->survey->findAll();
-    // Obtener todas las dependencias para el campo 'Brigada(s)'
-    $data['dependencias'] = $this->areas->obtenerAreas();
-    // Obtener todas las dependencias para el campo 'Brigada(s)'
-    $data['dependencias'] = $this->areas->obtenerAreas();
-    $data['brigadas'] = $this->usuarios->where('rol_id', 9)->findAll();
+    // Obtener todas las brigadas del modelo BrigadasModel
+    $data['brigadas'] = $this->brigadasModel->findAll();
     $data['operadores'] = []; // Inicialmente vacío, se llenará dinámicamente
-    $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll();
+    $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll(); // Esto parece ser para coordinadores, no para brigadas en sí.
 
     if ($this->request->getMethod() === 'post') {
         // Recoger los datos del formulario

@@ -81,10 +81,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="brigadas" class="form-label">Brigada(s):</label>
-                                    <select name="brigadas" id="brigadas" class="form-select select2">
-                                        <!-- El placeholder se maneja con Select2 -->
-                                        <?php foreach($dependencias as $dep): ?>
-                                            <option value="<?= esc($dep['id']) ?>" <?= (old('brigadas') == $dep['id']) ? 'selected' : '' ?>><?= esc($dep['nombre']) ?></option>
+                                    <select name="brigada_id" id="brigadas" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione una brigada</option>
+                                        <?php foreach($brigadas as $brigada): ?>
+                                            <option value="<?= esc($brigada['id']) ?>" <?= (old('brigada_id') == $brigada['id']) ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
