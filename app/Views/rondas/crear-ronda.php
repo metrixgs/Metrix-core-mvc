@@ -107,24 +107,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">
-                                        Universo (<span id="universoCount">0</span>)
-                                    </label>
-                                    <button type="button"
-                                            class="btn btn-outline-primary w-100"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalUniverso">
-                                        Seleccionar Universo
-                                    </button>
-                                    <!-- Valor final CSV (slugs) -->
-                                    <input type="hidden" id="universo" name="universo" value="<?= old('universo', '') ?>">
-                                    <!-- Resumen visual -->
-                                    <div id="universoSeleccionado" class="mt-2 text-muted small">
-                                        Ningún universo seleccionado
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label for="entregable" class="form-label">Entregable:</label>
                                     <input type="number" name="entregable" id="entregable" class="form-control" placeholder="# de orden de trabajo" value="<?= old('entregable') ?>">
                                 </div>
@@ -158,6 +141,49 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                             <option value="<?= esc($seg['id']) ?>" <?= old('sectorizacion') == $seg['id'] ? 'selected' : '' ?>><?= esc($seg['descripcion']) ?></option>
                                         <?php endforeach; ?>
                                     </select>
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <label class="form-label fw-semibold">
+                                        Universo (<span id="universoCount">0</span>)
+                                    </label>
+                                    <button type="button"
+                                            class="btn btn-outline-primary w-100"
+                                            id="btnToggleUniverso">
+                                        Seleccionar Universo
+                                    </button>
+                                    <!-- Valor final CSV (slugs) -->
+                                    <input type="hidden" id="universo" name="universo" value="<?= old('universo', '') ?>">
+                                    <!-- Resumen visual -->
+                                    <div id="universoSeleccionado" class="mt-2 text-muted small">
+                                        Ningún universo seleccionado
+                                    </div>
+
+                                    <div id="universoContent" class="mt-3 d-none">
+                                        <label class="form-label fw-semibold">Escribe para buscar y selecciona uno o varios</label>
+                                        <!-- Avisos -->
+                                        <div id="tagDebugAlert" class="alert alert-danger d-none"></div>
+                                        <!-- Opciones renderizadas desde el servidor -->
+                                        <select id="selectTagsUniverso" class="form-control" multiple>
+                                            <!-- Los tags se cargarán dinámicamente vía AJAX -->
+                                        </select>
+                                        <!-- Chips con “x” para quitar -->
+                                        <div class="mt-3">
+                                            <label class="form-label mb-1">Seleccionados</label>
+                                            <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
+                                        </div>
+                                        <!-- CSV de slugs (solo lectura) -->
+                                        <div class="mt-2">
+                                            <label class="form-label">Slugs (separados por comas)</label>
+                                            <input id="universoCsv" class="form-control" type="text" readonly>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            Al pulsar “Aplicar”, el valor se guarda en el formulario (input hidden) y verás los badges en la tarjeta.
+                                        </small>
+                                        <div class="mt-3 text-end">
+                                            <button type="button" id="btnClearUniverso" class="btn btn-outline-secondary me-2">Limpiar</button>
+                                            <button type="button" id="btnAplicarUniverso" class="btn btn-primary">Aplicar</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -313,52 +339,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     });
 </script>
 
-<!-- ===================== MODAL UNIVERSO ===================== -->
-<div class="modal fade" id="modalUniverso" tabindex="-1" aria-labelledby="modalUniversoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalUniversoLabel">Seleccionar Universo (Tags)</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body">
-        <label class="form-label fw-semibold">Escribe para buscar y selecciona uno o varios</label>
-
-        <!-- Avisos -->
-        <div id="tagDebugAlert" class="alert alert-danger d-none"></div>
-
-        <!-- Opciones renderizadas desde el servidor -->
-        <select id="selectTagsUniverso" class="form-control" multiple>
-            <!-- Los tags se cargarán dinámicamente vía AJAX -->
-        </select>
-
-        <!-- Chips con “x” para quitar -->
-        <div class="mt-3">
-          <label class="form-label mb-1">Seleccionados</label>
-          <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
-        </div>
-
-        <!-- CSV de slugs (solo lectura) -->
-        <div class="mt-2">
-          <label class="form-label">Slugs (separados por comas)</label>
-          <input id="universoCsv" class="form-control" type="text" readonly>
-        </div>
-
-        <small class="text-muted d-block mt-2">
-          Al pulsar “Aplicar”, el valor se guarda en el formulario (input hidden) y verás los badges en la tarjeta.
-        </small>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" id="btnClearUniverso" class="btn btn-outline-secondary">Limpiar</button>
-        <button type="button" id="btnAplicarUniverso" class="btn btn-primary">Aplicar</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ========================================================= -->
-
 <style>
   .chip {
     display: inline-flex; align-items: center;
@@ -381,7 +361,8 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 
 <script>
 (function($){
-  var $modal   = $('#modalUniverso');
+  var $btnToggleUniverso = $('#btnToggleUniverso');
+  var $universoContent = $('#universoContent');
   var $select  = $('#selectTagsUniverso');
   var $hidden  = $('#universo');
   var $summary = $('#universoSeleccionado');
@@ -389,22 +370,70 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
   var $chips   = $('#chipsContainer');
   var $csv     = $('#universoCsv');
 
-  // Abrir modal
-  $modal.on('shown.bs.modal', function () {
-    // Reinicializa Select2 siempre para asegurar buscador
-    if ($.fn.select2) {
-      if ($select.data('select2')) {
-        $select.select2('destroy');
-      }
+  // Inicializar Select2 para Universo (selección múltiple)
+  function initSelect2Universo() {
+    if ($.fn.select2 && !$select.data('select2')) { // Solo inicializar si no está ya inicializado
       $select.select2({
         width: '100%',
         placeholder: 'Escribe para buscar y selecciona uno o varios',
-        dropdownParent: $modal,
         closeOnSelect: false
       });
     }
-    var slugs = parseCSV($hidden.val());
-    $select.val(slugs).trigger('change');
+  }
+
+  // Cargar tags y estado inicial
+  function loadTagsAndInitialState() {
+    var TAGS_URL = "<?= site_url('rondas/tags') ?>";
+    function showTagError(msg) {
+      var $alert = $('#tagDebugAlert');
+      $alert.text(msg).removeClass('d-none');
+    }
+
+    $.getJSON(TAGS_URL + '?debug=1')
+      .done(function(resp){
+        if (resp && resp.ok === false) {
+          showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
+          return;
+        }
+        var rows = resp && resp.data ? resp.data : resp;
+        if (!Array.isArray(rows)) {
+          showTagError('Respuesta inesperada del servidor.');
+          return;
+        }
+        if (rows.length === 0) {
+          showTagError('No hay tags para mostrar.');
+          return;
+        }
+        rows.forEach(function(r){
+          var text = (r.tag || r.slug) + ' (' + r.slug + ')';
+          var opt  = new Option(text, r.slug, false, false);
+          opt.setAttribute('data-label', r.tag || r.slug);
+          $select.append(opt);
+        });
+
+        var initial = parseCSV($hidden.val());
+        if (initial.length) {
+          $select.val(initial).trigger('change');
+        } else {
+          $select.trigger('change'); // Disparar para inicializar el contador y chips si no hay nada
+        }
+      })
+      .fail(function(xhr){
+        var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
+        if (xhr.responseJSON && xhr.responseJSON.exception) {
+          msg += ' ' + xhr.responseJSON.exception;
+        }
+        showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
+      });
+  }
+
+  // Evento para mostrar/ocultar el contenido del universo
+  $btnToggleUniverso.on('click', function() {
+    $universoContent.toggleClass('d-none');
+    if (!$universoContent.hasClass('d-none')) {
+      initSelect2Universo();
+      loadTagsAndInitialState(); // Cargar tags y estado inicial cuando se muestra
+    }
   });
 
   // Cambio en selección
@@ -412,6 +441,8 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     var slugs = unique($select.val() || []);
     renderChips(slugs);
     $csv.val(slugs.join(','));
+    $count.text(slugs.length); // Actualizar el contador de universo
+    renderBadges(slugs); // Actualizar los badges en el resumen
   });
 
   // Quitar chip
@@ -428,19 +459,13 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     $csv.val('');
   });
 
-  // Aplicar y cerrar
+  // Aplicar (actualiza el hidden input y el resumen)
   $('#btnAplicarUniverso').on('click', function () {
     var slugs = parseCSV($csv.val());
     $hidden.val(slugs.join(','));
     renderBadges(slugs);
-    if (window.bootstrap && bootstrap.Modal) {
-      bootstrap.Modal.getInstance($modal[0]).hide();
-    } else {
-      $modal.removeClass('show').attr('aria-hidden','true').hide();
-      $('.modal-backdrop').remove();
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('padding-right');
-    }
+    // Opcional: ocultar el contenido del universo después de aplicar
+    $universoContent.addClass('d-none');
   });
 
   // Helpers
@@ -484,67 +509,14 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     $count.text(slugs.length);
   }
 
-  // Cargar estado inicial
+  // Cargar estado inicial del universo al cargar la página
+  // Esto asegura que el contador y los badges se muestren correctamente al inicio
   (function initFromHiddenOnLoad(){
     var initial = parseCSV($hidden.val());
     if (initial.length) {
-      renderChips(initial);
       renderBadges(initial);
-      $csv.val(initial.join(','));
     }
   })();
 
 })(jQuery);
-</script>
-
-<script>
-(function(){
-  var TAGS_URL = "<?= site_url('rondas/tags') ?>"; // Cambiado a la ruta de rondas
-  var $ = window.jQuery;
-  if (!$) return;
-
-  function showTagError(msg) {
-    var $alert = $('#tagDebugAlert');
-    $alert.text(msg).removeClass('d-none');
-  }
-
-  $('#modalUniverso').on('shown.bs.modal', function(){
-    var $select = $('#selectTagsUniverso');
-    // var hasOptions = $select.find('option[value]').length > 0; // Eliminado para forzar recarga
-    // if (hasOptions) return; // Eliminado para forzar recarga
-
-    $.getJSON(TAGS_URL + '?debug=1')
-      .done(function(resp){
-        if (resp && resp.ok === false) {
-          showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
-          return;
-        }
-        var rows = resp && resp.data ? resp.data : resp;
-        if (!Array.isArray(rows)) {
-          showTagError('Respuesta inesperada del servidor.');
-          return;
-        }
-        if (rows.length === 0) {
-          showTagError('No hay tags para mostrar.');
-          return;
-        }
-        rows.forEach(function(r){
-          var text = (r.tag || r.slug) + ' (' + r.slug + ')';
-          var opt  = new Option(text, r.slug, false, false);
-          opt.setAttribute('data-label', r.tag || r.slug);
-          $select.append(opt);
-        });
-        if ($.fn.select2 && $select.data('select2')) {
-          $select.trigger('change');
-        }
-      })
-      .fail(function(xhr){
-        var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
-        if (xhr.responseJSON && xhr.responseJSON.exception) {
-          msg += ' ' + xhr.responseJSON.exception;
-        }
-        showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
-      });
-  });
-})();
 </script>
