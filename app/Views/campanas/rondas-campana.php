@@ -63,7 +63,6 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th scope="col">ID Ronda</th>
-                                        <th scope="col">Nombre</th>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Horario</th>
                                         <th scope="col">Brigada</th>
@@ -77,7 +76,6 @@
                                         <?php foreach ($rondas as $ronda): ?>
                                             <tr>
                                                 <td>#RDA-<?= str_pad($ronda['id'] ?? 0, 6, '0', STR_PAD_LEFT); ?></td>
-                                                <td><?= esc($ronda['nombre'] ?? 'N/A'); ?></td>
                                                 <td><?= esc($ronda['fecha_actividad'] ?? 'N/A'); ?></td>
                                                 <td><?= esc($ronda['hora_actividad'] ?? 'N/A'); ?></td>
                                                 <td><?= esc($ronda['brigada_nombre'] ?? 'N/A'); ?></td>
@@ -111,7 +109,7 @@
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="8" class="text-center">No hay rondas vinculadas a esta campaña.</td>
+                                            <td colspan="7" class="text-center">No hay rondas vinculadas a esta campaña.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
