@@ -13,7 +13,8 @@ class UsuariosModel extends Model {
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'area_id', 'cargo', 'nombre', 'correo', 'telefono', 'contrasena', 
+        'codigo_ciudadano', 'curp', 'area_id', 'cargo', 'nombre', 'correo', 'telefono', 'contrasena',
+        'residencia', 'localidad', 'colonia', 'calle', 'codigo_postal', 'nivel_estudios', 'latitud', 'longitud',
         'rol_id', 'fecha_registro', 'creado_por_id', 'cuenta_id', 'created_by'
     ];
     protected $useTimestamps = false;
