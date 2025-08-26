@@ -646,6 +646,9 @@ class Tickets extends BaseController {
             # Cargar la plantilla del recordatorio
             $template = file_get_contents('app/Views/templates/notificacion_cierre_ticket.php');
 
+            # Obtenemos informacion del area...
+            $area = $this->areas->obtenerArea($ticket['area_id']);
+
             # Reemplazar las variables dinámicas
             $variables = [
                 '{{area_nombre}}' => $area['nombre'],
@@ -719,7 +722,7 @@ class Tickets extends BaseController {
         
         # Definimos las reglas de validación para los campos...
         $validationRules = [
-            'area_id' => 'required|numeric',
+            'area_id' => 'permit_empty|numeric|area_exists',
             'campana_id' => 'required|numeric',
             'cliente_id' => 'required|numeric',
             'titulo' => 'required|min_length[3]|max_length[255]',
@@ -822,7 +825,9 @@ class Tickets extends BaseController {
                     return redirect()->to("tickets/detalle/{$ticket_id}");
                 }
 
-                # Generar un nombre único para el archivo sin agregar la extensión dos veces
+                # Generar un nombre único para el archivo
+                $newName = $imagen->getRandomName();
+                
                 $usuario_id = $this->getUsuarioId();
                 if (empty($usuario_id)) {
                     $this->session->setFlashdata([
@@ -832,10 +837,8 @@ class Tickets extends BaseController {
                     ]);
                     return redirect()->to("login");
                 }
-                $imagen->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo sin extensión adicional
-                # Ahora añadimos la extensión solo una vez
-                $rutaConExtension = 'public/uploads/tickets/archivos/' . $newName;
-                $ruta = $rutaConExtension;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
+                $imagen->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo
+                $ruta = 'public/uploads/tickets/archivos/' . $newName;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
 
                 # Preparar los datos para la base de datos
                 $infoArchivo = [
