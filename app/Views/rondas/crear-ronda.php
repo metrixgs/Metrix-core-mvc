@@ -269,11 +269,52 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
             }, false);
         });
 
-        // Lógica para el botón "Generar Asignación" (se mantiene sin funcionalidad específica por ahora)
+        // Lógica para el botón "Generar Asignación"
         document.getElementById('btnGenerarAsignacion').addEventListener('click', function() {
-            // Aquí se podría añadir lógica para recalcular o reasignar puntos si fuera necesario
-            // Por ahora, la tarea se enfoca en la aparición dinámica al seleccionar operadores.
-            console.log('Botón Generar Asignación clickeado.');
+            var totalUsers = 10; // Simulación: Forzar el universo a 10
+            var selectedOperators = $('#operadores').select2('data');
+            var numOperators = selectedOperators.length;
+            var distribucionContainer = $('#distribucion-container');
+
+            if (numOperators === 0) {
+                alert('Por favor, seleccione al menos un operador para generar la asignación.');
+                return;
+            }
+
+            if (totalUsers === 0) {
+                alert('El universo de usuarios es 0. No se pueden asignar puntos.');
+                return;
+            }
+
+            var basePointsPerOperator = Math.floor(totalUsers / numOperators);
+            var remainder = totalUsers % numOperators;
+
+            distribucionContainer.empty(); // Limpiar el contenedor actual
+
+            selectedOperators.forEach(function(operator, index) {
+                var operatorName = operator.text.split(' (#')[0];
+                var operatorId = operator.id;
+                var points = basePointsPerOperator;
+
+                if (index < remainder) {
+                    points++; // Distribuir el resto entre los primeros operadores
+                }
+
+                // Simulación: Asignar 9 puntos al primer operador seleccionado
+                if (index === 0) {
+                    points = 9;
+                }
+
+                var html = `
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">${operatorName}</span>
+                            <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="${points}" min="0">
+                        </div>
+                    </div>
+                `;
+                distribucionContainer.append(html);
+            });
         });
 
         // Lógica para cargar operadores al seleccionar una brigada
@@ -321,7 +362,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         <div class="col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text">${operatorName}</span>
-                                <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="0">
+                                <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="0" min="0">
                             </div>
                         </div>
                     `;
@@ -369,6 +410,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
   var $count   = $('#universoCount');
   var $chips   = $('#chipsContainer');
   var $csv     = $('#universoCsv');
+  var COUNT_USERS_URL = "<?= site_url('rondas/countUsersBySelectedTags') ?>"; // Nuevo endpoint para rondas
 
   // Inicializar Select2 para Universo (selección múltiple)
   function initSelect2Universo() {
@@ -389,42 +431,61 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
       $alert.text(msg).removeClass('d-none');
     }
 
-    $.getJSON(TAGS_URL + '?debug=1')
-      .done(function(resp){
-        if (resp && resp.ok === false) {
-          showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
-          return;
-        }
-        var rows = resp && resp.data ? resp.data : resp;
-        if (!Array.isArray(rows)) {
-          showTagError('Respuesta inesperada del servidor.');
-          return;
-        }
+    // Si ya tenemos los tags en el PHP, los usamos directamente
+    <?php if (!empty($catalogo_tags)): ?>
+        console.log('Tags cargados desde PHP:', <?= json_encode($catalogo_tags) ?>);
+        var rows = <?= json_encode($catalogo_tags) ?>;
+        processTags(rows);
+    <?php else: ?>
+        // Si no, hacemos la llamada AJAX
+        $.getJSON(TAGS_URL + '?debug=1')
+          .done(function(resp){
+            console.log('Respuesta AJAX de tags:', resp);
+            if (resp && resp.ok === false) {
+              showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
+              return;
+            }
+            var rows = resp && resp.data ? resp.data : resp;
+            if (!Array.isArray(rows)) {
+              showTagError('Respuesta inesperada del servidor.');
+              return;
+            }
+            processTags(rows);
+          })
+          .fail(function(xhr){
+            var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
+            if (xhr.responseJSON && xhr.responseJSON.exception) {
+              msg += ' ' + xhr.responseJSON.exception;
+            }
+            showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
+          });
+    <?php endif; ?>
+
+    function processTags(rows) {
         if (rows.length === 0) {
-          showTagError('No hay tags para mostrar.');
-          return;
+            showTagError('No hay tags para mostrar.');
+            return;
         }
+        $select.empty(); // Limpiar opciones existentes
         rows.forEach(function(r){
-          var text = (r.tag || r.slug) + ' (' + r.slug + ')';
-          var opt  = new Option(text, r.slug, false, false);
-          opt.setAttribute('data-label', r.tag || r.slug);
-          $select.append(opt);
+            // Solo añadir tags si tienen al menos un usuario asociado
+            if (r.user_count > 0) {
+                var userCount = r.user_count !== undefined ? r.user_count : 0;
+                var text = (r.tag || r.slug) + ' (' + r.slug + ')' + (userCount > 0 ? ' [' + userCount + ' usuarios]' : '');
+                var opt  = new Option(text, r.slug, false, false);
+                opt.setAttribute('data-label', r.tag || r.slug);
+                opt.setAttribute('data-count', userCount);
+                $select.append(opt);
+            }
         });
 
         var initial = parseCSV($hidden.val());
         if (initial.length) {
-          $select.val(initial).trigger('change');
+            $select.val(initial).trigger('change');
         } else {
-          $select.trigger('change'); // Disparar para inicializar el contador y chips si no hay nada
+            $select.trigger('change'); // Disparar para inicializar el contador y chips si no hay nada
         }
-      })
-      .fail(function(xhr){
-        var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
-        if (xhr.responseJSON && xhr.responseJSON.exception) {
-          msg += ' ' + xhr.responseJSON.exception;
-        }
-        showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
-      });
+    }
   }
 
   // Evento para mostrar/ocultar el contenido del universo
@@ -441,7 +502,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     var slugs = unique($select.val() || []);
     renderChips(slugs);
     $csv.val(slugs.join(','));
-    $count.text(slugs.length); // Actualizar el contador de universo
+    updateUniversoCount(slugs); // Llamar a la función para actualizar el conteo de usuarios
     renderBadges(slugs); // Actualizar los badges en el resumen
   });
 
@@ -477,8 +538,16 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
   }
   function labelFor(slug) {
     var opt = $select.find(`option[value="${slug}"]`);
-    return opt.data('label') || opt.text() || slug;
+    return opt.data('label') || opt.text().split(' (')[0] || slug; // Ajuste para obtener solo el nombre del tag
   }
+
+  function userCountFor(slug) {
+    var opt = $select.find(`option[value="${slug}"]`);
+    var count = opt.data('count') || 0;
+    console.log(`userCountFor(${slug}): ${count}`); // Depuración
+    return count;
+  }
+
   function renderChips(slugs) {
     $chips.empty();
     if (!slugs.length) {
@@ -487,9 +556,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     }
     slugs.forEach(slug => {
       var lbl = labelFor(slug);
+      var count = userCountFor(slug);
       var chip = $(
         `<span class="chip" data-slug="${slug}">
-           ${$('<div>').text(lbl).html()}
+           ${$('<div>').text(lbl).html()} (${count})
            <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
          </span>`
       );
@@ -499,14 +569,27 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
   function renderBadges(slugs) {
     if (!slugs.length) {
       $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
-      $count.text('0');
+      // No tocar $count aquí, ya se maneja en updateUniversoCount
       return;
     }
-    var html = slugs.map(slug =>
-      `<span class="badge bg-light border text-primary me-1 mb-1">#${$('<div>').text(labelFor(slug)).html()}</span>`
-    ).join('');
+    var html = slugs.map(slug => {
+      var lbl = labelFor(slug);
+      var count = userCountFor(slug); // Obtener el conteo de usuarios para este tag
+      return `<span class="badge bg-light border text-primary me-1 mb-1">#${$('<div>').text(lbl).html()} (${count})</span>`;
+    }).join('');
     $summary.removeClass('text-muted').addClass('text-primary').html(html);
-    $count.text(slugs.length);
+    // No tocar $count aquí, ya se maneja en updateUniversoCount
+  }
+
+  // Función para actualizar el conteo de usuarios del universo
+  function updateUniversoCount(selectedSlugs) {
+    let totalCount = 0;
+    if (selectedSlugs.length > 0) {
+      selectedSlugs.forEach(slug => {
+        totalCount += userCountFor(slug);
+      });
+    }
+    $count.text(totalCount);
   }
 
   // Cargar estado inicial del universo al cargar la página
@@ -515,6 +598,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
     var initial = parseCSV($hidden.val());
     if (initial.length) {
       renderBadges(initial);
+      updateUniversoCount(initial); // Actualizar el conteo al cargar la página
     }
   })();
 

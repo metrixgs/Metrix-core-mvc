@@ -188,6 +188,9 @@ class Rondas extends BaseController {
     $data['brigadas'] = $this->brigadasModel->findAll();
     $data['operadores'] = []; // Inicialmente vacío, se llenará dinámicamente
     $data['usuarios_coordinador'] = $this->usuarios->where('rol_id', 9)->findAll(); // Esto parece ser para coordinadores, no para brigadas en sí.
+    // Cargar tags para el modal Universo (solo tags con usuarios asociados y su conteo)
+    $data['catalogo_tags'] = $this->tagsModel->getTagsWithUserCounts();
+    $data['tag_stats'] = array_column($data['catalogo_tags'], 'user_count', 'slug');
 
     if ($this->request->getMethod() === 'post') {
         // Recoger los datos del formulario
@@ -206,7 +209,8 @@ class Rondas extends BaseController {
             'territorio' => $this->request->getPost('territorio'),
             'nombre_territorio' => $this->request->getPost('nombre_territorio'),
             'sectorizacion' => $this->request->getPost('sectorizacion'),
-            'nombre_sectorizacion' => $this->request->getPost('nombre_sectorizacion')
+            'nombre_sectorizacion' => $this->request->getPost('nombre_sectorizacion'),
+            'universo_tags' => $this->request->getPost('universo') // Guardar los tags seleccionados
         ];
 
         // Crear la ronda
@@ -223,6 +227,18 @@ class Rondas extends BaseController {
                 $this->rondasSegmentaciones->crearRelacion([
                     'ronda_id' => $rondaId,
                     'segmentacion_id' => $segId
+                ]);
+            }
+        }
+
+        // Guardar la distribución de puntos por operador
+        $puntosOperador = $this->request->getPost('puntos_operador');
+        if (!empty($puntosOperador) && is_array($puntosOperador)) {
+            foreach ($puntosOperador as $operadorId => $puntos) {
+                $this->rondaOperadorPuntosModel->insert([
+                    'ronda_id' => $rondaId,
+                    'operador_id' => $operadorId,
+                    'puntos_asignados' => $puntos
                 ]);
             }
         }
@@ -580,19 +596,68 @@ public function finalizarRondaWeb($id = null)
     public function tags()
     {
         try {
-            // Obtener todas las etiquetas ordenadas por nombre
-            $tags = $this->tagsModel->allOrdered(); // Devuelve id, tag, slug
+            // Obtener todos los tags con el conteo de usuarios, incluyendo aquellos con 0 usuarios
+            $tags = $this->tagsModel->getUsersCountByTag(); // Devuelve slug => user_count
+            $allTags = $this->tagsModel->allOrdered(); // Devuelve id, tag, slug
+
+            // Combinar la información para tener el formato esperado en el frontend
+            $formattedTags = [];
+            foreach ($allTags as $tagInfo) {
+                $slug = $tagInfo['slug'];
+                $formattedTags[] = [
+                    'id'         => $tagInfo['id'],
+                    'tag'        => $tagInfo['tag'],
+                    'slug'       => $slug,
+                    'user_count' => $tags[$slug] ?? 0 // Asignar el conteo o 0 si no existe
+                ];
+            }
 
             // Respuesta en formato JSON estándar
             return $this->response->setJSON([
                 'ok'   => true,
-                'data' => $tags
+                'data' => $formattedTags
             ]);
         } catch (\Throwable $e) {
             // Captura errores y responde con mensaje claro
             return $this->response->setJSON([
                 'ok'        => false,
                 'message'   => 'Error al obtener las etiquetas',
+                'exception' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Cuenta el número de usuarios asociados a los tags seleccionados.
+     * Este método es llamado vía AJAX desde la vista crear-ronda.php.
+     *
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function countUsersBySelectedTags()
+    {
+        try {
+            $tagSlugsString = $this->request->getGet('tags');
+            $tagSlugs = [];
+
+            if (!empty($tagSlugsString)) {
+                $tagSlugs = array_map('trim', explode(',', $tagSlugsString));
+                // Filtrar slugs vacíos si los hubiera
+                $tagSlugs = array_filter($tagSlugs);
+            }
+
+            $userCount = 0;
+            if (!empty($tagSlugs)) {
+                $userCount = $this->usuarios->countUsersByTags($tagSlugs);
+            }
+
+            return $this->response->setJSON([
+                'ok'    => true,
+                'count' => $userCount
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON([
+                'ok'        => false,
+                'message'   => 'Error al contar usuarios por tags',
                 'exception' => $e->getMessage()
             ]);
         }

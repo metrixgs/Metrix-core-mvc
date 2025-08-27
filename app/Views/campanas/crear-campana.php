@@ -437,26 +437,13 @@ jQuery(document).ready(function($) {
 
     // Función para actualizar el conteo de usuarios del universo
     function updateUniversoCount(selectedSlugs) {
-      if (selectedSlugs.length === 0) {
-        $count.text('0');
-        return;
-      }
-
-      console.log('Llamando a COUNT_USERS_URL con tags:', selectedSlugs.join(',')); // Depuración
-      $.getJSON(COUNT_USERS_URL, { tags: selectedSlugs.join(',') })
-        .done(function(resp) {
-          console.log('Respuesta de COUNT_USERS_URL:', resp); // Depuración
-          if (resp && resp.ok) {
-            $count.text(resp.count);
-          } else {
-            console.error('Error al obtener el conteo de usuarios:', resp.message || 'Error desconocido');
-            $count.text('?');
-          }
-        })
-        .fail(function(xhr) {
-          console.error('Falló la llamada AJAX para contar usuarios:', xhr.status, xhr.responseText);
-          $count.text('?');
+      let totalCount = 0;
+      if (selectedSlugs.length > 0) {
+        selectedSlugs.forEach(slug => {
+          totalCount += userCountFor(slug);
         });
+      }
+      $count.text(totalCount);
     }
 
     // Cargar estado inicial

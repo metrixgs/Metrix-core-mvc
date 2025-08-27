@@ -867,46 +867,33 @@ public function rondas($campana_id)
         return $breadcrumb->render();
     }
     
-        /**
-         * Cuenta el número de usuarios que tienen todos los tags proporcionados.
-         * Se espera una lista de slugs de tags en el parámetro 'tags' de la URL (CSV).
-         *
-         * @return \CodeIgniter\HTTP\ResponseInterface
-         */
-        public function countUsersBySelectedTags()
-        {
-            try {
-                $tagSlugs = $this->request->getGet('tags');
-                $tagSlugsArray = array_filter(array_map('trim', explode(',', $tagSlugs)));
-    
-                $count = $this->usuarios->countUsersByTags($tagSlugsArray);
-    
-                return $this->response->setJSON([
-                    'ok'    => true,
-                    'count' => $count
-                ]);
-            } catch (\Throwable $e) {
-                return $this->response->setJSON([
-                    'ok'        => false,
-                    'message'   => 'Error al contar usuarios por tags',
-                    'exception' => $e->getMessage()
-                ]);
-            }
-        }
 
-    public function tagsCatalog()
+    public function tags() // Renombrado de tagsCatalog a tags
 {
     try {
         // Cargar el modelo
         $tagModel = new \App\Models\TagModel();
 
-        // Obtener solo los tags que tienen usuarios asociados, junto con el conteo
-        $tags = $tagModel->getTagsWithUserCounts();
+        // Obtener todos los tags con el conteo de usuarios, incluyendo aquellos con 0 usuarios
+        $tags = $tagModel->getUsersCountByTag(); // Devuelve slug => user_count
+        $allTags = $tagModel->allOrdered(); // Devuelve id, tag, slug
+
+        // Combinar la información para tener el formato esperado en el frontend
+        $formattedTags = [];
+        foreach ($allTags as $tagInfo) {
+            $slug = $tagInfo['slug'];
+            $formattedTags[] = [
+                'id'         => $tagInfo['id'],
+                'tag'        => $tagInfo['tag'],
+                'slug'       => $slug,
+                'user_count' => $tags[$slug] ?? 0 // Asignar el conteo o 0 si no existe
+            ];
+        }
 
         // Respuesta en formato JSON estándar
         return $this->response->setJSON([
             'ok'   => true,
-            'data' => $tags
+            'data' => $formattedTags
         ]);
     } catch (\Throwable $e) {
         // Captura errores y responde con mensaje claro

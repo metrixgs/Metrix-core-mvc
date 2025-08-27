@@ -16,8 +16,9 @@ class RondasModel extends Model {
         'campana_id', 'nombre', 'coordinador', 'encargado',
         'coordinador_campana',
         'encuesta_ronda',
-        'fecha_actividad', 'hora_actividad', 'estado', 'universo', // Eliminado 'segmentacion_id' y 'ronda_id' si no son directos de la tabla
-        'entregable', 'territorio', 'nombre_territorio', 'sectorizacion', 'nombre_sectorizacion' // Añadidos campos de delimitación territorial
+        'fecha_actividad', 'hora_actividad', 'estado', 'universo',
+        'entregable', 'territorio', 'nombre_territorio', 'sectorizacion', 'nombre_sectorizacion',
+        'universo_tags' // Añadido el campo para almacenar los tags del universo
     ];
 
     protected $useTimestamps = false;
