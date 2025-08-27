@@ -82,7 +82,20 @@
             </div>
           </div>
         </div>
-      </div>     <!-- IMPACTOS -->
+      </div>
+      <!-- MAPA DE MÉXICO -->
+      <div class="col-md-6 mt-0">
+        <div class="card shadow" style="border-color: #8bc34a;">
+          <div class="card-header text-white" style="background-color: #8bc34a;">
+            <h6 class="mb-0 fw-semibold"></h6> <!-- Título eliminado -->
+          </div>
+          <div class="card-body bg-white">
+            <div id="mapaMexico" style="height: 300px; width: 100%;"></div> <!-- Altura reducida -->
+          </div>
+        </div>
+      </div>
+
+      <!-- IMPACTOS -->
       <div class="col-md-6">
         <div class="card shadow" style="border-color: #8bc34a;">
           <div class="card-header text-white" style="background-color: #8bc34a;">
@@ -112,7 +125,7 @@
       </div>
 
       <!-- RESPONSABLES -->
-      <div class="col-md-6">
+      <div class="col-md-6 mt-4">
         <div class="card shadow" style="border-color: #8bc34a;">
           <div class="card-header text-white" style="background-color: #8bc34a;">
             <h6 class="mb-0 fw-semibold">👥 Responsables</h6>
@@ -290,6 +303,10 @@
       href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
 
+<!-- Carga de Leaflet CSS y JS -->
+<link rel="stylesheet" href="<?= base_url('public/files/libs/leaflet/leaflet.css') ?>" />
+<script src="<?= base_url('public/files/libs/leaflet/leaflet.js') ?>"></script>
+
 <!-- Comentado temporalmente debido a SyntaxError en la consola -->
 <!-- <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script> -->
 <!-- <script src="path/to/choices.min.js"></script> -->
@@ -306,6 +323,11 @@ jQuery(document).ready(function($) {
     var $chips   = $('#chipsContainer');
     var $csv     = $('#universoCsv');
     var COUNT_USERS_URL = "<?= site_url('campanas/countUsersBySelectedTags') ?>"; // Nuevo endpoint
+
+    // Variables para el mapa
+    var map;
+    var currentGeoJsonLayer;
+    var selectedPolygons = []; // Para almacenar los polígonos seleccionados
 
     if ($.fn.select2) {
       $('.select2').select2({ width: '100%' });
@@ -525,4 +547,125 @@ jQuery(document).ready(function($) {
     console.error("Error en el script de carga de tags AJAX:", e);
   }
 });
+</script>
+
+<script>
+  jQuery(document).ready(function($) {
+    // Inicializar el mapa
+    map = L.map('mapaMexico').setView([23.6345, -102.5528], 5); // Centrado en México
+
+    // Añadir capa base de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Estilo por defecto para los polígonos
+    var defaultStyle = {
+      fillColor: '#8bc34a',
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '3',
+      fillOpacity: 0.7
+    };
+
+    // Estilo para polígonos seleccionados
+    var selectedStyle = {
+      fillColor: '#ff7800',
+      weight: 3,
+      opacity: 1,
+      color: '#666',
+      dashArray: '',
+      fillOpacity: 0.9
+    };
+
+    // Función para cargar capas GeoJSON
+    function loadGeoJsonLayer(geoJsonUrl) {
+      if (currentGeoJsonLayer) {
+        map.removeLayer(currentGeoJsonLayer);
+      }
+      selectedPolygons = []; // Limpiar selección al cambiar de capa
+
+      $.getJSON(geoJsonUrl, function(data) {
+        selectedPolygons = []; // Limpiar selección anterior
+
+        currentGeoJsonLayer = L.geoJSON(data, {
+          style: function(feature) {
+            // Aplicar selectedStyle a todos los polígonos al cargar la capa
+            var featureId = feature.properties.id || feature.properties.CVE_ENT || feature.properties.CVE_MUN;
+            selectedPolygons.push(featureId); // Añadir todos los IDs a la selección
+            return selectedStyle; // Estilo por defecto para todos los polígonos al cargar
+          },
+          onEachFeature: function(feature, layer) {
+            layer.on({
+              click: function(e) {
+                var clickedLayer = e.target;
+                var featureId = feature.properties.id || feature.properties.CVE_ENT || feature.properties.CVE_MUN;
+
+                if (selectedPolygons.includes(featureId)) {
+                  // Deseleccionar
+                  selectedPolygons = selectedPolygons.filter(id => id !== featureId);
+                  clickedLayer.setStyle(defaultStyle);
+                } else {
+                  // Seleccionar
+                  selectedPolygons.push(featureId);
+                  clickedLayer.setStyle(selectedStyle);
+                }
+                console.log("Polígonos seleccionados:", selectedPolygons);
+                // Aquí podrías actualizar un input hidden con los IDs seleccionados
+              }
+            });
+            // Opcional: Añadir tooltip o popup
+            if (feature.properties && feature.properties.NOM_ENT) {
+              layer.bindPopup(feature.properties.NOM_ENT);
+            } else if (feature.properties && feature.properties.NOM_MUN) {
+              layer.bindPopup(feature.properties.NOM_MUN);
+            } else if (feature.properties && feature.properties.NOM_LOC) { // Para delegaciones/localidades
+              layer.bindPopup(feature.properties.NOM_LOC);
+            } else if (feature.properties && feature.properties.NOM_DIST) { // Para distritos
+              layer.bindPopup(feature.properties.NOM_DIST);
+            } else if (feature.properties && feature.properties.SECCION) { // Para secciones
+              layer.bindPopup('Sección: ' + feature.properties.SECCION);
+            }
+          }
+        }).addTo(map);
+
+        map.fitBounds(currentGeoJsonLayer.getBounds());
+      }).fail(function(jqxhr, textStatus, error) {
+        var err = textStatus + ", " + error;
+        console.error("Request Failed: " + err);
+        alert("No se pudo cargar la capa GeoJSON: " + err);
+      });
+    }
+
+    // Cargar la capa de estados de México por defecto (ejemplo con GeoJSON)
+    // Necesitarás un endpoint que sirva GeoJSON para estados, municipios, etc.
+    // Por ahora, usaré un placeholder. Deberás reemplazar esto con tus URLs reales.
+    loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Placeholder
+
+    // Manejar el cambio en la selección de delimitación territorial
+    $('#territorio_local').on('change', function() {
+      var selectedValue = $(this).val();
+      if (selectedValue === 'municipio') {
+        loadGeoJsonLayer('<?= base_url('mapa/data/municipios.geojson') ?>'); // Placeholder
+      } else if (selectedValue === 'delegacion') {
+        loadGeoJsonLayer('<?= base_url('mapa/data/delegaciones.geojson') ?>'); // Placeholder
+      } else {
+        loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Por defecto
+      }
+    });
+
+    // Manejar el cambio en la selección de sector electoral
+    $('#sector_electoral').on('change', function() {
+      var selectedValue = $(this).val();
+      if (selectedValue === 'distrito') {
+        loadGeoJsonLayer('<?= base_url('mapa/data/distritos.geojson') ?>'); // Placeholder
+      } else if (selectedValue === 'seccion') {
+        loadGeoJsonLayer('<?= base_url('mapa/data/secciones.geojson') ?>'); // Placeholder
+      } else {
+        loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Por defecto
+      }
+    });
+
+  });
 </script>
