@@ -224,6 +224,12 @@
                                                     </div>
                                                     <div class="modal-body">
                   <?php
+// Cargar el helper de Wasabi S3
+helper('WasabiS3');
+
+// Nombre del bucket de Wasabi S3
+$wasabiBucketName = 'metrixapi'; // Nombre del bucket proporcionado por el usuario
+
 // Mejora para obtener la extensión de una URL de Wasabi S3
 function getFileExtensionFromUrl($url) {
     // Eliminar los parámetros de consulta de la URL
@@ -234,7 +240,18 @@ function getFileExtensionFromUrl($url) {
 
 // Usar en tu código:
 $extension = getFileExtensionFromUrl($archivo['ruta']);
-$rutaArchivo = $archivo['ruta']; // La URL completa de Wasabi S3
+
+// Generar la URL pre-firmada para Wasabi S3
+// Asume que $archivo['ruta'] contiene la clave del objeto en el bucket (ej. 'uploads/tickets/archivos/imagen.jpg')
+$rutaArchivo = get_signed_wasabi_s3_url($wasabiBucketName, $archivo['ruta']);
+
+// Si la URL firmada es nula (hubo un error), se puede intentar con base_url() como fallback o mostrar un error.
+if (is_null($rutaArchivo)) {
+    // Fallback a la ruta original si la firma falla, o manejar el error.
+    $rutaArchivo = base_url($archivo['ruta']);
+    // Opcional: Loggear el error o mostrar un mensaje al usuario.
+    error_log("No se pudo generar la URL firmada para: " . $archivo['ruta']);
+}
 
 // Vista previa según el tipo de archivo
 if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
@@ -249,7 +266,7 @@ if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
 } else {
     echo "Este formato no es compatible para vista previa.";
 }
-                                                        ?>
+                                                         ?>
                                                         <br><br>
                                                         <!-- Opción de descarga para todos los archivos -->
                                                         <a href="<?= $rutaArchivo ?>" class="btn btn-primary" download>Descargar archivo</a>
