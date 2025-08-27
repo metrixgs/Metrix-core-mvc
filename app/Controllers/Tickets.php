@@ -42,7 +42,7 @@ class Tickets extends BaseController {
         $this->tipos = new TiposIncidenciasModel();
 
         # Cargar los Helpers
-        helper(['Alerts', 'Email', 'Rol', 'Menu', 'bitacora']);
+        helper(['Alerts', 'Email', 'Rol', 'Menu', 'bitacora', 'WasabiS3']);
     }
 
     public function index() {
@@ -722,7 +722,7 @@ class Tickets extends BaseController {
         
         # Definimos las reglas de validación para los campos...
         $validationRules = [
-            'area_id' => 'permit_empty|numeric|area_exists',
+            'area_id' => 'permit_empty|numeric|area_exists', // Revertido a permit_empty
             'campana_id' => 'required|numeric',
             'cliente_id' => 'required|numeric',
             'titulo' => 'required|min_length[3]|max_length[255]',
@@ -837,18 +837,42 @@ class Tickets extends BaseController {
                     ]);
                     return redirect()->to("login");
                 }
-                $imagen->move('public/uploads/tickets/archivos/', $newName); // Guardamos el archivo
-                $ruta = 'public/uploads/tickets/archivos/' . $newName;  // Actualizamos la ruta para usar la nueva ruta con la extensión correcta
+                
+                // Ruta del archivo en Wasabi S3
+                $s3ObjectKey = 'uploads/tickets/archivos/' . $newName;
+                $wasabiBucketName = 'metrixapi'; // Nombre del bucket proporcionado por el usuario
+
+                // Subir el archivo a Wasabi S3
+                $s3Client = get_wasabi_s3_client();
+                try {
+                    $s3Client->putObject([
+                        'Bucket' => $wasabiBucketName,
+                        'Key' => $s3ObjectKey,
+                        'SourceFile' => $imagen->getTempName(), // Usar el archivo temporal subido
+                        'ContentType' => $imagen->getMimeType(),
+                        'ACL' => 'public-read', // Opcional: si quieres que los archivos sean públicamente accesibles (sin firmar)
+                    ]);
+                    $ruta = $s3ObjectKey; // Guardar la clave del objeto S3 en la base de datos
+                } catch (\Aws\Exception\AwsException $e) {
+                    // Manejar el error de subida a S3
+                    error_log("Error al subir archivo a Wasabi S3: " . $e->getMessage());
+                    $this->session->setFlashdata([
+                        'titulo' => "¡Error!",
+                        'mensaje' => "No se pudo subir el archivo a Wasabi S3: " . $e->getMessage(),
+                        'tipo' => "danger"
+                    ]);
+                    return redirect()->to("tickets/detalle/{$ticket_id}");
+                }
 
                 # Preparar los datos para la base de datos
                 $infoArchivo = [
                     'ticket_id' => $ticket_id,
                     'usuario_id' => $usuario_id,
                     'descripcion' => $descripcion,
-                    'ruta' => $ruta,
-                    'extencion' => $extencion, // Guardamos la extensión en lugar del MIME
+                    'ruta' => $ruta, // Ahora contiene la clave del objeto S3
+                    'extencion' => $extencion,
                     'tamano' => $tamano,
-                    'tipo_mime' => $extencion,
+                    'tipo_mime' => $imagen->getMimeType(), // Usar el tipo MIME real del archivo
                     'fecha_subida' => date('Y-m-d H:i:s')
                 ];
 
