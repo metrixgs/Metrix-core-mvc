@@ -875,8 +875,8 @@ public function rondas($campana_id)
         $tagModel = new \App\Models\TagModel();
 
         // Obtener todos los tags con el conteo de usuarios, incluyendo aquellos con 0 usuarios
-        $tags = $tagModel->getUsersCountByTag(); // Devuelve slug => user_count
         $allTags = $tagModel->allOrdered(); // Devuelve id, tag, slug
+        $userCounts = $tagModel->getUsersCountByTag(); // Devuelve slug => user_count
 
         // Combinar la información para tener el formato esperado en el frontend
         $formattedTags = [];
@@ -886,7 +886,7 @@ public function rondas($campana_id)
                 'id'         => $tagInfo['id'],
                 'tag'        => $tagInfo['tag'],
                 'slug'       => $slug,
-                'user_count' => $tags[$slug] ?? 0 // Asignar el conteo o 0 si no existe
+                'user_count' => $userCounts[$slug] ?? 0 // Asignar el conteo o 0 si no existe
             ];
         }
 
