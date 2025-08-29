@@ -79,21 +79,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="brigadas" class="form-label">Brigada(s):</label>
-                                    <select name="brigada_id" id="brigadas" class="form-select select2">
-                                        <option value="" disabled selected hidden>Seleccione una brigada</option>
-                                        <?php foreach($brigadas as $brigada): ?>
-                                            <option value="<?= esc($brigada['id']) ?>" <?= (old('brigada_id') == $brigada['id']) ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="operadores" class="form-label">Operadores:</label>
-                                    <select name="operadores[]" id="operadores" class="form-select select2" multiple>
-                                        <!-- Los operadores se cargarán dinámicamente vía AJAX -->
-                                    </select>
-                                </div>
                                 <div class="col-md-6 mt-3">
                                     <label for="coordinador" class="form-label">Coordinador:</label>
                                     <select name="coordinador" id="coordinador" class="form-select select2" required>
@@ -145,6 +130,21 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="brigadas" class="form-label">Brigada(s):</label>
+                                    <select name="brigada_id" id="brigadas" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione una brigada</option>
+                                        <?php foreach($brigadas as $brigada): ?>
+                                            <option value="<?= esc($brigada['id']) ?>" <?= (old('brigada_id') == $brigada['id']) ? 'selected' : '' ?>><?= esc($brigada['nombre']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="operadores" class="form-label">Operadores:</label>
+                                    <select name="operadores[]" id="operadores" class="form-select select2" multiple>
+                                        <!-- Los operadores se cargarán dinámicamente vía AJAX -->
+                                    </select>
+                                </div>
                                 <div class="col-md-6">
                                     <label for="territorio" class="form-label">Territorio:</label>
                                     <select name="territorio" id="territorio" class="form-select select2">
