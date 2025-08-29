@@ -119,7 +119,16 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label for="encuesta_ronda" class="form-label">Encuesta de Ronda:</label>
+                                    <select name="encuesta_ronda" id="encuesta_ronda" class="form-select select2">
+                                        <option value="" disabled selected hidden>Seleccione una encuesta</option>
+                                        <?php foreach($surveys as $survey): ?>
+                                            <option value="<?= esc($survey['id']) ?>" <?= (old('encuesta_ronda') == $survey['id']) ? 'selected' : '' ?>><?= esc($survey['title']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
                                     <label for="entregable" class="form-label">Entregable:</label>
                                     <input type="number" name="entregable" id="entregable" class="form-control" placeholder="# de orden de trabajo" value="<?= old('entregable') ?>">
                                 </div>
