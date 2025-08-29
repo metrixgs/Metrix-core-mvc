@@ -159,6 +159,19 @@ class Rondas extends BaseController {
         $data['ronda']['visitas_realizadas'] = $visitas_realizadas;
         $data['ronda']['universo'] = $universo; // Asegurarse de que el universo esté disponible en la vista
 
+        // Obtener la distribución de puntos por operador para esta ronda
+        $puntos_operadores_raw = $this->rondaOperadorPuntosModel->where('ronda_id', $id)->findAll();
+        $puntos_operadores = [];
+
+        foreach ($puntos_operadores_raw as $puntos_op) {
+            $operador = $this->usuarios->find($puntos_op['operador_id']);
+            $puntos_operadores[] = [
+                'operador_nombre' => $operador['nombre'] ?? 'N/A',
+                'puntos_asignados' => $puntos_op['puntos_asignados']
+            ];
+        }
+        $data['ronda']['puntos_operadores'] = $puntos_operadores;
+
         // Los siguientes indicadores se inicializan a 0 ya que no hay una fuente de datos clara vinculada a ronda_id
         // Si se requiere que sean reales, se necesita implementar la lógica de obtención de datos.
         $data['ronda']['incidencias_reportadas'] = 0;

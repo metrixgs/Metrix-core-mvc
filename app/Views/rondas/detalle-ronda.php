@@ -149,8 +149,28 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted">Aquí se mostrará la distribución de puntos o zonas asignadas a esta ronda.</p>
-                        <!-- Aquí podrías cargar dinámicamente la tabla o mapa de distribución -->
+                        <?php if (!empty($ronda['puntos_operadores'])): ?>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Operador</th>
+                                            <th>Puntos Asignados</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($ronda['puntos_operadores'] as $puntos_op): ?>
+                                            <tr>
+                                                <td><?= esc($puntos_op['operador_nombre']); ?></td>
+                                                <td><?= esc($puntos_op['puntos_asignados']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <p class="text-muted">No hay puntos asignados a operadores para esta ronda.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
