@@ -96,8 +96,16 @@
                                 <h6 class="fs-16"><?= esc($ronda['coordinador_nombre'] ?? 'N/A'); ?></h6>
                             </div>
                             <div class="col-md-4">
-                                <p class="mb-0 text-muted">Encargado (Operador):</p>
-                                <h6 class="fs-16"><?= esc($ronda['encargado_nombre'] ?? 'N/A'); ?></h6>
+                                <p class="mb-0 text-muted">Encargados (Operadores):</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php if (!empty($ronda['puntos_operadores'])): ?>
+                                        <?php foreach ($ronda['puntos_operadores'] as $puntos_op): ?>
+                                            <span class="badge bg-primary-subtle text-primary fs-12"><?= esc($puntos_op['operador_nombre']); ?></span>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">N/A</span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
