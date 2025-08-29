@@ -115,6 +115,8 @@
 
             <!-- Valor final CSV (slugs) -->
             <input type="hidden" id="universo" name="universo">
+            <!-- Valor final del conteo de usuarios del universo -->
+            <input type="hidden" id="universo_count_input" name="universo_count">
 
             <!-- Resumen visual -->
             <div id="universoSeleccionado" class="mt-2 text-muted small">
@@ -466,6 +468,7 @@ jQuery(document).ready(function($) {
         });
       }
       $count.text(totalCount);
+      $('#universo_count_input').val(totalCount); // Actualizar el input hidden
     }
 
     // Cargar estado inicial

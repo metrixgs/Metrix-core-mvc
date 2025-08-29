@@ -347,8 +347,9 @@ public function rondas($campana_id)
     $encuesta = $this->request->getPost('encuesta'); // Esto será un array si se seleccionan múltiples
     $entregables = $this->request->getPost('entregables');
     $universo = $this->request->getPost('universo');
+    $universo_count = $this->request->getPost('universo_count'); // Nuevo campo
     $territorio = $this->request->getPost('territorio');
-    $territorio_subtype = $this->request->getPost('territorio-electorales-subtype') 
+    $territorio_subtype = $this->request->getPost('territorio-electorales-subtype')
         ?? $this->request->getPost('territorio-geograficos-subtype');
     $sectorizacion = $this->request->getPost('sectorizacion');
 
@@ -364,6 +365,7 @@ public function rondas($campana_id)
         'encuesta' => 'permit_empty',
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
+        'universo_count' => 'permit_empty|numeric', // Nueva regla de validación
         'territorio' => 'permit_empty|in_list[electorales,geograficos]',
         'territorio_subtype' => 'permit_empty|string',
         'sectorizacion' => 'permit_empty',
@@ -390,6 +392,7 @@ public function rondas($campana_id)
         'encuesta' => is_array($encuesta) ? json_encode($encuesta) : ($encuesta ?? null),
         'entregables' => $entregables ?? null,
         'universo' => $universo ?? null,
+        'universo_count' => $universo_count ?? 0, // Asignar el nuevo campo
         'territorio' => $territorio ?? null,
         'territorio_subtype' => $territorio_subtype ?? null,
         'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,

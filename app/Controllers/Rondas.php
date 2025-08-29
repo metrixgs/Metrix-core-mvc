@@ -13,6 +13,7 @@ use App\Models\RondasSegmentacionesModel;
 use App\Models\AreasModel; // Añadir el modelo de Áreas (Dependencias)
 use App\Models\TagModel; // Añadir el modelo de Tags
 use App\Models\BrigadasModel; // Añadir el modelo de Brigadas
+use App\Models\CampanasModel; // Añadir el modelo de Campanas
 
 class Rondas extends BaseController {
 
@@ -24,6 +25,7 @@ class Rondas extends BaseController {
     protected $rondasSegmentaciones;
     protected $areas; // Añadir propiedad para AreasModel
     protected $brigadasModel; // Añadir propiedad para BrigadasModel
+    protected $campanasModel; // Añadir propiedad para CampanasModel
 
     public function __construct() {
         // Instanciar los modelos
@@ -37,6 +39,7 @@ class Rondas extends BaseController {
         $this->survey = new SurveyModel();
         $this->tagsModel = new TagModel(); // Instanciar TagModel
         $this->brigadasModel = new BrigadasModel(); // Instanciar BrigadasModel
+        $this->campanasModel = new CampanasModel(); // Instanciar CampanasModel
 
         # Cargar los Helpers
         helper('Alerts');

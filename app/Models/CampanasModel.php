@@ -15,9 +15,9 @@ class CampanasModel extends Model {
     'tipo_id', 'subtipo_id', 'area_id', 'nombre',
     'coordinador', 'descripcion', 'fecha_inicio',
     'fecha_fin', 'estado', 'encuesta',
-    'entregables', 'universo', 'territorio',
+    'entregables', 'universo', 'universo_count', 'territorio', // Añadir 'universo_count'
     'territorio_subtype', 'sectorizacion',
-    'canal_difusion', 'objetivo', 'sector_electoral', 'territorio_local' // ← Agrega esto
+    'canal_difusion', 'objetivo', 'sector_electoral', 'territorio_local'
 ];
 
 

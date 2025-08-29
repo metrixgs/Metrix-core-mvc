@@ -144,46 +144,29 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                 </div>
                                 <div class="col-md-12 mt-3">
                                     <label class="form-label fw-semibold">
-                                        Universo (<span id="universoCount">0</span>)
+                                        Universo (<span id="universoCount"><?= esc($campana['universo_count'] ?? 0) ?></span>)
                                     </label>
-                                    <button type="button"
-                                            class="btn btn-outline-primary w-100"
-                                            id="btnToggleUniverso">
-                                        Seleccionar Universo
-                                    </button>
-                                    <!-- Valor final CSV (slugs) -->
-                                    <input type="hidden" id="universo" name="universo" value="<?= old('universo', '') ?>">
-                                    <!-- Resumen visual -->
+                                    <!-- Resumen visual de los tags de la campaña -->
                                     <div id="universoSeleccionado" class="mt-2 text-muted small">
-                                        Ningún universo seleccionado
-                                    </div>
+                                        <?php
+                                        $universoSlugs = $campana['universo'] ?? '';
+                                        $universoTags = explode(',', $universoSlugs);
+                                        $universoTags = array_filter(array_map('trim', $universoTags)); // Limpiar y filtrar vacíos
 
-                                    <div id="universoContent" class="mt-3 d-none">
-                                        <label class="form-label fw-semibold">Escribe para buscar y selecciona uno o varios</label>
-                                        <!-- Avisos -->
-                                        <div id="tagDebugAlert" class="alert alert-danger d-none"></div>
-                                        <!-- Opciones renderizadas desde el servidor -->
-                                        <select id="selectTagsUniverso" class="form-control" multiple>
-                                            <!-- Los tags se cargarán dinámicamente vía AJAX -->
-                                        </select>
-                                        <!-- Chips con “x” para quitar -->
-                                        <div class="mt-3">
-                                            <label class="form-label mb-1">Seleccionados</label>
-                                            <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
-                                        </div>
-                                        <!-- CSV de slugs (solo lectura) -->
-                                        <div class="mt-2">
-                                            <label class="form-label">Slugs (separados por comas)</label>
-                                            <input id="universoCsv" class="form-control" type="text" readonly>
-                                        </div>
-                                        <small class="text-muted d-block mt-2">
-                                            Al pulsar “Aplicar”, el valor se guarda en el formulario (input hidden) y verás los badges en la tarjeta.
-                                        </small>
-                                        <div class="mt-3 text-end">
-                                            <button type="button" id="btnClearUniverso" class="btn btn-outline-secondary me-2">Limpiar</button>
-                                            <button type="button" id="btnAplicarUniverso" class="btn btn-primary">Aplicar</button>
-                                        </div>
+                                        if (!empty($universoTags)) {
+                                            foreach ($universoTags as $tagSlug) {
+                                                // Aquí necesitaríamos una forma de obtener el nombre del tag a partir del slug
+                                                // Por ahora, mostraremos el slug directamente o un nombre genérico si no hay un mapeo fácil
+                                                echo '<span class="badge bg-light border text-primary me-1 mb-1">#' . esc($tagSlug) . '</span>';
+                                            }
+                                        } else {
+                                            echo 'Ningún universo seleccionado en la campaña';
+                                        }
+                                        ?>
                                     </div>
+                                    <!-- Campo oculto para mantener el universo de la campaña si se necesita en el POST de la ronda -->
+                                    <input type="hidden" name="universo_campana" value="<?= esc($campana['universo'] ?? '') ?>">
+                                    <input type="hidden" name="universo_count_campana" value="<?= esc($campana['universo_count'] ?? 0) ?>">
                                 </div>
                             </div>
                         </div>
@@ -401,206 +384,144 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 </style>
 
 <script>
-(function($){
-  var $btnToggleUniverso = $('#btnToggleUniverso');
-  var $universoContent = $('#universoContent');
-  var $select  = $('#selectTagsUniverso');
-  var $hidden  = $('#universo');
-  var $summary = $('#universoSeleccionado');
-  var $count   = $('#universoCount');
-  var $chips   = $('#chipsContainer');
-  var $csv     = $('#universoCsv');
-  var COUNT_USERS_URL = "<?= site_url('rondas/countUsersBySelectedTags') ?>"; // Nuevo endpoint para rondas
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar Select2 para Brigadas (selección única)
+        $('#brigadas').select2({
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true // Permite deseleccionar
+        });
 
-  // Inicializar Select2 para Universo (selección múltiple)
-  function initSelect2Universo() {
-    if ($.fn.select2 && !$select.data('select2')) { // Solo inicializar si no está ya inicializado
-      $select.select2({
-        width: '100%',
-        placeholder: 'Escribe para buscar y selecciona uno o varios',
-        closeOnSelect: false
-      });
-    }
-  }
+        // Inicializar Select2 para Operadores (selección múltiple)
+        $('#operadores').select2({
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true, // Permite deseleccionar
+            multiple: true // Habilita la selección múltiple
+        });
 
-  // Cargar tags y estado inicial
-  function loadTagsAndInitialState() {
-    var TAGS_URL = "<?= site_url('rondas/tags') ?>";
-    function showTagError(msg) {
-      var $alert = $('#tagDebugAlert');
-      $alert.text(msg).removeClass('d-none');
-    }
+        // Inicializar Select2 para otros selectores genéricos (si los hay y necesitan configuración por defecto)
+        // Por ejemplo, para 'territorio' y 'sectorizacion'
+        $('#territorio, #sectorizacion').select2({
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true
+        });
 
-    // Si ya tenemos los tags en el PHP, los usamos directamente
-    <?php if (!empty($catalogo_tags)): ?>
-        console.log('Tags cargados desde PHP:', <?= json_encode($catalogo_tags) ?>);
-        var rows = <?= json_encode($catalogo_tags) ?>;
-        processTags(rows);
-    <?php else: ?>
-        // Si no, hacemos la llamada AJAX
-        $.getJSON(TAGS_URL + '?debug=1')
-          .done(function(resp){
-            console.log('Respuesta AJAX de tags:', resp);
-            if (resp && resp.ok === false) {
-              showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
-              return;
+        // Validación de formulario Bootstrap
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Lógica para el botón "Generar Asignación"
+        document.getElementById('btnGenerarAsignacion').addEventListener('click', function() {
+            var totalUsers = parseInt($('#universoCount').text()) || 0; // Obtener el universo real de la campaña
+            var selectedOperators = $('#operadores').select2('data');
+            var numOperators = selectedOperators.length;
+            var distribucionContainer = $('#distribucion-container');
+
+            if (numOperators === 0) {
+                alert('Por favor, seleccione al menos un operador para generar la asignación.');
+                return;
             }
-            var rows = resp && resp.data ? resp.data : resp;
-            if (!Array.isArray(rows)) {
-              showTagError('Respuesta inesperada del servidor.');
-              return;
-            }
-            processTags(rows);
-          })
-          .fail(function(xhr){
-            var msg = 'Falló la llamada AJAX (' + xhr.status + ').';
-            if (xhr.responseJSON && xhr.responseJSON.exception) {
-              msg += ' ' + xhr.responseJSON.exception;
-            }
-            showTagError(msg + ' Revisa la ruta <?= site_url('rondas/tags') ?> y el acceso a la DB.');
-          });
-    <?php endif; ?>
 
-    function processTags(rows) {
-        if (rows.length === 0) {
-            showTagError('No hay tags para mostrar.');
-            return;
-        }
-        $select.empty(); // Limpiar opciones existentes
-        rows.forEach(function(r){
-            // Solo añadir tags si tienen al menos un usuario asociado
-            if (r.user_count > 0) {
-                var userCount = r.user_count !== undefined ? r.user_count : 0;
-                var text = (r.tag || r.slug) + ' (' + r.slug + ')' + (userCount > 0 ? ' [' + userCount + ' usuarios]' : '');
-                var opt  = new Option(text, r.slug, false, false);
-                opt.setAttribute('data-label', r.tag || r.slug);
-                opt.setAttribute('data-count', userCount);
-                $select.append(opt);
+            if (totalUsers === 0) {
+                alert('El universo de usuarios es 0. No se pueden asignar puntos.');
+                return;
+            }
+
+            var basePointsPerOperator = Math.floor(totalUsers / numOperators);
+            var remainder = totalUsers % numOperators;
+
+            distribucionContainer.empty(); // Limpiar el contenedor actual
+
+            selectedOperators.forEach(function(operator, index) {
+                var operatorName = operator.text.split(' (#')[0];
+                var operatorId = operator.id;
+                var points = basePointsPerOperator;
+
+                if (index < remainder) {
+                    points++; // Distribuir el resto entre los primeros operadores
+                }
+
+                var html = `
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">${operatorName}</span>
+                            <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="${points}" min="0">
+                        </div>
+                    </div>
+                `;
+                distribucionContainer.append(html);
+            });
+        });
+
+        // Lógica para cargar operadores al seleccionar una brigada
+        $('#brigadas').on('change', function() {
+            var selectedBrigadaId = $(this).val(); // Obtener el ID de la brigada seleccionada
+            var operadoresSelect = $('#operadores');
+            operadoresSelect.empty(); // Limpiar el selector de operadores
+
+            if (selectedBrigadaId) {
+                $.ajax({
+                    url: '<?= base_url('rondas/obtenerOperadoresPorBrigada/') ?>' + selectedBrigadaId,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.length > 0) {
+                            data.forEach(function(operador) {
+                                operadoresSelect.append(new Option(operador.nombre, operador.id, false, false));
+                            });
+                        }
+                        operadoresSelect.trigger('change'); // Notificar a Select2 que las opciones han cambiado
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error al obtener operadores:", error);
+                    }
+                });
+            } else {
+                // Si no hay brigada seleccionada, limpiar y notificar a Select2
+                operadoresSelect.trigger('change');
             }
         });
 
-        var initial = parseCSV($hidden.val());
-        if (initial.length) {
-            $select.val(initial).trigger('change');
-        } else {
-            $select.trigger('change'); // Disparar para inicializar el contador y chips si no hay nada
+        // Lógica para actualizar la distribución de puntos al seleccionar operadores
+        $('#operadores').on('change', function() {
+            var selectedOperators = $(this).select2('data');
+            var distribucionContainer = $('#distribucion-container');
+            distribucionContainer.empty(); // Limpiar el contenedor actual
+
+            if (selectedOperators.length === 0) {
+                distribucionContainer.append('<div class="col-12" id="no-operadores-message"><p class="text-muted">Seleccione operadores para ver la distribución de puntos.</p></div>');
+            } else {
+                selectedOperators.forEach(function(operator) {
+                    var operatorName = operator.text.split(' (#')[0]; // Obtener solo el nombre
+                    var operatorId = operator.id;
+                    var html = `
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">${operatorName}</span>
+                                <input type="number" name="puntos_operador[${operatorId}]" class="form-control" value="0" min="0">
+                            </div>
+                        </div>
+                    `;
+                    distribucionContainer.append(html);
+                });
+            }
+        }).trigger('change'); // Disparar el evento al cargar la página para mostrar los operadores preseleccionados
+
+        // Disparar el evento change en #brigadas al cargar la página si hay brigadas preseleccionadas
+        // Esto es útil si se está editando una ronda y ya hay brigadas seleccionadas
+        if ($('#brigadas').val() && $('#brigadas').val().length > 0) {
+            $('#brigadas').trigger('change');
         }
-    }
-  }
 
-  // Evento para mostrar/ocultar el contenido del universo
-  $btnToggleUniverso.on('click', function() {
-    $universoContent.toggleClass('d-none');
-    if (!$universoContent.hasClass('d-none')) {
-      initSelect2Universo();
-      loadTagsAndInitialState(); // Cargar tags y estado inicial cuando se muestra
-    }
-  });
-
-  // Cambio en selección
-  $select.on('change', function () {
-    var slugs = unique($select.val() || []);
-    renderChips(slugs);
-    $csv.val(slugs.join(','));
-    updateUniversoCount(slugs); // Llamar a la función para actualizar el conteo de usuarios
-    renderBadges(slugs); // Actualizar los badges en el resumen
-  });
-
-  // Quitar chip
-  $chips.on('click', '.remove', function () {
-    var slug = $(this).closest('.chip').data('slug');
-    var current = unique($select.val() || []);
-    var next = current.filter(s => s !== slug);
-    $select.val(next).trigger('change');
-  });
-
-  // Limpiar selección
-  $('#btnClearUniverso').on('click', function () {
-    $select.val(null).trigger('change');
-    $csv.val('');
-  });
-
-  // Aplicar (actualiza el hidden input y el resumen)
-  $('#btnAplicarUniverso').on('click', function () {
-    var slugs = parseCSV($csv.val());
-    $hidden.val(slugs.join(','));
-    renderBadges(slugs);
-    // Opcional: ocultar el contenido del universo después de aplicar
-    $universoContent.addClass('d-none');
-  });
-
-  // Helpers
-  function parseCSV(str) {
-    return (str || '').split(',').map(s => s.trim()).filter(Boolean);
-  }
-  function unique(arr) {
-    return [...new Set(arr.map(s => s.trim()).filter(Boolean))];
-  }
-  function labelFor(slug) {
-    var opt = $select.find(`option[value="${slug}"]`);
-    return opt.data('label') || opt.text().split(' (')[0] || slug; // Ajuste para obtener solo el nombre del tag
-  }
-
-  function userCountFor(slug) {
-    var opt = $select.find(`option[value="${slug}"]`);
-    var count = opt.data('count') || 0;
-    console.log(`userCountFor(${slug}): ${count}`); // Depuración
-    return count;
-  }
-
-  function renderChips(slugs) {
-    $chips.empty();
-    if (!slugs.length) {
-      $chips.append('<span class="text-muted">No hay seleccionados</span>');
-      return;
-    }
-    slugs.forEach(slug => {
-      var lbl = labelFor(slug);
-      var count = userCountFor(slug);
-      var chip = $(
-        `<span class="chip" data-slug="${slug}">
-           ${$('<div>').text(lbl).html()} (${count})
-           <span class="remove" aria-label="Quitar" title="Quitar">&times;</span>
-         </span>`
-      );
-      $chips.append(chip);
     });
-  }
-  function renderBadges(slugs) {
-    if (!slugs.length) {
-      $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
-      // No tocar $count aquí, ya se maneja en updateUniversoCount
-      return;
-    }
-    var html = slugs.map(slug => {
-      var lbl = labelFor(slug);
-      var count = userCountFor(slug); // Obtener el conteo de usuarios para este tag
-      return `<span class="badge bg-light border text-primary me-1 mb-1">#${$('<div>').text(lbl).html()} (${count})</span>`;
-    }).join('');
-    $summary.removeClass('text-muted').addClass('text-primary').html(html);
-    // No tocar $count aquí, ya se maneja en updateUniversoCount
-  }
-
-  // Función para actualizar el conteo de usuarios del universo
-  function updateUniversoCount(selectedSlugs) {
-    let totalCount = 0;
-    if (selectedSlugs.length > 0) {
-      selectedSlugs.forEach(slug => {
-        totalCount += userCountFor(slug);
-      });
-    }
-    $count.text(totalCount);
-  }
-
-  // Cargar estado inicial del universo al cargar la página
-  // Esto asegura que el contador y los badges se muestren correctamente al inicio
-  (function initFromHiddenOnLoad(){
-    var initial = parseCSV($hidden.val());
-    if (initial.length) {
-      renderBadges(initial);
-      updateUniversoCount(initial); // Actualizar el conteo al cargar la página
-    }
-  })();
-
-})(jQuery);
 </script>
