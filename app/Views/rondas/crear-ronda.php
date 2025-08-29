@@ -155,8 +155,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 
                                         if (!empty($universoTags)) {
                                             foreach ($universoTags as $tagSlug) {
-                                                // Aquí necesitaríamos una forma de obtener el nombre del tag a partir del slug
-                                                // Por ahora, mostraremos el slug directamente o un nombre genérico si no hay un mapeo fácil
+                                                // Filtrar tags específicos que se consideran "quemados" o no deseados en la visualización
+                                                if (in_array($tagSlug, ['salvadorlista', 'joven', 'deportista'])) {
+                                                    continue; // Saltar estos tags
+                                                }
                                                 echo '<span class="badge bg-light border text-primary me-1 mb-1">#' . esc($tagSlug) . '</span>';
                                             }
                                         } else {
