@@ -170,6 +170,9 @@ public function detalle($campana_id)
     if (empty($campana)) {
         return redirect()->to("campanas/");
     }
+    // Obtener el nombre del coordinador
+    $coordinador = $this->usuarios->find($campana['coordinador']);
+    $campana['nombre_coordinador'] = $coordinador['nombre'] ?? 'No asignado';
     $data['campana'] = $campana;
 
     // Obtener encuestas relacionadas con esta campaña

@@ -136,7 +136,8 @@
                                     <!-- Coordinador -->
                                     <div class="col-md-6">
                                         <label class="form-label">Coordinador(a):<span class="text-danger">*</span> (1/1)</label>
-                                        <input type="text" class="form-control" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>" required>
+                                        <input type="text" class="form-control" name="coordinador_nombre" value="<?= esc($campana['nombre_coordinador'] ?? ''); ?>" readonly>
+                                        <input type="hidden" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>">
                                     </div>
                                 </div>
 
@@ -265,7 +266,8 @@ $mapUrls = [
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="coordinador" class="form-label">Coordinador(a)</label>
-                            <input type="text" class="form-control" id="coordinador" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>" required>
+                            <input type="text" class="form-control" id="coordinador_nombre_modal" value="<?= esc($campana['nombre_coordinador'] ?? ''); ?>" readonly>
+                            <input type="hidden" id="coordinador_id_modal" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>">
                         </div>
                     </div>
 
