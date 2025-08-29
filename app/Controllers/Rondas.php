@@ -14,6 +14,7 @@ use App\Models\AreasModel; // Añadir el modelo de Áreas (Dependencias)
 use App\Models\TagModel; // Añadir el modelo de Tags
 use App\Models\BrigadasModel; // Añadir el modelo de Brigadas
 use App\Models\CampanasModel; // Añadir el modelo de Campanas
+use App\Models\RondaOperadorPuntosModel; // Añadir el modelo de RondaOperadorPuntos
 
 class Rondas extends BaseController {
 
@@ -26,6 +27,7 @@ class Rondas extends BaseController {
     protected $areas; // Añadir propiedad para AreasModel
     protected $brigadasModel; // Añadir propiedad para BrigadasModel
     protected $campanasModel; // Añadir propiedad para CampanasModel
+    protected $rondaOperadorPuntosModel; // Añadir propiedad para RondaOperadorPuntosModel
 
     public function __construct() {
         // Instanciar los modelos
@@ -40,6 +42,7 @@ class Rondas extends BaseController {
         $this->tagsModel = new TagModel(); // Instanciar TagModel
         $this->brigadasModel = new BrigadasModel(); // Instanciar BrigadasModel
         $this->campanasModel = new CampanasModel(); // Instanciar CampanasModel
+        $this->rondaOperadorPuntosModel = new RondaOperadorPuntosModel(); // Instanciar RondaOperadorPuntosModel
 
         # Cargar los Helpers
         helper('Alerts');
@@ -201,7 +204,7 @@ class Rondas extends BaseController {
             'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1),
             'nombre' => $this->request->getPost('nombre_ronda') ?? ($this->request->getPost('nombre_campana') ?? ''), // Usar nombre_ronda si existe, sino nombre_campana, sino cadena vacía
             'coordinador' => $this->request->getPost('coordinador'),
-            'encargado' => $this->request->getPost('encargado'),
+            // 'encargado' => $this->request->getPost('encargado'), // Eliminado según solicitud del usuario
             'coordinador_campana' => $this->request->getPost('coordinador_campana'),
             'encuesta_ronda' => $this->request->getPost('encuesta_ronda'),
             'fecha_actividad' => $this->request->getPost('fecha_actividad'),
@@ -213,7 +216,6 @@ class Rondas extends BaseController {
             'nombre_territorio' => $this->request->getPost('nombre_territorio'),
             'sectorizacion' => $this->request->getPost('sectorizacion'),
             'nombre_sectorizacion' => $this->request->getPost('nombre_sectorizacion'),
-            'universo_tags' => $this->request->getPost('universo') // Guardar los tags seleccionados
         ];
 
         // Crear la ronda
@@ -238,6 +240,8 @@ class Rondas extends BaseController {
         $puntosOperador = $this->request->getPost('puntos_operador');
         if (!empty($puntosOperador) && is_array($puntosOperador)) {
             foreach ($puntosOperador as $operadorId => $puntos) {
+                // Asegurarse de que $puntos sea un entero
+                $puntos = (int) $puntos;
                 $this->rondaOperadorPuntosModel->insert([
                     'ronda_id' => $rondaId,
                     'operador_id' => $operadorId,

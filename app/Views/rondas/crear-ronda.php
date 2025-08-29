@@ -94,6 +94,18 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                         <!-- Los operadores se cargarán dinámicamente vía AJAX -->
                                     </select>
                                 </div>
+                                <div class="col-md-6 mt-3">
+                                    <label for="coordinador" class="form-label">Coordinador:</label>
+                                    <select name="coordinador" id="coordinador" class="form-select select2" required>
+                                        <option value="" disabled selected hidden>Seleccione un coordinador</option>
+                                        <?php foreach($usuarios_coordinador as $coord): ?>
+                                            <option value="<?= esc($coord['id']) ?>" <?= (old('coordinador') == $coord['id']) ? 'selected' : '' ?>><?= esc($coord['nombre']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Por favor, seleccione un coordinador.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
