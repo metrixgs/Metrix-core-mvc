@@ -129,7 +129,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label for="brigadas" class="form-label">Brigada(s):</label>
+                                        <label for="brigadas" class="form-label">Coordinador de Brigada:</label>
                                         <select name="brigada_id" id="brigadas" class="form-select select2">
                                             <option value="" disabled selected hidden>Seleccione una brigada</option>
                                             <?php foreach($brigadas as $brigada): ?>

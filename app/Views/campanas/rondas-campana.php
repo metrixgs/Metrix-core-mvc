@@ -65,7 +65,7 @@
                                         <th scope="col">ID Ronda</th>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Horario</th>
-                                        <th scope="col">Coordinador de Brigada</th>
+                                        <th scope="col">Coordinador de Ronda</th>
                                         <th scope="col">Estado</th>
                                         <th scope="col" class="text-center">Acciones</th>
                                     </tr>
