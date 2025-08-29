@@ -65,8 +65,7 @@
                                         <th scope="col">ID Ronda</th>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Horario</th>
-                                        <th scope="col">Brigada</th>
-                                        <th scope="col">Encargado</th>
+                                        <th scope="col">Coordinador de Brigada</th>
                                         <th scope="col">Estado</th>
                                         <th scope="col" class="text-center">Acciones</th>
                                     </tr>
@@ -79,7 +78,6 @@
                                                 <td><?= esc($ronda['fecha_actividad'] ?? 'N/A'); ?></td>
                                                 <td><?= esc($ronda['hora_actividad'] ?? 'N/A'); ?></td>
                                                 <td><?= esc($ronda['brigada_nombre'] ?? 'N/A'); ?></td>
-                                                <td><?= esc($ronda['encargado_nombre'] ?? 'N/A'); ?></td>
                                                 <td>
                                                     <?php
                                                     $estado_clase = 'bg-secondary';
