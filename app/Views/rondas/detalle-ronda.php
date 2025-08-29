@@ -99,10 +99,6 @@
                                 <p class="mb-0 text-muted">Encargado (Operador):</p>
                                 <h6 class="fs-16"><?= esc($ronda['encargado_nombre'] ?? 'N/A'); ?></h6>
                             </div>
-                            <div class="col-md-4">
-                                <p class="mb-0 text-muted">Coordinador de Campaña:</p>
-                                <h6 class="fs-16"><?= esc($ronda['coordinador_campana_nombre'] ?? 'N/A'); ?></h6>
-                            </div>
                         </div>
                     </div>
                 </div>
