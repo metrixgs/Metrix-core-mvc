@@ -87,6 +87,6 @@ class RondasModel extends Model {
     {
         // Instanciar el modelo si no está ya disponible (ej. inyectado por el controlador)
         $surveyResponseModel = new \App\Models\SurveyResponseModel();
-        return $surveyResponseModel->where('id_ronda', $ronda_id)->countAllResults();
+        return $surveyResponseModel->builder()->where('id_ronda', $ronda_id)->countAllResults();
     }
 }
