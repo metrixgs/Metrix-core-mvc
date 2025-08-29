@@ -256,7 +256,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 
         // Lógica para el botón "Generar Asignación"
         document.getElementById('btnGenerarAsignacion').addEventListener('click', function() {
-            var totalUsers = 10; // Simulación: Forzar el universo a 10
+            var totalUsers = parseInt($('#universoCount').text()) || 0; // Obtener el universo real de la campaña
             var selectedOperators = $('#operadores').select2('data');
             var numOperators = selectedOperators.length;
             var distribucionContainer = $('#distribucion-container');
@@ -285,10 +285,6 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                     points++; // Distribuir el resto entre los primeros operadores
                 }
 
-                // Simulación: Asignar 9 puntos al primer operador seleccionado
-                if (index === 0) {
-                    points = 9;
-                }
 
                 var html = `
                     <div class="col-md-4">
