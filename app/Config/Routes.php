@@ -238,3 +238,13 @@ $routes->post('dashboard-metrix/comparativa-liderazgos', 'DashboardMetrix::compa
 $routes->post('dashboard-metrix/comparativa-secciones', 'DashboardMetrix::comparativaSecciones');
 $routes->post('dashboard-metrix/selectors-data', 'DashboardMetrix::getSelectorsData');
 
+
+// Rutas del Dashboard de Eventos
+$routes->get('dashboard-eventos', 'DashboardEventos::index');
+$routes->post('dashboard-eventos/update-metrics', 'DashboardEventos::updateMetrics');
+$routes->post('dashboard-eventos/selectors-data', 'DashboardEventos::getSelectorsData');
+$routes->post('dashboard-eventos/top-lideres', 'DashboardEventos::getTopLideres');
+$routes->get('dashboard-eventos/debug-seccion-data', 'DashboardEventos::debugSeccionData');
+$routes->get('dashboard-eventos/debug-lideres-data', 'DashboardEventos::debugLideresData');
+$routes->get('dashboard-eventos/debug-js', 'DashboardEventos::debugJavaScript');
+

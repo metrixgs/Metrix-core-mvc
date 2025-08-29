@@ -156,6 +156,7 @@
                             <a href="#sidebarIncidencias" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Incidencias</a>
                             <div class="collapse menu-dropdown" id="sidebarIncidencias" data-bs-parent="#sidebarModulos">
                                 <ul class="nav nav-sm flex-column">
+                                    
                                     <li class="nav-item">
                                         <a href="<?= base_url() . 'dashboard-metrix'; ?>" class="nav-link">Dashboard</a>
                                     </li>
@@ -176,6 +177,16 @@
                                     </li>
                                     <li class="nav-item">
                                         <a href="<?= base_url() . 'tareas/'; ?>" class="nav-link">Mis Tareas</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#sidebarEventos" class="nav-link" data-bs-toggle="collapse" data-bs-parent="#sidebarModulos">Dashboard Eventos</a>
+                            <div class="collapse menu-dropdown" id="sidebarEventos" data-bs-parent="#sidebarModulos">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="<?= base_url() . 'dashboard-eventos'; ?>" class="nav-link">Dashboard Eventos</a>
                                     </li>
                                 </ul>
                             </div>
