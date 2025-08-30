@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UsuariosModel;
 use App\Models\AreasModel;
+use App\Models\BrigadasModel; // Añadir este modelo
 use App\Models\TicketsModel;
 use App\Models\TareasModel;
 use App\Models\NotificacionesModel;
@@ -18,11 +19,12 @@ use App\Libraries\Breadcrumb;
 use App\Models\TagModel;
  
  
-
+ 
 class Campanas extends BaseController {
 
     protected $usuarios;
     protected $areas;
+    protected $brigadas; // Declarar la propiedad para BrigadasModel
     protected $tickets;
     protected $tareas;
     protected $notificaciones;
@@ -37,6 +39,7 @@ class Campanas extends BaseController {
         // Instanciar los modelos
         $this->usuarios = new UsuariosModel();
     $this->areas = new AreasModel();
+    $this->brigadas = new BrigadasModel(); // Instanciar BrigadasModel
     $this->tickets = new TicketsModel();
     $this->notificaciones = new NotificacionesModel();
     $this->tareas = new TareasModel();
@@ -832,6 +835,7 @@ public function rondas($campana_id)
         $data['surveys'] = $this->survey->findAll();
 
         $data['dependencias'] = $this->areas->obtenerAreas();
+        $data['brigadas'] = $this->brigadas->findAll(); // Obtener todas las brigadas del BrigadasModel
 
         // Cargar tags para el modal Universo (solo tags con usuarios asociados y su conteo)
         $data['catalogo_tags'] = $this->tagsModel->getTagsWithUserCounts();

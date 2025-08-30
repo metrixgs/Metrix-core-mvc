@@ -140,8 +140,8 @@
           <div class="mb-3">
   <label class="form-label fw-semibold" style="color: #8bc34a;">Dependencia <span class="text-danger">*</span></label>
  <select class="form-select select2" id="dependencia" name="dependencia" required>
-    <?php foreach ($dependencias as $dependencia_item): ?>
-        <option value="<?= $dependencia_item['id'] ?>"><?= esc($dependencia_item['nombre']) ?></option>
+    <?php foreach ($brigadas as $brigada_item): ?>
+        <option value="<?= $brigada_item['id'] ?>"><?= esc($brigada_item['nombre']) ?></option>
     <?php endforeach; ?>
 </select>
 
