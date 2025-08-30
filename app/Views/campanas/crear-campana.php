@@ -99,7 +99,7 @@
           </div>
           <div class="card-body bg-white">
             <label class="form-label fw-semibold text-success-salvador">
-              Universo (<span id="universoCount">0</span>)
+              Universo (<span id="universoCount">0</span> usuarios) (<span id="selectedTagsCountOutside">0</span> tags)
             </label>
 
             <button type="button"
@@ -277,7 +277,7 @@
 
         <!-- Chips con “x” para quitar -->
         <div class="mt-3">
-          <label class="form-label mb-1">Seleccionados</label>
+          <label class="form-label mb-1">Seleccionados (<span id="selectedTagsCount">0</span>)</label>
           <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
         </div>
 
@@ -426,6 +426,7 @@ jQuery(document).ready(function($) {
 
     function renderChips(slugs) {
       $chips.empty();
+      $('#selectedTagsCount').text(slugs.length); // Actualizar el contador de tags seleccionados
       if (!slugs.length) {
         $chips.append('<span class="text-muted">No hay seleccionados</span>');
         return;
@@ -445,7 +446,7 @@ jQuery(document).ready(function($) {
     function renderBadges(slugs) {
       if (!slugs.length) {
         $summary.removeClass('text-dark').addClass('text-muted').html('Ningún universo seleccionado');
-        // No tocar $count aquí, ya se maneja en updateUniversoCount
+        $('#selectedTagsCountOutside').text(0); // Actualizar el contador de tags seleccionados fuera del modal
         return;
       }
       var html = slugs.map(slug => {
@@ -454,7 +455,7 @@ jQuery(document).ready(function($) {
         return `<span class="badge bg-light border text-dark me-1 mb-1">#${$('<div>').text(lbl).html()} (${count})</span>`;
       }).join('');
       $summary.removeClass('text-muted').addClass('text-dark').html(html);
-      // No tocar $count aquí, ya se maneja en updateUniversoCount
+      $('#selectedTagsCountOutside').text(slugs.length); // Actualizar el contador de tags seleccionados fuera del modal
     }
 
     // Función para actualizar el conteo de usuarios del universo
