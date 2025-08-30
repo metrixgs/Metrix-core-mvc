@@ -245,11 +245,7 @@
           <div id="chipsContainer" class="chips-container border rounded p-2" style="min-height:44px;"></div>
         </div>
 
-        <!-- CSV de slugs (solo lectura) -->
-        <div class="mt-2">
-          <label class="form-label">Slugs (separados por comas)</label>
-          <input id="universoCsv" class="form-control" type="text" readonly>
-        </div>
+      
 
         <small class="text-muted d-block mt-2">
           Al pulsar “Aplicar”, el valor se guarda en el formulario (input hidden) y verás los badges en la tarjeta.
