@@ -1,6 +1,6 @@
   
  <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent mt-5 pt-4">
-  <h4 class="mb-sm-0" style="color: #8bc34a;">Nueva Campaña</h4>
+  <h4 class="mb-sm-0 text-success-salvador">Nueva Campaña</h4>
   <div class="page-title-right">
     <?php if (!empty($breadcrumb)) : ?>
       <?= $breadcrumb ?>
@@ -18,25 +18,25 @@
       <!-- DATOS GENERALES -->
       <div class="col-md-12">
         <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
+          <div class="card-header text-white bg-success-salvador">
             <h6 class="mb-0 fw-semibold">📋 Datos Generales</h6>
           </div>
           <div class="card-body bg-white">
             <div class="row">
               <div class="col-md-6">
-                <label class="form-label fw-semibold" style="color: #8bc34a;">Nombre de la Campaña <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nombre" name="nombre" required style="border-color: #8bc34a;">
+                <label class="form-label fw-semibold text-success-salvador">Nombre de la Campaña <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-success-salvador" id="nombre" name="nombre" required>
               </div>
               <div class="col-md-4">
-                <label class="form-label fw-semibold" style="color: #8bc34a;">Vigencia <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold text-success-salvador">Vigencia <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio" required style="border-color: #8bc34a;">
-                  <input type="date" class="form-control" name="fecha_fin" id="fecha_fin" required style="border-color: #8bc34a;">
+                  <input type="date" class="form-control border-success-salvador" name="fecha_inicio" id="fecha_inicio" required>
+                  <input type="date" class="form-control border-success-salvador" name="fecha_fin" id="fecha_fin" required>
                 </div>
               </div>
               <div class="col-md-2">
-                <label class="form-label fw-semibold" style="color: #8bc34a;">Tipo <span class="text-danger">*</span></label>
-                <select class="form-select select2" id="tipo_id" name="tipo_id" required style="border-color: #8bc34a;">
+                <label class="form-label fw-semibold text-success-salvador">Tipo <span class="text-danger">*</span></label>
+                <select class="form-select select2 border-success-salvador" id="tipo_id" name="tipo_id" required>
                   <?php foreach ($tipos_campanas as $tipo): ?>
                     <option value="<?= $tipo['id']; ?>"><?= htmlspecialchars($tipo['nombre']); ?></option>
                   <?php endforeach; ?>
@@ -45,8 +45,8 @@
             </div>
             <div class="row mt-3">
               <div class="col-md-12">
-                <label class="form-label fw-semibold" style="color: #8bc34a;">Objetivo de la campaña</label>
-                <textarea class="form-control" name="objetivo" rows="1" style="border-color: #8bc34a;"></textarea>
+                <label class="form-label fw-semibold text-success-salvador">Objetivo de la campaña</label>
+                <textarea class="form-control border-success-salvador" name="objetivo" rows="1"></textarea>
               </div>
             </div>
           </div>
@@ -55,22 +55,22 @@
 
       <!-- DELIMITACIÓN TERRITORIAL -->
       <div class="col-md-6">
-        <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
+        <div class="card shadow border-success-salvador">
+          <div class="card-header text-white bg-success-salvador">
             <h6 class="mb-0 fw-semibold">🗺️ Delimitación Territorial</h6>
           </div>
           <div class="card-body bg-white">
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Territorio Local</label>
-              <select class="form-select select2" id="territorio_local" name="territorio_local" style="border-color: #8bc34a;">
+              <label class="form-label fw-semibold text-success-salvador">Territorio Local</label>
+              <select class="form-select select2 border-success-salvador" id="territorio_local" name="territorio_local">
                  
                 <option value="municipio">Municipio</option>
                 <option value="delegacion">Delegación</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Sector Electoral</label>
-              <select class="form-select select2" id="sector_electoral" name="sector_electoral" style="border-color: #8bc34a;">
+              <label class="form-label fw-semibold text-success-salvador">Sector Electoral</label>
+              <select class="form-select select2 border-success-salvador" id="sector_electoral" name="sector_electoral">
                 
                 <option value="distrito">Distrito</option>
                 <option value="seccion">Sección</option>
@@ -81,9 +81,9 @@
       </div>
       <!-- MAPA DE MÉXICO -->
       <div class="col-md-6 mt-0">
-        <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
-            <h6 class="mb-0 fw-semibold"></h6> <!-- Título eliminado -->
+        <div class="card shadow border-success-salvador">
+          <div class="card-header text-white bg-success-salvador">
+            <h6 class="mb-0 fw-semibold">🌎 Mapa de México</h6>
           </div>
           <div class="card-body bg-white">
             <div id="mapaMexico" style="height: 300px; width: 100%;"></div> <!-- Altura reducida -->
@@ -93,17 +93,17 @@
 
       <!-- IMPACTOS -->
       <div class="col-md-6">
-        <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
+        <div class="card shadow border-success-salvador">
+          <div class="card-header text-white bg-success-salvador">
             <h6 class="mb-0 fw-semibold">🎯 Impactos</h6>
           </div>
           <div class="card-body bg-white">
-            <label class="form-label fw-semibold" style="color: #8bc34a;">
+            <label class="form-label fw-semibold text-success-salvador">
               Universo (<span id="universoCount">0</span>)
             </label>
 
             <button type="button"
-                    class="btn btn-outline-success w-100"
+                    class="btn btn-outline-success-salvador w-100"
                     data-bs-toggle="modal"
                     data-bs-target="#modalUniverso">
               Seleccionar Universo
@@ -124,22 +124,22 @@
 
       <!-- RESPONSABLES -->
       <div class="col-md-6 mt-4">
-        <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
+        <div class="card shadow border-success-salvador">
+          <div class="card-header text-white bg-success-salvador">
             <h6 class="mb-0 fw-semibold">👥 Responsables</h6>
           </div>
           <div class="card-body bg-white">
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Área Responsable <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="area_id" name="area_id" required style="border-color: #8bc34a;">
+              <label class="form-label fw-semibold text-success-salvador">Área Responsable <span class="text-danger">*</span></label>
+              <select class="form-select select2 border-success-salvador" id="area_id" name="area_id" required>
                 <?php foreach ($areas as $area): ?>
                   <option value="<?= $area['id']; ?>"><?= htmlspecialchars($area['nombre']); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
           <div class="mb-3">
-  <label class="form-label fw-semibold" style="color: #8bc34a;">Dependencia <span class="text-danger">*</span></label>
- <select class="form-select select2" id="dependencia" name="dependencia" required>
+  <label class="form-label fw-semibold text-success-salvador">Dependencia <span class="text-danger">*</span></label>
+ <select class="form-select select2 border-success-salvador" id="dependencia" name="dependencia" required>
     <?php foreach ($brigadas as $brigada_item): ?>
         <option value="<?= $brigada_item['id'] ?>"><?= esc($brigada_item['nombre']) ?></option>
     <?php endforeach; ?>
@@ -154,14 +154,14 @@
 
       <!-- INTERACCIONES -->
       <div class="col-md-6">
-        <div class="card shadow" style="border-color: #8bc34a;">
-          <div class="card-header text-white" style="background-color: #8bc34a;">
+        <div class="card shadow border-success-salvador">
+          <div class="card-header text-white bg-success-salvador">
             <h6 class="mb-0 fw-semibold">🔗 Interacciones</h6>
           </div>
           <div class="card-body bg-white">
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Encuesta <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="encuesta" name="encuesta[]" multiple="multiple" style="border-color: #8bc34a;">
+              <label class="form-label fw-semibold text-success-salvador">Encuesta <span class="text-danger">*</span></label>
+              <select class="form-select select2 border-success-salvador" id="encuesta" name="encuesta[]" multiple="multiple">
                 <?php if (!empty($surveys)): ?>
                   <?php foreach ($surveys as $survey): ?>
                     <option value="<?= $survey['id']; ?>">#<?= $survey['id']; ?> <?= htmlspecialchars($survey['title']); ?></option>
@@ -172,8 +172,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold" style="color: #8bc34a;">Entregables <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="entregables" name="entregables" required style="border-color: #8bc34a;">
+              <label class="form-label fw-semibold text-success-salvador">Entregables <span class="text-danger">*</span></label>
+              <select class="form-select select2 border-success-salvador" id="entregables" name="entregables" required>
                 <option value="00001">Orden # 00001</option>
                 <option value="00002">Orden # 00002</option>
                 <option value="00003">Orden # 00003</option>
@@ -185,12 +185,12 @@
 
 
       <!-- BOTONES -->
-      <div class="card shadow mt-4" style="border-color: #8bc34a;">
+      <div class="card shadow mt-4 border-success-salvador">
         <div class="card-body bg-white d-flex justify-content-end">
-          <a href="<?= base_url('campanas'); ?>" class="btn btn-outline me-2" style="border-color: #8bc34a; color: #8bc34a;">
+          <a href="<?= base_url('campanas'); ?>" class="btn btn-outline-success-salvador me-2">
             <i class="fas fa-times me-1"></i> Cancelar
           </a>
-          <button type="submit" class="btn text-white" style="background-color: #8bc34a; border-color: #8bc34a;">
+          <button type="submit" class="btn text-white bg-success-salvador border-success-salvador">
             <i class="fas fa-plus me-1"></i> Crear Campaña
           </button>
         </div>
@@ -200,18 +200,54 @@
   </div>
 </form>
 
+<style>
+  .text-success-salvador {
+    color: #8bc34a !important;
+  }
+  .bg-success-salvador {
+    background-color: #8bc34a !important;
+  }
+  .border-success-salvador {
+    border-color: #8bc34a !important;
+  }
+  .btn-outline-success-salvador {
+    color: #8bc34a !important;
+    border-color: #8bc34a !important;
+  }
+  .btn-outline-success-salvador:hover {
+    background-color: #8bc34a !important;
+    color: #fff !important;
+  }
+
+  /* Estilos para chips del modal Universo */
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: .25rem .5rem; margin: .2rem;
+    border: 1px solid #ced4da; border-radius: 20px;
+    background: #f8f9fa; font-size: .85rem;
+  }
+  .chip .remove {
+    margin-left: .4rem; cursor: pointer; font-weight: bold;
+  }
+
+  /* Asegura que el Select2 para selección múltiple se expanda verticalmente */
+  .select2-container--default .select2-selection--multiple {
+    min-height: 38px; /* Altura mínima para que se vea bien */
+    height: auto; /* Permite que la altura se ajuste automáticamente */
+  }
+</style>
 
 <!-- ===================== MODAL UNIVERSO ===================== -->
 <div class="modal fade" id="modalUniverso" tabindex="-1" aria-labelledby="modalUniversoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content" style="border-color:#8bc34a;">
-      <div class="modal-header" style="background-color:#8bc34a;">
+    <div class="modal-content border-success-salvador">
+      <div class="modal-header bg-success-salvador">
         <h5 class="modal-title text-white" id="modalUniversoLabel">Seleccionar Universo (Tags)</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
       <div class="modal-body">
-        <label class="form-label fw-semibold" style="color:#8bc34a;">Escribe para buscar y selecciona uno o varios</label>
+        <label class="form-label fw-semibold text-success-salvador">Escribe para buscar y selecciona uno o varios</label>
 
         <!-- Avisos -->
         <?php if (empty($catalogo_tags)): ?>
@@ -254,33 +290,14 @@
 
       <div class="modal-footer">
         <button type="button" id="btnClearUniverso" class="btn btn-outline-secondary">Limpiar</button>
-        <button type="button" id="btnAplicarUniverso" class="btn text-white" style="background-color:#8bc34a;">Aplicar</button>
+        <button type="button" id="btnAplicarUniverso" class="btn text-white bg-success-salvador">Aplicar</button>
       </div>
     </div>
   </div>
 </div>
 <!-- ========================================================= -->
 
-<style>
-  .chip {
-    display: inline-flex; align-items: center;
-    padding: .25rem .5rem; margin: .2rem;
-    border: 1px solid #ced4da; border-radius: 20px;
-    background: #f8f9fa; font-size: .85rem;
-  }
-  .chip .remove {
-    margin-left: .4rem; cursor: pointer; font-weight: bold;
-  }
-</style>
-
-<style>
-  /* Asegura que el Select2 para selección múltiple se expanda verticalmente */
-  .select2-container--default .select2-selection--multiple {
-    min-height: 38px; /* Altura mínima para que se vea bien */
-    height: auto; /* Permite que la altura se ajuste automáticamente */
-  }
-</style>
- <!-- ===== Loader de dependencias (solo si faltan) ===== -->
+  <!-- ===== Loader de dependencias (solo si faltan) ===== -->
  <!-- Carga de jQuery de forma estándar -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
