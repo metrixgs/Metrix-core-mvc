@@ -52,9 +52,6 @@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-sm btn-light" id="btnExportar">Exportar</button>
                         <a href="<?= base_url('campanas/ficha/' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-warning">Ficha Informativa</a>
-                        <a href="<?= base_url('campanas/rondas/' . ($campana['id'] ?? 0)); ?>" class="btn btn-sm btn-primary">Ver Rondas</a>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalIncidenciasCampana">Incidencias</button>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEncuestasCampana">Ver Encuestas</button>
                     </div>
                 </div>
             </div>

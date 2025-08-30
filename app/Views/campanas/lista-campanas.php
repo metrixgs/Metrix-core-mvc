@@ -59,7 +59,6 @@
                     <th>Tipo de Campaña</th>
                     <th>Estatus</th>
                     <th>Área Responsable</th>
-                    <th>Coordinador(a)</th>
                     <th>Fecha de Inicio</th>
                     <th>Fecha de Término</th>
                     <th class="text-center">Detalles</th>
@@ -125,9 +124,6 @@
                           <?php endif; ?>
                         </td>
 
-                        <!-- Coordinador -->
-                        <td><?= esc($campana['nombre_coordinador']) ?></td>
-
                         <!-- Fecha de inicio -->
                         <td><?= date('d/M/Y', strtotime($campana['fecha_inicio'])); ?></td>
 
@@ -145,7 +141,7 @@
                     <?php endforeach; ?>
                   <?php } else { ?>
                     <tr>
-                      <td colspan="9" class="text-center">No hay campañas disponibles.</td>
+                      <td colspan="8" class="text-center">No hay campañas disponibles.</td>
                     </tr>
                   <?php } ?>
                 </tbody>
