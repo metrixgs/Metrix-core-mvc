@@ -32,7 +32,7 @@ class Campanas extends BaseController {
     protected $segmentaciones;
     protected $survey;
     protected $surveyResponseModel; // Declarar la propiedad para el nuevo modelo
-
+ 
     public function __construct() {
         // Instanciar los modelos
         $this->usuarios = new UsuariosModel();
@@ -66,8 +66,8 @@ class Campanas extends BaseController {
     // Campañas con nombre del coordinador
     $campanas = $this->campanas->obtenerCampanas();
     foreach ($campanas as &$campana) {
-        $usuario = $this->usuarios->find($campana['coordinador']);
-        $campana['nombre_coordinador'] = $usuario['nombre'] ?? 'N/D';
+        $area = $this->areas->find($campana['dependencia']);
+        $campana['nombre_dependencia'] = $area['nombre'] ?? 'N/D';
     }
     $data['campanas'] = $campanas;
 
@@ -171,8 +171,8 @@ public function detalle($campana_id)
         return redirect()->to("campanas/");
     }
     // Obtener el nombre del coordinador
-    $coordinador = $this->usuarios->find($campana['coordinador']);
-    $campana['nombre_coordinador'] = $coordinador['nombre'] ?? 'No asignado';
+    $dependencia_area = $this->areas->find($campana['dependencia']);
+    $campana['nombre_dependencia'] = $dependencia_area['nombre'] ?? 'No asignado';
     $data['campana'] = $campana;
 
     // Obtener encuestas relacionadas con esta campaña
@@ -327,10 +327,7 @@ public function rondas($campana_id)
 
      public function crear()
 {
-    $data['usuarios_coordinador'] = $this->usuarios
-        ->select('id, nombre')
-        ->where('rol_id', 9)
-        ->findAll();
+    $data['dependencias'] = $this->areas->obtenerAreas();
 
     // ⚠️ Si la solicitud es GET, solo muestra el formulario
     if ($this->request->getMethod() === 'get') {
@@ -339,7 +336,7 @@ public function rondas($campana_id)
 
     // 🔽 Todo esto se ejecuta solo si es POST
     $nombre = $this->request->getPost('nombre');
-    $coordinador = $this->request->getPost('coordinador');
+    $dependencia = $this->request->getPost('dependencia');
     $tipo_id = $this->request->getPost('tipo_id');
     $subtipo_id = $this->request->getPost('subtipo_id');
     $area_id = $this->request->getPost('area_id');
@@ -357,7 +354,7 @@ public function rondas($campana_id)
 
     $validationRules = [
         'nombre' => 'permit_empty|max_length[100]',
-        'coordinador' => 'permit_empty|max_length[100]',
+        'dependencia' => 'permit_empty|max_length[100]',
         'tipo_id' => 'permit_empty|numeric',
         'area_id' => 'permit_empty|numeric',
         'estado' => 'permit_empty|in_list[Programada,Activa,Finalizada,Propuesta]',
@@ -383,7 +380,7 @@ public function rondas($campana_id)
 
     $infoCampana = [
         'nombre' => $nombre,
-        'coordinador' => $coordinador,
+        'dependencia' => $dependencia,
         'tipo_id' => $tipo_id,
         'area_id' => $area_id,
         'estado' => $estado,
@@ -834,10 +831,7 @@ public function rondas($campana_id)
             ->findAll();
         $data['surveys'] = $this->survey->findAll();
 
-        $data['usuarios_coordinador'] = $this->usuarios
-    ->select('id, nombre')
-    ->where('rol_id', 9)
-    ->findAll();
+        $data['dependencias'] = $this->areas->obtenerAreas();
 
         // Cargar tags para el modal Universo (solo tags con usuarios asociados y su conteo)
         $data['catalogo_tags'] = $this->tagsModel->getTagsWithUserCounts();

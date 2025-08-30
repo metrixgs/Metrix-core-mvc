@@ -13,7 +13,7 @@ class CampanasModel extends Model {
     protected $useSoftDeletes = false;
  protected $allowedFields = [
     'tipo_id', 'subtipo_id', 'area_id', 'nombre',
-    'coordinador', 'descripcion', 'fecha_inicio',
+    'dependencia', 'descripcion', 'fecha_inicio',
     'fecha_fin', 'estado', 'encuesta',
     'entregables', 'universo', 'universo_count', 'territorio', // Añadir 'universo_count'
     'territorio_subtype', 'sectorizacion',
