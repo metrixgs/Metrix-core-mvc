@@ -132,9 +132,8 @@
                                     </div>
                                     <!-- Coordinador -->
                                     <div class="col-md-6">
-                                        <label class="form-label">Coordinador(a):<span class="text-danger">*</span> (1/1)</label>
-                                        <input type="text" class="form-control" name="coordinador_nombre" value="<?= esc($campana['nombre_coordinador'] ?? ''); ?>" readonly>
-                                        <input type="hidden" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>">
+                                        <label class="form-label">Dependencia:</label>
+                                        <input type="text" class="form-control" value="<?= esc($campana['nombre_dependencia'] ?? 'No especificada'); ?>" readonly>
                                     </div>
                                 </div>
 
@@ -262,9 +261,17 @@ $mapUrls = [
                             <input type="text" class="form-control" id="nombre" name="nombre" value="<?= esc($campana['nombre'] ?? ''); ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="coordinador" class="form-label">Coordinador(a)</label>
-                            <input type="text" class="form-control" id="coordinador_nombre_modal" value="<?= esc($campana['nombre_coordinador'] ?? ''); ?>" readonly>
-                            <input type="hidden" id="coordinador_id_modal" name="coordinador" value="<?= esc($campana['coordinador'] ?? ''); ?>">
+                            <label for="dependencia_id_modal" class="form-label">Dependencia</label>
+                            <select class="form-select" id="dependencia_id_modal" name="dependencia">
+                                <option value="">Seleccione una brigada</option>
+                                <?php if (isset($brigadas) && !empty($brigadas)): ?>
+                                    <?php foreach ($brigadas as $brigada): ?>
+                                        <option value="<?= esc($brigada['id']); ?>" <?= (isset($campana['dependencia']) && $campana['dependencia'] == $brigada['id']) ? 'selected' : ''; ?>>
+                                            <?= esc($brigada['nombre']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
                         </div>
                     </div>
 

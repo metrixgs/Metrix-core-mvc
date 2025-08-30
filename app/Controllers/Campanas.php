@@ -173,9 +173,9 @@ public function detalle($campana_id)
     if (empty($campana)) {
         return redirect()->to("campanas/");
     }
-    // Obtener el nombre del coordinador
-    $dependencia_area = $this->areas->find($campana['dependencia']);
-    $campana['nombre_dependencia'] = $dependencia_area['nombre'] ?? 'No asignado';
+    // Obtener el nombre de la dependencia (brigada)
+    $dependencia_brigada = $this->brigadas->find($campana['dependencia']);
+    $campana['nombre_dependencia'] = $dependencia_brigada['nombre'] ?? 'No asignado';
     $data['campana'] = $campana;
 
     // Obtener encuestas relacionadas con esta campaña
@@ -184,9 +184,10 @@ public function detalle($campana_id)
     // Tickets por campaña
     $data['tickets'] = $this->tickets->obtenerTicketsPorCampana($campana['id']);
 
-    // Tipos de campañas y áreas
+    // Tipos de campañas, áreas y brigadas
     $data['tipos_campanas'] = $this->tiposCampanas->obtenerTiposCampanas();
     $data['areas'] = $this->areas->obtenerAreas();
+    $data['brigadas'] = $this->brigadas->findAll(); // Añadir brigadas para el modal de edición
 
     // Breadcrumb
     $data['breadcrumb'] = $this->generarBreadcrumb([
