@@ -45,7 +45,7 @@ class CampanasModel extends Model {
             return $builder->get()->getRowArray();
         }
 
-        $builder->orderBy('tbl_campanas.id', 'DESC');
+        $builder->orderBy('tbl_campanas.id', 'ASC');
 
         return $builder->get()->getResultArray();
     }
