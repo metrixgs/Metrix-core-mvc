@@ -44,11 +44,7 @@
               </div>
             </div>
             <div class="row mt-3">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold" style="color: #8bc34a;">Canal de difusión</label>
-                <input type="text" class="form-control" name="canal_difusion" placeholder="Ej: Redes Sociales" style="border-color: #8bc34a;">
-              </div>
-              <div class="col-md-6">
+              <div class="col-md-12">
                 <label class="form-label fw-semibold" style="color: #8bc34a;">Objetivo de la campaña</label>
                 <textarea class="form-control" name="objetivo" rows="1" style="border-color: #8bc34a;"></textarea>
               </div>
@@ -187,13 +183,6 @@
         </div>
       </div>
 
-      <!-- DESCRIPCIÓN -->
-      <div class="col-md-12">
-        <div class="mb-3">
-          <label class="form-label fw-semibold" style="color: #8bc34a;">Descripción <span class="text-danger">*</span></label>
-          <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
-        </div>
-      </div>
 
       <!-- BOTONES -->
       <div class="card shadow mt-4" style="border-color: #8bc34a;">
@@ -322,7 +311,6 @@ jQuery(document).ready(function($) {
     var $summary = $('#universoSeleccionado');
     var $count   = $('#universoCount');
     var $chips   = $('#chipsContainer');
-    var $csv     = $('#universoCsv');
     var COUNT_USERS_URL = "<?= site_url('campanas/countUsersBySelectedTags') ?>"; // Nuevo endpoint
 
     // Variables para el mapa
@@ -373,7 +361,6 @@ jQuery(document).ready(function($) {
     $select.on('change', function () {
       var slugs = unique($select.val() || []);
       renderChips(slugs);
-      $csv.val(slugs.join(','));
       updateUniversoCount(slugs); // Llamar a la función para actualizar el conteo de usuarios
     });
 
@@ -388,12 +375,11 @@ jQuery(document).ready(function($) {
     // Limpiar selección
     $('#btnClearUniverso').on('click', function () {
       $select.val(null).trigger('change');
-      $csv.val('');
     });
 
     // Aplicar y cerrar
     $('#btnAplicarUniverso').on('click', function () {
-      var slugs = parseCSV($csv.val());
+      var slugs = unique($select.val() || []); // Obtener los slugs directamente del select
       $hidden.val(slugs.join(','));
       renderBadges(slugs);
       if (window.bootstrap && bootstrap.Modal) {
@@ -476,7 +462,6 @@ jQuery(document).ready(function($) {
       if (initial.length) {
         renderChips(initial);
         renderBadges(initial);
-        $csv.val(initial.join(','));
         updateUniversoCount(initial); // Actualizar el conteo al cargar la página
       }
     })();

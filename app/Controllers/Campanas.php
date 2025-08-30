@@ -344,7 +344,6 @@ public function rondas($campana_id)
     $subtipo_id = $this->request->getPost('subtipo_id');
     $area_id = $this->request->getPost('area_id');
     $estado = $this->request->getPost('estado');
-    $descripcion = $this->request->getPost('descripcion');
     $fecha_inicio = $this->request->getPost('fecha_inicio');
     $fecha_fin = $this->request->getPost('fecha_fin');
     $encuesta = $this->request->getPost('encuesta'); // Esto será un array si se seleccionan múltiples
@@ -362,7 +361,6 @@ public function rondas($campana_id)
         'tipo_id' => 'permit_empty|numeric',
         'area_id' => 'permit_empty|numeric',
         'estado' => 'permit_empty|in_list[Programada,Activa,Finalizada,Propuesta]',
-        'descripcion' => 'permit_empty|string',
         'fecha_inicio' => 'permit_empty|valid_date',
         'fecha_fin' => 'permit_empty|valid_date',
         'encuesta' => 'permit_empty',
@@ -389,7 +387,6 @@ public function rondas($campana_id)
         'tipo_id' => $tipo_id,
         'area_id' => $area_id,
         'estado' => $estado,
-        'descripcion' => $descripcion,
         'fecha_inicio' => $fecha_inicio,
         'fecha_fin' => $fecha_fin,
         'encuesta' => is_array($encuesta) ? json_encode($encuesta) : ($encuesta ?? null),
@@ -399,7 +396,6 @@ public function rondas($campana_id)
         'territorio' => $territorio ?? null,
         'territorio_subtype' => $territorio_subtype ?? null,
         'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
-        'canal_difusion' => $this->request->getPost('canal_difusion'),
         'objetivo' => $this->request->getPost('objetivo'),
         'sector_electoral' => $this->request->getPost('sector_electoral'),
         'territorio_local' => $this->request->getPost('territorio_local'),
