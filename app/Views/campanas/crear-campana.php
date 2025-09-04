@@ -60,16 +60,16 @@
             <h6 class="mb-0 fw-semibold">🗺️ Delimitación Territorial</h6>
           </div>
           <div class="card-body bg-white">
-            <div class="mb-3">
+            <div class="mb-3" style="display: none;">
               <label class="form-label fw-semibold text-success-salvador">Estado</label>
-              <select class="form-select select2 border-success-salvador" id="estados_filtro" name="estados_filtro[]" multiple="multiple">
+              <select class="form-select select2 border-success-salvador" id="estados_filtro" name="estados_filtro[]" multiple="multiple" disabled>
                 <!-- Opciones de estados se cargarán dinámicamente con JavaScript -->
               </select>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold text-success-salvador">Municipio</label>
-              <select class="form-select select2 border-success-salvador" id="municipios_filtro" name="municipios_filtro[]" multiple="multiple" disabled>
-                <option value="" disabled selected>Selecciona un estado primero</option>
+              <select class="form-select select2 border-success-salvador" id="municipios_filtro" name="municipios_filtro[]" multiple="multiple">
+                <option value="" disabled selected>Selecciona un municipio</option>
               </select>
             </div>
             <div class="mb-3">
@@ -601,30 +601,38 @@ jQuery(document).ready(function($) {
     var selectedMunicipios = []; // IDs de municipios seleccionados en el mapa
 
     // Función para cargar y filtrar capas GeoJSON
-    function loadAndFilterGeoJsonLayer(geoJsonData, filterIds = []) {
-      // Si la capa ya existe, la limpiamos para añadir los nuevos datos filtrados
+    function loadAndFilterGeoJsonLayer(geoJsonData, filterIds = [], selectedFeatureIds = []) {
+      // Si la capa ya existe, la removemos del mapa
       if (currentGeoJsonLayer) {
-        currentGeoJsonLayer.clearLayers();
-      } else {
-        // Si no existe, la creamos por primera vez
-        currentGeoJsonLayer = L.geoJSON(null, { // Inicializamos con null, los datos se añadirán con addData
-          filter: function(feature) {
-            // Si no hay filtros, mostrar todos. Si hay filtros, mostrar solo los que coincidan.
-            return filterIds.length === 0 || filterIds.includes(feature.properties.id.toString());
-          },
-          style: function(feature) {
-            var featureId = feature.properties.id.toString();
-            if (selectedMunicipios.includes(featureId)) {
-              return selectedStyle;
-            }
-            return defaultStyle;
-          },
-          onEachFeature: function(feature, layer) {
-            layer.on({
-              click: function(e) {
-                var clickedLayer = e.target;
-                var featureId = feature.properties.id.toString();
+        map.removeLayer(currentGeoJsonLayer);
+      }
 
+      // Siempre creamos una nueva capa GeoJSON
+      currentGeoJsonLayer = L.geoJSON(null, { // Inicializamos con null, los datos se añadirán con addData
+        filter: function(feature) {
+          // Si no hay filtros, mostrar todos. Si hay filtros, mostrar solo los que coincidan.
+          return filterIds.length === 0 || filterIds.includes(feature.properties.id.toString());
+        },
+        style: function(feature) {
+          var featureId = feature.properties.id.toString();
+          if (selectedFeatureIds.includes(featureId)) {
+            return selectedStyle;
+          }
+          return defaultStyle;
+        },
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            click: function(e) {
+              var clickedLayer = e.target;
+              var featureId = feature.properties.id.toString();
+
+              // La lógica de selección en el mapa debe ser independiente del dropdown
+              // y puede manejar tanto municipios como colonias si se desea.
+              // Por ahora, mantendremos la lógica para municipios si se hace clic en un municipio.
+              // Si se hace clic en una colonia, se podría implementar una lógica similar para colonias.
+
+              // Si el feature es un municipio (asumiendo que nom_mun existe para municipios)
+              if (feature.properties && feature.properties.nom_mun) {
                 if (selectedMunicipios.includes(featureId)) {
                   // Deseleccionar
                   selectedMunicipios = selectedMunicipios.filter(id => id !== featureId);
@@ -634,16 +642,19 @@ jQuery(document).ready(function($) {
                   selectedMunicipios.push(featureId);
                   clickedLayer.setStyle(selectedStyle);
                 }
-                console.log("Municipios seleccionados en el mapa:", selectedMunicipios);
-                // Aquí podrías actualizar un input hidden con los IDs seleccionados
+                console.log("Municipios seleccionados en el mapa (por clic):", selectedMunicipios);
               }
-            });
-            if (feature.properties && feature.properties.nom_mun) {
-              layer.bindPopup("<b>" + feature.properties.nom_mun + "</b>");
+              // Aquí podrías añadir lógica para colonias si se hace clic en ellas
             }
+          });
+          // Mostrar popup con el nombre del feature (municipio o colonia)
+          if (feature.properties && feature.properties.nom_mun) {
+            layer.bindPopup("<b>" + feature.properties.nom_mun + "</b>");
+          } else if (feature.properties && feature.properties.nom_col) {
+            layer.bindPopup("<b>" + feature.properties.nom_col + "</b>");
           }
-        }).addTo(map);
-      }
+        }
+      }).addTo(map);
 
       if (!geoJsonData || !geoJsonData.features) {
         console.warn("No se proporcionaron datos GeoJSON válidos para filtrar.");
@@ -669,9 +680,8 @@ jQuery(document).ready(function($) {
     }
 
     // Variables para almacenar los datos GeoJSON de cada nivel
-    var allEstadosData = null;
+    var allEstadosData = null; // Se mantiene por si se decide usar en el futuro, pero no se carga inicialmente
     var allMunicipiosData = null;
-    var allDelegacionesData = null;
     var allColoniasData = null;
 
     // Referencias a los selects
@@ -762,31 +772,13 @@ jQuery(document).ready(function($) {
       });
     }
 
-    // Cargar estados al inicio
-    loadApiDataAndPopulateSelect(API_URLS.estados, $estadosFiltro, 'Estados', 'cve_ent', 'nom_ent');
+    // Cargar municipios al inicio
+    loadApiDataAndPopulateSelect(API_URLS.municipios, $municipiosFiltro, 'Municipios', 'id', 'nom_mun');
 
-    // Manejar el cambio en la selección de estados
+    // Manejar el cambio en la selección de estados (deshabilitado/oculto)
     $estadosFiltro.on('change', function() {
-      var selectedEstadoIds = $(this).val();
-      $municipiosFiltro.empty().prop('disabled', true);
-      $delegacionesColoniasFiltro.empty().prop('disabled', true);
-      initSelect2($municipiosFiltro, 'Selecciona un estado primero', true);
-      initSelect2($delegacionesColoniasFiltro, 'Selecciona un municipio primero', true);
-
-      if (selectedEstadoIds && selectedEstadoIds.length > 0) {
-        // Cargar municipios del estado seleccionado
-        loadApiDataAndPopulateSelect(API_URLS.municipios, $municipiosFiltro, 'Municipios', 'id', 'nom_mun', selectedEstadoIds, 'cve_ent'); // Asumiendo que cve_ent es el ID del estado en municipios
-        // Mostrar la capa de estados seleccionados en el mapa
-        let filteredEstados = {
-          type: "FeatureCollection",
-          features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
-        };
-        loadAndFilterGeoJsonLayer(filteredEstados);
-      } else {
-        // Si no hay estados seleccionados, limpiar el mapa
-        if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
-        map.setView([23.6345, -102.5528], 5); // Centrar en México
-      }
+      // No hacer nada, ya que el filtrado principal es por municipio
+      // Si se decide habilitar los estados en el futuro, la lógica iría aquí.
     });
 
     // Manejar el cambio en la selección de municipios
@@ -796,66 +788,55 @@ jQuery(document).ready(function($) {
       initSelect2($delegacionesColoniasFiltro, 'Selecciona un municipio primero', true);
 
       if (selectedMunicipioIds && selectedMunicipioIds.length > 0) {
-        // Cargar delegaciones/colonias del municipio seleccionado
-        loadApiDataAndPopulateSelect(API_URLS.delegaciones, $delegacionesColoniasFiltro, 'Delegaciones/Colonias', 'id', 'nom_loc', selectedMunicipioIds, 'cu_mun'); // Asumiendo que cu_mun es el ID del municipio en delegaciones
+        // Cargar colonias del municipio seleccionado
+        loadApiDataAndPopulateSelect(API_URLS.colonias, $delegacionesColoniasFiltro, 'Colonias', 'id', 'nom_col', selectedMunicipioIds, 'cve_mun'); // Asumiendo que cve_mun es el ID del municipio en colonias
+        
+        // Actualizar la variable global de municipios seleccionados para el mapa
+        selectedMunicipios = selectedMunicipioIds;
+
         // Mostrar la capa de municipios seleccionados en el mapa
-        let filteredMunicipios = {
-          type: "FeatureCollection",
-          features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
-        };
-        loadAndFilterGeoJsonLayer(filteredMunicipios);
-      } else {
-        // Si no hay municipios seleccionados, mostrar los estados seleccionados
-        var selectedEstadoIds = $estadosFiltro.val();
-        if (selectedEstadoIds && selectedEstadoIds.length > 0) {
-          let filteredEstados = {
+        if (allMunicipiosData) {
+          let filteredMunicipios = {
             type: "FeatureCollection",
-            features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
+            features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
           };
-          loadAndFilterGeoJsonLayer(filteredEstados);
-        } else {
-          if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
-          map.setView([23.6345, -102.5528], 5);
+          loadAndFilterGeoJsonLayer(filteredMunicipios, selectedMunicipioIds, selectedMunicipioIds);
         }
+      } else {
+        // Si no hay municipios seleccionados, limpiar el mapa
+        selectedMunicipios = []; // Limpiar la selección del mapa
+        if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+        map.setView([23.6345, -102.5528], 5); // Centrar en México
       }
     });
 
     // Manejar el cambio en la selección de delegaciones/colonias
     $delegacionesColoniasFiltro.on('change', function() {
-      var selectedDelegacionColoniaIds = $(this).val();
-      if (selectedDelegacionColoniaIds && selectedDelegacionColoniaIds.length > 0) {
-        // Mostrar la capa de delegaciones/colonias seleccionadas en el mapa
-        // Aquí necesitaríamos una lógica para combinar delegaciones y colonias si vienen de APIs separadas
-        // Por simplicidad, asumiré que 'delegaciones' API puede contener ambos o que se usará una u otra.
-        // Si 'colonias' es una API separada, necesitaríamos cargarla también.
-        // Para este ejemplo, usaré allDelegacionesData.
-        let filteredDelegacionesColonias = {
-          type: "FeatureCollection",
-          features: allDelegacionesData.features.filter(f => selectedDelegacionColoniaIds.includes(f.properties.id.toString()))
-        };
-        loadAndFilterGeoJsonLayer(filteredDelegacionesColonias);
+      var selectedColoniaIds = $(this).val();
+      if (selectedColoniaIds && selectedColoniaIds.length > 0) {
+        // Mostrar la capa de colonias seleccionadas en el mapa
+        if (allColoniasData) {
+          let filteredColonias = {
+            type: "FeatureCollection",
+            features: allColoniasData.features.filter(f => selectedColoniaIds.includes(f.properties.id.toString()))
+          };
+          loadAndFilterGeoJsonLayer(filteredColonias, selectedColoniaIds, selectedColoniaIds);
+        }
       } else {
-        // Si no hay delegaciones/colonias seleccionadas, mostrar los municipios seleccionados
+        // Si no hay colonias seleccionadas, mostrar los municipios seleccionados
         var selectedMunicipioIds = $municipiosFiltro.val();
         if (selectedMunicipioIds && selectedMunicipioIds.length > 0) {
-          let filteredMunicipios = {
-            type: "FeatureCollection",
-            features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
-          };
-          loadAndFilterGeoJsonLayer(filteredMunicipios);
-        } else {
-          // Si no hay municipios, mostrar estados
-          var selectedEstadoIds = $estadosFiltro.val();
-          if (selectedEstadoIds && selectedEstadoIds.length > 0) {
-            let filteredEstados = {
+          if (allMunicipiosData) {
+            let filteredMunicipios = {
               type: "FeatureCollection",
-              features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
+              features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
             };
-            loadAndFilterGeoJsonLayer(filteredEstados);
-          } else {
-            if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
-            map.setView([23.6345, -102.5528], 5);
+            loadAndFilterGeoJsonLayer(filteredMunicipios, selectedMunicipioIds, selectedMunicipioIds);
           }
+        } else {
+          // Si no hay municipios seleccionados, limpiar el mapa
+          if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+          map.setView([23.6345, -102.5528], 5); // Centrar en México
         }
       }
     });
