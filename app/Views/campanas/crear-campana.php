@@ -76,6 +76,12 @@
                 <option value="seccion">Sección</option>
               </select>
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-success-salvador">Municipios</label>
+              <select class="form-select select2 border-success-salvador" id="municipios_filtro" name="municipios_filtro[]" multiple="multiple">
+                <!-- Opciones de municipios se cargarán dinámicamente con JavaScript -->
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -552,8 +558,11 @@ jQuery(document).ready(function($) {
 
 <script>
   jQuery(document).ready(function($) {
+    // URL de la API de municipios
+    const MUNICIPIOS_API_URL = 'https://soymetrix.com/api/municipios';
+
     // Inicializar el mapa
-    map = L.map('mapaMexico').setView([23.6345, -102.5528], 5); // Centrado en México
+    var map = L.map('mapaMexico').setView([23.6345, -102.5528], 5); // Centrado en México
 
     // Añadir capa base de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -580,93 +589,169 @@ jQuery(document).ready(function($) {
       fillOpacity: 0.9
     };
 
-    // Función para cargar capas GeoJSON
-    function loadGeoJsonLayer(geoJsonUrl) {
+    var currentGeoJsonLayer;
+    var allMunicipiosData = null; // Almacenar todos los datos de municipios
+    var selectedMunicipios = []; // IDs de municipios seleccionados en el mapa
+
+    // Función para cargar y filtrar capas GeoJSON
+    function loadAndFilterGeoJsonLayer(geoJsonData, filterIds = []) {
+      // Si la capa ya existe, la limpiamos para añadir los nuevos datos filtrados
       if (currentGeoJsonLayer) {
-        map.removeLayer(currentGeoJsonLayer);
-      }
-      selectedPolygons = []; // Limpiar selección al cambiar de capa
-
-      $.getJSON(geoJsonUrl, function(data) {
-        selectedPolygons = []; // Limpiar selección anterior
-
-        currentGeoJsonLayer = L.geoJSON(data, {
+        currentGeoJsonLayer.clearLayers();
+      } else {
+        // Si no existe, la creamos por primera vez
+        currentGeoJsonLayer = L.geoJSON(null, { // Inicializamos con null, los datos se añadirán con addData
+          filter: function(feature) {
+            // Si no hay filtros, mostrar todos. Si hay filtros, mostrar solo los que coincidan.
+            return filterIds.length === 0 || filterIds.includes(feature.properties.id.toString());
+          },
           style: function(feature) {
-            // Aplicar selectedStyle a todos los polígonos al cargar la capa
-            var featureId = feature.properties.id || feature.properties.CVE_ENT || feature.properties.CVE_MUN;
-            selectedPolygons.push(featureId); // Añadir todos los IDs a la selección
-            return selectedStyle; // Estilo por defecto para todos los polígonos al cargar
+            var featureId = feature.properties.id.toString();
+            if (selectedMunicipios.includes(featureId)) {
+              return selectedStyle;
+            }
+            return defaultStyle;
           },
           onEachFeature: function(feature, layer) {
             layer.on({
               click: function(e) {
                 var clickedLayer = e.target;
-                var featureId = feature.properties.id || feature.properties.CVE_ENT || feature.properties.CVE_MUN;
+                var featureId = feature.properties.id.toString();
 
-                if (selectedPolygons.includes(featureId)) {
+                if (selectedMunicipios.includes(featureId)) {
                   // Deseleccionar
-                  selectedPolygons = selectedPolygons.filter(id => id !== featureId);
+                  selectedMunicipios = selectedMunicipios.filter(id => id !== featureId);
                   clickedLayer.setStyle(defaultStyle);
                 } else {
                   // Seleccionar
-                  selectedPolygons.push(featureId);
+                  selectedMunicipios.push(featureId);
                   clickedLayer.setStyle(selectedStyle);
                 }
-                console.log("Polígonos seleccionados:", selectedPolygons);
+                console.log("Municipios seleccionados en el mapa:", selectedMunicipios);
                 // Aquí podrías actualizar un input hidden con los IDs seleccionados
               }
             });
-            // Opcional: Añadir tooltip o popup
-            if (feature.properties && feature.properties.NOM_ENT) {
-              layer.bindPopup(feature.properties.NOM_ENT);
-            } else if (feature.properties && feature.properties.NOM_MUN) {
-              layer.bindPopup(feature.properties.NOM_MUN);
-            } else if (feature.properties && feature.properties.NOM_LOC) { // Para delegaciones/localidades
-              layer.bindPopup(feature.properties.NOM_LOC);
-            } else if (feature.properties && feature.properties.NOM_DIST) { // Para distritos
-              layer.bindPopup(feature.properties.NOM_DIST);
-            } else if (feature.properties && feature.properties.SECCION) { // Para secciones
-              layer.bindPopup('Sección: ' + feature.properties.SECCION);
+            if (feature.properties && feature.properties.nom_mun) {
+              layer.bindPopup("<b>" + feature.properties.nom_mun + "</b>");
             }
           }
         }).addTo(map);
+      }
 
+      if (!geoJsonData || !geoJsonData.features) {
+        console.warn("No se proporcionaron datos GeoJSON válidos para filtrar.");
+        return;
+      }
+
+      // Añadir solo las características filtradas a la capa existente
+      let filteredFeatures = {
+        type: "FeatureCollection",
+        features: geoJsonData.features.filter(feature => {
+          // Asegurarse de que la geometría no sea nula (features inválidos)
+          return feature.geometry && (filterIds.length === 0 || filterIds.includes(feature.properties.id.toString()));
+        })
+      };
+      currentGeoJsonLayer.addData(filteredFeatures);
+
+      if (currentGeoJsonLayer.getLayers().length > 0) {
         map.fitBounds(currentGeoJsonLayer.getBounds());
-      }).fail(function(jqxhr, textStatus, error) {
-        var err = textStatus + ", " + error;
-        console.error("Request Failed: " + err);
-        alert("No se pudo cargar la capa GeoJSON: " + err);
+      } else {
+        // Si no hay capas filtradas, centrar en México
+        map.setView([23.6345, -102.5528], 5);
+      }
+    }
+
+    // Cargar todos los municipios desde la API al inicio
+    $.getJSON(MUNICIPIOS_API_URL, function(data) {
+      // Pre-procesar las geometrías de cada feature si es un string
+      let processedFeatures = data.features.map(f => {
+        let geometry = f.geometry;
+        if (typeof geometry === 'string') {
+          try {
+            geometry = JSON.parse(geometry);
+          } catch (e) {
+            console.error("Error parsing geometry string for feature:", f.properties.nom_mun, e);
+            geometry = null; // Marcar como inválido
+          }
+        }
+        return {
+          type: "Feature",
+          geometry: geometry,
+          properties: f.properties || {}
+        };
+      }).filter(f => f.geometry !== null); // Filtrar features con geometría nula
+
+      allMunicipiosData = { type: "FeatureCollection", features: processedFeatures }; // Guardar todos los datos procesados
+      loadAndFilterGeoJsonLayer(allMunicipiosData); // Mostrar todos los municipios por defecto
+
+      // Llenar el select de municipios
+      var $municipiosFiltro = $('#municipios_filtro');
+      $municipiosFiltro.empty(); // Limpiar la opción de "Cargando..."
+
+      if (processedFeatures.length === 0) {
+        $municipiosFiltro.append('<option value="" disabled>No hay municipios disponibles</option>');
+      } else {
+        $municipiosFiltro.append('<option value="">Todos los municipios</option>'); // Opción para mostrar todos
+        processedFeatures.forEach(function(feature) {
+          var id = feature.properties.id;
+          var nombre = feature.properties.nom_mun;
+          $municipiosFiltro.append(new Option(nombre, id));
+        });
+      }
+
+      // Inicializar Select2 para el nuevo select de municipios
+      if ($.fn.select2) {
+        $municipiosFiltro.select2({
+          width: '100%',
+          placeholder: 'Selecciona uno o varios municipios',
+          allowClear: true // Permite limpiar la selección
+        });
+      }
+      // Habilitar el select después de cargar los datos
+      $municipiosFiltro.prop('disabled', false);
+
+    }).fail(function(jqxhr, textStatus, error) {
+      var err = textStatus + ", " + error;
+      console.error("Error al cargar municipios desde la API: " + err);
+      alert("No se pudieron cargar los municipios: " + err);
+
+      // Mostrar mensaje de error en el select
+      var $municipiosFiltro = $('#municipios_filtro');
+      $municipiosFiltro.empty();
+      $municipiosFiltro.append('<option value="" disabled>Error al cargar municipios</option>');
+      if ($.fn.select2) {
+        $municipiosFiltro.select2({
+          width: '100%',
+          placeholder: 'Error al cargar municipios',
+          disabled: true // Deshabilitar el select en caso de error
+        });
+      }
+    });
+
+    // Añadir la opción de "Cargando..." al inicio y deshabilitar el select
+    var $municipiosFiltroInitial = $('#municipios_filtro');
+    $municipiosFiltroInitial.empty();
+    $municipiosFiltroInitial.append('<option value="" disabled selected>Cargando municipios...</option>');
+    if ($.fn.select2) {
+      $municipiosFiltroInitial.select2({
+        width: '100%',
+        placeholder: 'Cargando municipios...',
+        disabled: true // Deshabilitar mientras carga
       });
     }
 
-    // Cargar la capa de estados de México por defecto (ejemplo con GeoJSON)
-    // Necesitarás un endpoint que sirva GeoJSON para estados, municipios, etc.
-    // Por ahora, usaré un placeholder. Deberás reemplazar esto con tus URLs reales.
-    loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Placeholder
-
-    // Manejar el cambio en la selección de delimitación territorial
-    $('#territorio_local').on('change', function() {
-      var selectedValue = $(this).val();
-      if (selectedValue === 'municipio') {
-        loadGeoJsonLayer('<?= base_url('mapa/data/municipios.geojson') ?>'); // Placeholder
-      } else if (selectedValue === 'delegacion') {
-        loadGeoJsonLayer('<?= base_url('mapa/data/delegaciones.geojson') ?>'); // Placeholder
-      } else {
-        loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Por defecto
+    // Manejar el cambio en la selección del filtro de municipios
+    $('#municipios_filtro').on('change', function() {
+      var selectedMunicipioIds = $(this).val(); // Obtiene un array de IDs seleccionados
+      if (allMunicipiosData) {
+        loadAndFilterGeoJsonLayer(allMunicipiosData, selectedMunicipioIds);
       }
     });
 
-    // Manejar el cambio en la selección de sector electoral
-    $('#sector_electoral').on('change', function() {
-      var selectedValue = $(this).val();
-      if (selectedValue === 'distrito') {
-        loadGeoJsonLayer('<?= base_url('mapa/data/distritos.geojson') ?>'); // Placeholder
-      } else if (selectedValue === 'seccion') {
-        loadGeoJsonLayer('<?= base_url('mapa/data/secciones.geojson') ?>'); // Placeholder
-      } else {
-        loadGeoJsonLayer('<?= base_url('mapa/data/estados.geojson') ?>'); // Por defecto
-      }
-    });
+    // Deshabilitar los selects de "Territorio Local" y "Sector Electoral"
+    // ya que la funcionalidad de municipios los reemplaza o complementa.
+    $('#territorio_local').prop('disabled', true);
+    $('#sector_electoral').prop('disabled', true);
 
   });
 </script>
