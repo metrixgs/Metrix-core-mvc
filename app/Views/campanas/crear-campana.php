@@ -61,25 +61,27 @@
           </div>
           <div class="card-body bg-white">
             <div class="mb-3">
-              <label class="form-label fw-semibold text-success-salvador">Territorio Local</label>
-              <select class="form-select select2 border-success-salvador" id="territorio_local" name="territorio_local">
-                 
-                <option value="municipio">Municipio</option>
-                <option value="delegacion">Delegación</option>
+              <label class="form-label fw-semibold text-success-salvador">Estado</label>
+              <select class="form-select select2 border-success-salvador" id="estados_filtro" name="estados_filtro[]" multiple="multiple">
+                <!-- Opciones de estados se cargarán dinámicamente con JavaScript -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-success-salvador">Municipio</label>
+              <select class="form-select select2 border-success-salvador" id="municipios_filtro" name="municipios_filtro[]" multiple="multiple" disabled>
+                <option value="" disabled selected>Selecciona un estado primero</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-success-salvador">Delegación/Colonia</label>
+              <select class="form-select select2 border-success-salvador" id="delegaciones_colonias_filtro" name="delegaciones_colonias_filtro[]" multiple="multiple" disabled>
+                <option value="" disabled selected>Selecciona un municipio primero</option>
               </select>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold text-success-salvador">Sector Electoral</label>
-              <select class="form-select select2 border-success-salvador" id="sector_electoral" name="sector_electoral">
-                
-                <option value="distrito">Distrito</option>
-                <option value="seccion">Sección</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold text-success-salvador">Municipios</label>
-              <select class="form-select select2 border-success-salvador" id="municipios_filtro" name="municipios_filtro[]" multiple="multiple">
-                <!-- Opciones de municipios se cargarán dinámicamente con JavaScript -->
+              <select class="form-select select2 border-success-salvador" id="sector_electoral" name="sector_electoral" disabled>
+                <option value="" disabled selected>No disponible</option>
               </select>
             </div>
           </div>
@@ -558,8 +560,13 @@ jQuery(document).ready(function($) {
 
 <script>
   jQuery(document).ready(function($) {
-    // URL de la API de municipios
-    const MUNICIPIOS_API_URL = 'https://soymetrix.com/api/municipios';
+    // URLs de las APIs de delimitación territorial
+    const API_URLS = {
+      estados: 'https://soymetrix.com/api/estados',
+      municipios: 'https://soymetrix.com/api/municipios',
+      delegaciones: 'https://soymetrix.com/api/delegaciones',
+      colonias: 'https://soymetrix.com/api/colonias',
+    };
 
     // Inicializar el mapa
     var map = L.map('mapaMexico').setView([23.6345, -102.5528], 5); // Centrado en México
@@ -661,16 +668,43 @@ jQuery(document).ready(function($) {
       }
     }
 
-    // Cargar todos los municipios desde la API al inicio
-    $.getJSON(MUNICIPIOS_API_URL, function(data) {
-      // Pre-procesar las geometrías de cada feature si es un string
+    // Variables para almacenar los datos GeoJSON de cada nivel
+    var allEstadosData = null;
+    var allMunicipiosData = null;
+    var allDelegacionesData = null;
+    var allColoniasData = null;
+
+    // Referencias a los selects
+    var $estadosFiltro = $('#estados_filtro');
+    var $municipiosFiltro = $('#municipios_filtro');
+    var $delegacionesColoniasFiltro = $('#delegaciones_colonias_filtro');
+
+    // Función genérica para inicializar Select2
+    function initSelect2($selectElement, placeholderText, disabled = false) {
+      if ($.fn.select2) {
+        if ($selectElement.data('select2')) {
+          $selectElement.select2('destroy');
+        }
+        $selectElement.select2({
+          width: '100%',
+          placeholder: placeholderText,
+          allowClear: true,
+          disabled: disabled
+        });
+      }
+    }
+
+    // Función para pre-procesar los datos GeoJSON (parsear geometría)
+    function preprocessGeoJson(data) {
+      if (!data || !data.features) return { type: "FeatureCollection", features: [] };
+
       let processedFeatures = data.features.map(f => {
         let geometry = f.geometry;
         if (typeof geometry === 'string') {
           try {
             geometry = JSON.parse(geometry);
           } catch (e) {
-            console.error("Error parsing geometry string for feature:", f.properties.nom_mun, e);
+            console.error("Error parsing geometry string for feature:", f.properties.nom_mun || f.properties.NOM_ENT || 'Unknown', e);
             geometry = null; // Marcar como inválido
           }
         }
@@ -680,65 +714,151 @@ jQuery(document).ready(function($) {
           properties: f.properties || {}
         };
       }).filter(f => f.geometry !== null); // Filtrar features con geometría nula
+      return { type: "FeatureCollection", features: processedFeatures };
+    }
 
-      allMunicipiosData = { type: "FeatureCollection", features: processedFeatures }; // Guardar todos los datos procesados
-      loadAndFilterGeoJsonLayer(allMunicipiosData); // Mostrar todos los municipios por defecto
+    // Función para cargar datos de una API y poblar un select
+    function loadApiDataAndPopulateSelect(apiUrl, $selectElement, placeholderText, idProperty, nameProperty, parentId = null, parentIdProperty = null) {
+      $selectElement.empty();
+      $selectElement.append('<option value="" disabled selected>Cargando ' + placeholderText.toLowerCase() + '...</option>');
+      initSelect2($selectElement, 'Cargando ' + placeholderText.toLowerCase() + '...', true);
 
-      // Llenar el select de municipios
-      var $municipiosFiltro = $('#municipios_filtro');
-      $municipiosFiltro.empty(); // Limpiar la opción de "Cargando..."
+      $.getJSON(apiUrl, function(data) {
+        let processedData = preprocessGeoJson(data);
+        let filteredData = processedData.features;
 
-      if (processedFeatures.length === 0) {
-        $municipiosFiltro.append('<option value="" disabled>No hay municipios disponibles</option>');
+        if (parentId !== null && parentIdProperty !== null) {
+          filteredData = processedData.features.filter(f => f.properties[parentIdProperty] == parentId);
+        }
+
+        $selectElement.empty();
+        if (filteredData.length === 0) {
+          $selectElement.append('<option value="" disabled>No hay ' + placeholderText.toLowerCase() + ' disponibles</option>');
+          initSelect2($selectElement, 'No hay ' + placeholderText.toLowerCase() + ' disponibles', true);
+        } else {
+          $selectElement.append('<option value="">Todos los ' + placeholderText.toLowerCase() + '</option>');
+          filteredData.forEach(function(feature) {
+            var id = feature.properties[idProperty];
+            var nombre = feature.properties[nameProperty];
+            $selectElement.append(new Option(nombre, id));
+          });
+          initSelect2($selectElement, placeholderText, false);
+        }
+
+        // Almacenar los datos cargados globalmente
+        if (apiUrl === API_URLS.estados) allEstadosData = processedData;
+        if (apiUrl === API_URLS.municipios) allMunicipiosData = processedData;
+        if (apiUrl === API_URLS.delegaciones) allDelegacionesData = processedData;
+        if (apiUrl === API_URLS.colonias) allColoniasData = processedData;
+
+      }).fail(function(jqxhr, textStatus, error) {
+        var err = textStatus + ", " + error;
+        console.error("Error al cargar " + placeholderText.toLowerCase() + " desde la API: " + err);
+        alert("No se pudieron cargar los " + placeholderText.toLowerCase() + ": " + err);
+
+        $selectElement.empty();
+        $selectElement.append('<option value="" disabled>Error al cargar ' + placeholderText.toLowerCase() + '</option>');
+        initSelect2($selectElement, 'Error al cargar ' + placeholderText.toLowerCase() + '', true);
+      });
+    }
+
+    // Cargar estados al inicio
+    loadApiDataAndPopulateSelect(API_URLS.estados, $estadosFiltro, 'Estados', 'cve_ent', 'nom_ent');
+
+    // Manejar el cambio en la selección de estados
+    $estadosFiltro.on('change', function() {
+      var selectedEstadoIds = $(this).val();
+      $municipiosFiltro.empty().prop('disabled', true);
+      $delegacionesColoniasFiltro.empty().prop('disabled', true);
+      initSelect2($municipiosFiltro, 'Selecciona un estado primero', true);
+      initSelect2($delegacionesColoniasFiltro, 'Selecciona un municipio primero', true);
+
+      if (selectedEstadoIds && selectedEstadoIds.length > 0) {
+        // Cargar municipios del estado seleccionado
+        loadApiDataAndPopulateSelect(API_URLS.municipios, $municipiosFiltro, 'Municipios', 'id', 'nom_mun', selectedEstadoIds, 'cve_ent'); // Asumiendo que cve_ent es el ID del estado en municipios
+        // Mostrar la capa de estados seleccionados en el mapa
+        let filteredEstados = {
+          type: "FeatureCollection",
+          features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
+        };
+        loadAndFilterGeoJsonLayer(filteredEstados);
       } else {
-        $municipiosFiltro.append('<option value="">Todos los municipios</option>'); // Opción para mostrar todos
-        processedFeatures.forEach(function(feature) {
-          var id = feature.properties.id;
-          var nombre = feature.properties.nom_mun;
-          $municipiosFiltro.append(new Option(nombre, id));
-        });
-      }
-
-      // Inicializar Select2 para el nuevo select de municipios
-      if ($.fn.select2) {
-        $municipiosFiltro.select2({
-          width: '100%',
-          placeholder: 'Selecciona uno o varios municipios',
-          allowClear: true // Permite limpiar la selección
-        });
-      }
-      // Habilitar el select después de cargar los datos
-      $municipiosFiltro.prop('disabled', false);
-
-    }).fail(function(jqxhr, textStatus, error) {
-      var err = textStatus + ", " + error;
-      console.error("Error al cargar municipios desde la API: " + err);
-      alert("No se pudieron cargar los municipios: " + err);
-
-      // Mostrar mensaje de error en el select
-      var $municipiosFiltro = $('#municipios_filtro');
-      $municipiosFiltro.empty();
-      $municipiosFiltro.append('<option value="" disabled>Error al cargar municipios</option>');
-      if ($.fn.select2) {
-        $municipiosFiltro.select2({
-          width: '100%',
-          placeholder: 'Error al cargar municipios',
-          disabled: true // Deshabilitar el select en caso de error
-        });
+        // Si no hay estados seleccionados, limpiar el mapa
+        if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+        map.setView([23.6345, -102.5528], 5); // Centrar en México
       }
     });
 
-    // Añadir la opción de "Cargando..." al inicio y deshabilitar el select
-    var $municipiosFiltroInitial = $('#municipios_filtro');
-    $municipiosFiltroInitial.empty();
-    $municipiosFiltroInitial.append('<option value="" disabled selected>Cargando municipios...</option>');
-    if ($.fn.select2) {
-      $municipiosFiltroInitial.select2({
-        width: '100%',
-        placeholder: 'Cargando municipios...',
-        disabled: true // Deshabilitar mientras carga
-      });
-    }
+    // Manejar el cambio en la selección de municipios
+    $municipiosFiltro.on('change', function() {
+      var selectedMunicipioIds = $(this).val();
+      $delegacionesColoniasFiltro.empty().prop('disabled', true);
+      initSelect2($delegacionesColoniasFiltro, 'Selecciona un municipio primero', true);
+
+      if (selectedMunicipioIds && selectedMunicipioIds.length > 0) {
+        // Cargar delegaciones/colonias del municipio seleccionado
+        loadApiDataAndPopulateSelect(API_URLS.delegaciones, $delegacionesColoniasFiltro, 'Delegaciones/Colonias', 'id', 'nom_loc', selectedMunicipioIds, 'cu_mun'); // Asumiendo que cu_mun es el ID del municipio en delegaciones
+        // Mostrar la capa de municipios seleccionados en el mapa
+        let filteredMunicipios = {
+          type: "FeatureCollection",
+          features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
+        };
+        loadAndFilterGeoJsonLayer(filteredMunicipios);
+      } else {
+        // Si no hay municipios seleccionados, mostrar los estados seleccionados
+        var selectedEstadoIds = $estadosFiltro.val();
+        if (selectedEstadoIds && selectedEstadoIds.length > 0) {
+          let filteredEstados = {
+            type: "FeatureCollection",
+            features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
+          };
+          loadAndFilterGeoJsonLayer(filteredEstados);
+        } else {
+          if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+          map.setView([23.6345, -102.5528], 5);
+        }
+      }
+    });
+
+    // Manejar el cambio en la selección de delegaciones/colonias
+    $delegacionesColoniasFiltro.on('change', function() {
+      var selectedDelegacionColoniaIds = $(this).val();
+      if (selectedDelegacionColoniaIds && selectedDelegacionColoniaIds.length > 0) {
+        // Mostrar la capa de delegaciones/colonias seleccionadas en el mapa
+        // Aquí necesitaríamos una lógica para combinar delegaciones y colonias si vienen de APIs separadas
+        // Por simplicidad, asumiré que 'delegaciones' API puede contener ambos o que se usará una u otra.
+        // Si 'colonias' es una API separada, necesitaríamos cargarla también.
+        // Para este ejemplo, usaré allDelegacionesData.
+        let filteredDelegacionesColonias = {
+          type: "FeatureCollection",
+          features: allDelegacionesData.features.filter(f => selectedDelegacionColoniaIds.includes(f.properties.id.toString()))
+        };
+        loadAndFilterGeoJsonLayer(filteredDelegacionesColonias);
+      } else {
+        // Si no hay delegaciones/colonias seleccionadas, mostrar los municipios seleccionados
+        var selectedMunicipioIds = $municipiosFiltro.val();
+        if (selectedMunicipioIds && selectedMunicipioIds.length > 0) {
+          let filteredMunicipios = {
+            type: "FeatureCollection",
+            features: allMunicipiosData.features.filter(f => selectedMunicipioIds.includes(f.properties.id.toString()))
+          };
+          loadAndFilterGeoJsonLayer(filteredMunicipios);
+        } else {
+          // Si no hay municipios, mostrar estados
+          var selectedEstadoIds = $estadosFiltro.val();
+          if (selectedEstadoIds && selectedEstadoIds.length > 0) {
+            let filteredEstados = {
+              type: "FeatureCollection",
+              features: allEstadosData.features.filter(f => selectedEstadoIds.includes(f.properties.id.toString()))
+            };
+            loadAndFilterGeoJsonLayer(filteredEstados);
+          } else {
+            if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+            map.setView([23.6345, -102.5528], 5);
+          }
+        }
+      }
+    });
 
     // Manejar el cambio en la selección del filtro de municipios
     $('#municipios_filtro').on('change', function() {
