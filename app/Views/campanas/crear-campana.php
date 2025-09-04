@@ -738,7 +738,11 @@ jQuery(document).ready(function($) {
         let filteredData = processedData.features;
 
         if (parentId !== null && parentIdProperty !== null) {
-          filteredData = processedData.features.filter(f => f.properties[parentIdProperty] == parentId);
+          if (Array.isArray(parentId)) {
+            filteredData = processedData.features.filter(f => parentId.includes(f.properties[parentIdProperty].toString()));
+          } else {
+            filteredData = processedData.features.filter(f => f.properties[parentIdProperty].toString() == parentId.toString());
+          }
         }
 
         $selectElement.empty();
