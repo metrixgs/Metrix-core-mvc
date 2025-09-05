@@ -83,7 +83,7 @@
             <div id="territorio_delegacion_container" class="mb-3" style="display: none;">
               <label class="form-label fw-semibold text-success-salvador">Delegación</label>
               <select class="form-select select2 border-success-salvador" id="delegaciones_filtro" name="delegaciones_filtro[]" multiple="multiple">
-                <option value="" disabled selected>API en construcción</option>
+                <option value="" disabled selected>Selecciona una delegación</option>
               </select>
             </div>
 
@@ -868,7 +868,7 @@ jQuery(document).ready(function($) {
             break;
           case 'delegacion':
             $territorioDelegacionContainer.show();
-            loadApiDataAndPopulateSelect(API_URLS.delegaciones, $delegacionesFiltro, 'Delegaciones', 'id', 'nom_mun'); // Asumiendo 'nom_mun' para delegaciones también
+            loadApiDataAndPopulateSelect(API_URLS.delegaciones, $delegacionesFiltro, 'Delegaciones', 'id_del', 'nom_del');
             break;
           case 'distrito_federal':
             $territorioDistritoFederalContainer.show();
@@ -958,6 +958,17 @@ jQuery(document).ready(function($) {
       // Actualizar el mapa con los municipios seleccionados
       if (allMunicipiosData) {
         loadAndFilterGeoJsonLayer(allMunicipiosData, selectedMunicipioIds, selectedMunicipioIds, 'id', 'nom_mun');
+      } else {
+        if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
+        map.setView([23.6345, -102.5528], 5);
+      }
+    });
+
+    // Manejar el cambio en el selector de Delegaciones para actualizar el mapa
+    $delegacionesFiltro.on('change', function() {
+      var selectedDelegacionIds = $(this).val();
+      if (allDelegacionesData) {
+        loadAndFilterGeoJsonLayer(allDelegacionesData, selectedDelegacionIds, selectedDelegacionIds, 'id_del', 'nom_del');
       } else {
         if (currentGeoJsonLayer) currentGeoJsonLayer.clearLayers();
         map.setView([23.6345, -102.5528], 5);
