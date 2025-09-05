@@ -18,23 +18,40 @@ class Directorio extends BaseController
     public function index()
     {
         $page = $this->request->getVar('page') ?? 1;
-        $perPage = 7;
+        $perPage = $this->request->getVar('perPage') ?? 25; // Obtener perPage de la URL o usar 25 por defecto
 
         // Hacemos LEFT JOIN a sí mismo para obtener los datos del líder (si lo hay)
+        $page = $this->request->getVar('page') ?? 1;
+        $perPage = $this->request->getVar('perPage') ?? 25; // Obtener perPage de la URL o usar 25 por defecto
+
+        // Construir el builder para la consulta principal
         $builder = $this->directorioModel
-            ->select('directorio.*, 
-                      lider.nombre AS lider_nombre, 
-                      lider.primer_apellido AS lider_apellido, 
+            ->select('directorio.*,
+                      lider.nombre AS lider_nombre,
+                      lider.primer_apellido AS lider_apellido,
                       lider.segundo_apellido AS lider_segundo')
             ->join('directorio AS lider', 'lider.id = directorio.id_lider', 'left');
 
-        $contactos = $builder->paginate($perPage, 'group1');
-        $pager = $this->directorioModel->pager;
+        // Obtener el total de registros antes de aplicar la paginación
+        $totalContactos = $builder->countAllResults(false);
 
+        $contactos = [];
+        $pager = null;
+
+        // Si perPage es -1 (opción "Todos"), no paginar
+        if ($perPage == -1) {
+            $contactos = $builder->findAll();
+            $perPage = $totalContactos; // Para que la vista sepa que se están mostrando todos
+        } else {
+            $contactos = $builder->paginate($perPage, 'group1');
+            $pager = $this->directorioModel->pager;
+        }
+        
         $data = [
             'contactos' => $contactos,
             'pager' => $pager,
             'perPage' => $perPage,
+            'totalContactos' => $totalContactos, // Pasar el total de contactos a la vista
             'titulo_pagina' => 'Directorio | Lista de Contactos'
         ];
 
@@ -327,5 +344,109 @@ class Directorio extends BaseController
              . view('directorio/mapa', $data)
              . view('incl/footer-application', $data)
              . view('incl/scripts-application', $data);
-    }
+   }
+
+   public function importarCsv()
+   {
+       $validation = \Config\Services::validation();
+       $file = $this->request->getFile('csvFile');
+
+       // Reglas de validación para el archivo CSV
+       $rules = [
+           'csvFile' => [
+               'uploaded[csvFile]',
+               'mime_in[csvFile,text/csv]',
+               'max_size[csvFile,5120]', // 5MB
+           ],
+       ];
+
+       if (!$this->validate($rules)) {
+           return redirect()->back()->with('error', 'Error al subir el archivo: ' . $validation->getError('csvFile'));
+       }
+
+       if (!$file->isValid() || $file->hasMoved()) {
+           return redirect()->back()->with('error', 'Error al subir el archivo CSV.');
+       }
+
+       $filePath = $file->getTempName();
+       $handle = fopen($filePath, 'r');
+
+       if ($handle === FALSE) {
+           return redirect()->back()->with('error', 'No se pudo abrir el archivo CSV.');
+       }
+
+       $header = fgetcsv($handle, 0, ','); // Leer la primera fila (encabezados)
+       $rows = [];
+       $insertedCount = 0;
+       $errors = [];
+
+       // Mapeo de columnas del CSV a campos de la base de datos
+       $columnMapping = [
+           'ID_DEL' => 'id_del',
+           'NOM_DEL' => 'nom_del',
+           'CVE_LOC' => 'cve_loc',
+           'NOM_LOC' => 'nom_loc',
+           'ID_COL' => 'id_col',
+           'NOM_COL' => 'nom_col',
+           'CVE_AGEB' => 'cve_ageb',
+           'CVE_MZA' => 'cve_mza',
+           'CU_MZA' => 'cu_mza',
+           'CVE_CAT' => 'cve_cat',
+           'CALLE' => 'calle',
+           'NUM_EXT' => 'numero_exterior',
+           'NO_INT' => 'numero_interior',
+           'LETRA' => 'letra',
+           'COLONIA' => 'colonia',
+           'TIPO' => 'tipo',
+           'ZONA' => 'zona',
+           'SECTOR' => 'sector',
+           'DISTRITO_F' => 'distrito_f',
+           'DISTRITO_L' => 'distrito_l',
+           'SECCION' => 'seccion',
+           'CIRCUITO' => 'circuito',
+           'DISTRITO_J' => 'distrito_j',
+           'LAT' => 'latitud',
+           'LON' => 'longitud',
+           // Asegúrate de que todos los campos relevantes del CSV estén aquí
+           // y que coincidan con los 'allowedFields' en DirectorioModel.php
+       ];
+
+       while (($row = fgetcsv($handle, 0, ',')) !== FALSE) {
+           if (count($header) != count($row)) {
+               $errors[] = "Fila con número de columnas incorrecto: " . implode(',', $row);
+               continue;
+           }
+           $rowData = array_combine($header, $row);
+           $dataToInsert = [];
+
+           foreach ($columnMapping as $csvColumn => $dbField) {
+               if (isset($rowData[$csvColumn])) {
+                   $dataToInsert[$dbField] = $rowData[$csvColumn];
+               }
+           }
+
+           // Campos adicionales que no vienen en el CSV pero son requeridos o tienen valores por defecto
+           $dataToInsert['nombre'] = $rowData['NOM_DEL'] ?? 'N/A'; // O algún valor por defecto
+           $dataToInsert['primer_apellido'] = $rowData['NOM_LOC'] ?? 'N/A'; // O algún valor por defecto
+           $dataToInsert['tipo_red'] = 'CDN'; // Valor por defecto, ajustar si el CSV lo provee
+           $dataToInsert['codigo_ciudadano'] = 'CDZ-' . uniqid(); // Generar un código único
+
+           // Validar y guardar
+           if ($this->directorioModel->insert($dataToInsert)) {
+               $insertedCount++;
+           } else {
+               $errors[] = "Error al insertar la fila: " . implode(',', $row) . " - Errores: " . json_encode($this->directorioModel->errors());
+           }
+       }
+
+       fclose($handle);
+
+       if (!empty($errors)) {
+           session()->setFlashdata('error', 'Se importaron ' . $insertedCount . ' registros con éxito, pero ocurrieron errores en algunas filas: ' . implode('; ', $errors));
+       } else {
+           session()->setFlashdata('mensaje', 'Se importaron ' . $insertedCount . ' registros desde el CSV con éxito.');
+       }
+
+       return redirect()->to('/directorio');
+   }
 }

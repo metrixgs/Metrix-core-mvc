@@ -184,6 +184,7 @@ $routes->get('/directorio/crear', 'Directorio::crear');
 $routes->post('/directorio/guardar', 'Directorio::guardar');
 $routes->get('/directorio/editar/(:num)', 'Directorio::editar/$1');
 $routes->post('/directorio/actualizar/(:num)', 'Directorio::actualizar/$1');
+$routes->post('/directorio/importarCsv', 'Directorio::importarCsv');
 
 $routes->post('directorio/eliminar/(:num)', 'Directorio::eliminar/$1');
 

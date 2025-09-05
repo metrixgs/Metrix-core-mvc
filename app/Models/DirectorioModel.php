@@ -16,6 +16,9 @@ class DirectorioModel extends Model
         'empresa', 'cargo', 'nivel_estudios', 'ocupacion',
         'tipo_discapacidad', 'grupo_etnico', 'acepta_avisos', 'acepta_terminos',
         'activo', 'tipo_cliente','codigo_ciudadano', 'foto_perfil', 'id_lider','tipo_red','latitud', 'longitud',
+        'id_del', 'nom_del', 'cve_loc', 'nom_loc', 'id_col', 'nom_col',
+        'cve_ageb', 'cve_mza', 'cu_mza', 'cve_cat', 'tipo', 'zona', 'sector',
+        'distrito_f', 'distrito_l', 'seccion', 'circuito', 'distrito_j', 'letra',
     ];
     protected $useTimestamps = true;
     protected $createdField = 'fecha_creacion';

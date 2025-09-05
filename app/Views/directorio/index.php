@@ -44,10 +44,11 @@
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="text-muted small fw-medium">Mostrar:</span>
-                                <select class="form-select form-select-sm border-2" style="width: 80px;">
-                                    <option selected>25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
+                                <select class="form-select form-select-sm border-2" style="width: 80px;" onchange="window.location.href = '<?= base_url('directorio') ?>?perPage=' + this.value;">
+                                    <option value="25" <?= ($perPage == 25) ? 'selected' : '' ?>>25</option>
+                                    <option value="50" <?= ($perPage == 50) ? 'selected' : '' ?>>50</option>
+                                    <option value="100" <?= ($perPage == 100) ? 'selected' : '' ?>>100</option>
+                                    <option value="-1" <?= ($perPage == $totalContactos && $totalContactos > 0) ? 'selected' : '' ?>>Todos</option>
                                 </select>
                             </div>
                             <div class="vr d-none d-md-block"></div>
@@ -80,7 +81,7 @@
                             </span>
                         </div>
                         <div id="searchCount" class="text-muted small fw-semibold" style="min-width: 140px;">
-                            <?= isset($contactos) ? count($contactos) : 0 ?> contactos
+                            <?= $totalContactos ?> contactos
                         </div>
                     </div>
                 </div>
@@ -89,7 +90,7 @@
 
         <!-- Botón Agregar -->
        <!-- Botón Agregar estilo dividido, tamaño ajustado al contenido -->
-<div class="mb-4">
+<div class="mb-4 d-flex gap-2">
     <a href="<?= base_url('directorio/crear'); ?>" class="btn btn-lg d-inline-flex align-items-stretch p-0 shadow-sm rounded overflow-hidden" style="background-color: #4CAF87;">
         <span class="d-flex align-items-center justify-content-center px-3" style="background-color: #2E7D62;">
             <i class="bi bi-plus-lg text-white fs-5"></i>
@@ -98,6 +99,43 @@
             ADD
         </span>
     </a>
+    <!-- Botón para importar CSV -->
+    <button type="button" class="btn btn-lg btn-info d-inline-flex align-items-center gap-2 px-4 fw-semibold text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#importCsvModal">
+        <i class="bi bi-upload fs-5"></i> IMPORTAR CSV
+    </button>
+</div>
+
+<!-- Modal de Importación CSV -->
+<div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="importCsvModalLabel"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Importar Ciudadanos desde CSV</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?= base_url('directorio/importarCsv'); ?>" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <p class="text-muted">Sube un archivo CSV para agregar masivamente nuevos ciudadanos al directorio. Asegúrate de que el archivo tenga el formato correcto.</p>
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label fw-semibold">Seleccionar archivo CSV:</label>
+                        <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".csv" required>
+                        <div class="form-text">El archivo debe ser un CSV y no exceder los 5MB.</div>
+                    </div>
+                    <div class="alert alert-info border-0" role="alert">
+                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-2"></i>Formato del CSV esperado:</h6>
+                        <p class="mb-0">Las columnas deben coincidir con los campos de la base de datos. El orden no importa, pero los nombres de las columnas sí.</p>
+                        <ul class="mt-2 mb-0 small">
+                            <li><code>ID_DEL</code>, <code>NOM_DEL</code>, <code>CVE_LOC</code>, <code>NOM_LOC</code>, <code>ID_COL</code>, <code>NOM_COL</code>, <code>CVE_AGEB</code>, <code>CVE_MZA</code>, <code>CU_MZA</code>, <code>CVE_CAT</code>, <code>CALLE</code>, <code>NUM_EXT</code>, <code>NO_INT</code>, <code>LETRA</code>, <code>COLONIA</code>, <code>TIPO</code>, <code>ZONA</code>, <code>SECTOR</code>, <code>DISTRITO_F</code>, <code>DISTRITO_L</code>, <code>SECCION</code>, <code>CIRCUITO</code>, <code>DISTRITO_J</code>, <code>LAT</code>, <code>LON</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up me-2"></i>Importar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 
@@ -105,7 +143,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark fw-semibold"><i class="bi bi-table me-2"></i>Lista de Ciudadanos</h5>
-                <span class="badge bg-primary rounded-pill px-3 py-2"><?= isset($contactos) ? count($contactos) : 0 ?> contactos</span>
+                <span class="badge bg-primary rounded-pill px-3 py-2"><?= $totalContactos ?> contactos</span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -126,9 +164,15 @@
                         </thead>
                         <tbody id="contactsTable">
                             <?php if (!empty($contactos)): ?>
-                                <?php $i = 1; foreach ($contactos as $c): ?>
+                                <?php
+                                $currentPage = $pager ? $pager->getCurrentPage('group1') : 1;
+                                $perPageValue = $perPage;
+                                $startIndex = ($currentPage - 1) * $perPageValue;
+                                $i = 1;
+                                foreach ($contactos as $c):
+                                ?>
                                     <tr>
-                                        <td class="text-center fw-bold"><?= $i ?></td>
+                                        <td class="text-center fw-bold"><?= $startIndex + $i ?></td>
                                         <td class="text-center">
                                       <?php 
     $tipo = $c['tipo_red'] ?? '—';
@@ -207,9 +251,11 @@
         </div>
 
         <!-- Paginación -->
-        <div class="d-flex justify-content-center mt-4">
-            <?= $pager->links('group1', 'default_full') ?>
-        </div>
+        <?php if ($pager): ?>
+            <div class="d-flex justify-content-center mt-4">
+                <?= $pager->links('group1', 'default_full', ['perPage' => $perPage]) ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -226,7 +272,7 @@
             });
 
             document.getElementById('searchCount').textContent = term === ''
-                ? '<?= count($contactos ?? []) ?> contactos'
+                ? '<?= $totalContactos ?> contactos'
                 : `${visible} contacto${visible !== 1 ? 's' : ''} encontrado${visible !== 1 ? 's' : ''}`;
         });
 
