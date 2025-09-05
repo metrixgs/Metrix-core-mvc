@@ -78,12 +78,6 @@
                 <option value="" disabled selected>Selecciona un municipio primero</option>
               </select>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold text-success-salvador">Sector Electoral</label>
-              <select class="form-select select2 border-success-salvador" id="sector_electoral" name="sector_electoral" disabled>
-                <option value="" disabled selected>No disponible</option>
-              </select>
-            </div>
           </div>
         </div>
       </div>
