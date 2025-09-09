@@ -5,7 +5,13 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0"><?= $titulo_pagina; ?></h4>
+                    <div class="d-flex align-items-center">
+                        <select class="form-select form-select-sm" id="dashboardSelector" onchange="navigateToDashboard()" style="max-width: 220px; font-size: 0.95rem; font-weight: 500; border: 1px solid #dee2e6; background-color: #fff; padding: 0.375rem 0.75rem;">
+                            <option value="panel">Incidencias</option>
+                            <option value="dashboard-metrix">Beneficiarios</option>
+                            <option value="dashboard-eventos">Corregidora</option>
+                        </select>
+                    </div>
 
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
@@ -34,8 +40,8 @@
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
-                                <div class="avatar-sm rounded-circle bg-primary">
-                                    <span class="avatar-title rounded-circle bg-primary">
+                                <div class="avatar-sm rounded-circle bg-success">
+                                    <span class="avatar-title rounded-circle bg-success">
                                         <i class="ri-file-list-3-line fs-16"></i>
                                     </span>
                                 </div>
@@ -50,13 +56,13 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <p class="text-uppercase fw-medium text-muted text-truncate mb-2">Abiertas</p>
-                                <h4 class="fs-22 fw-semibold ff-secondary mb-0 text-warning">
+                                <h4 class="fs-22 fw-semibold ff-secondary mb-0" style="color: #20c997;">
                                     <span class="counter-value" data-target="<?= $pendientes ?>" id="kpi-abiertas">0</span>
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
-                                <div class="avatar-sm rounded-circle bg-warning">
-                                    <span class="avatar-title rounded-circle bg-warning">
+                                <div class="avatar-sm rounded-circle" style="background-color: #20c997;">
+                                    <span class="avatar-title rounded-circle" style="background-color: #20c997;">
                                         <i class="ri-time-line fs-16"></i>
                                     </span>
                                 </div>
@@ -92,13 +98,13 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <p class="text-uppercase fw-medium text-muted text-truncate mb-2">Tiempo Promedio</p>
-                                <h4 class="fs-22 fw-semibold ff-secondary mb-0 text-info">
+                                <h4 class="fs-22 fw-semibold ff-secondary mb-0" style="color: #17a2b8;">
                                     <span class="counter-value" data-target="24" id="kpi-tiempo-promedio">0</span>h
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
-                                <div class="avatar-sm rounded-circle bg-info">
-                                    <span class="avatar-title rounded-circle bg-info">
+                                <div class="avatar-sm rounded-circle" style="background-color: #17a2b8;">
+                                    <span class="avatar-title rounded-circle" style="background-color: #17a2b8;">
                                         <i class="ri-timer-line fs-16"></i>
                                     </span>
                                 </div>
@@ -470,19 +476,22 @@ const dashboardData = {
 // Variables globales para los gráficos
 let charts = {};
 
-// Configuración de colores - Paleta compatible con verde
+// Configuración de colores - Paleta verde
 const colors = {
     primary: '#28a745',    // Verde principal
     success: '#20c997',    // Verde azulado
-    warning: '#ffc107',    // Amarillo dorado
-    danger: '#dc3545',     // Rojo suave
+    warning: '#6f9c3d',    // Verde oliva
+    danger: '#5cb85c',     // Verde claro
     info: '#17a2b8',      // Azul verdoso
     light: '#f8f9fa',     // Gris muy claro
-    dark: '#343a40',      // Gris oscuro
+    dark: '#2d5a3d',      // Verde oscuro
     secondary: '#6c757d', // Gris medio
-    accent: '#155724',    // Verde oscuro
+    accent: '#155724',    // Verde muy oscuro
     mint: '#d4edda',      // Verde menta claro
-    forest: '#2d5a3d'     // Verde bosque
+    forest: '#2d5a3d',    // Verde bosque
+    lime: '#32cd32',      // Verde lima
+    emerald: '#50c878',   // Verde esmeralda
+    sage: '#9caf88'       // Verde salvia
 };
 
 // Inicialización del dashboard
@@ -586,7 +595,7 @@ function initializeCharts() {
             labels: [],
             datasets: [{
                 data: [],
-                backgroundColor: [colors.danger, colors.warning, colors.success],
+                backgroundColor: [colors.danger, colors.warning, colors.primary],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -608,8 +617,8 @@ function initializeCharts() {
         data: {
             labels: ['Abiertas', 'Cerradas'],
             datasets: [{
-                data: [dashboardData.pendientes, dashboardData.cumplidos],
-                backgroundColor: [colors.warning, colors.success],
+            data: [dashboardData.pendientes, dashboardData.cumplidos],
+            backgroundColor: [colors.emerald, colors.primary],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -633,8 +642,8 @@ function initializeCharts() {
             datasets: [{
                 label: 'Horas Promedio',
                 data: [],
-                backgroundColor: colors.info,
-                borderColor: colors.info,
+                backgroundColor: colors.emerald,
+                borderColor: colors.emerald,
                 borderWidth: 1
             }]
         },
@@ -661,9 +670,9 @@ function initializeCharts() {
                 backgroundColor: [
                     colors.primary,
                     colors.success,
-                    colors.warning,
-                    colors.danger,
-                    colors.info
+                    colors.emerald,
+                    colors.lime,
+                    colors.sage
                 ]
             }]
         },
@@ -734,7 +743,7 @@ function initializeCharts() {
             datasets: [{
                 label: 'Incidencias Asignadas',
                 data: [30, 25, 15, 10, 8],
-                backgroundColor: colors.warning
+                backgroundColor: colors.sage
             }]
         },
         options: {
@@ -770,8 +779,8 @@ function initializeCharts() {
                 {
                     label: 'Red',
                     data: [3, 5, 4, 7, 6, 5],
-                    borderColor: colors.warning,
-                    backgroundColor: colors.warning + '20'
+                    borderColor: colors.emerald,
+                    backgroundColor: colors.emerald + '20'
                 }
             ]
         },
@@ -1009,5 +1018,33 @@ window.addEventListener('resize', function() {
             charts[key].resize();
         }
     });
+});
+
+// Funciones para el selector de dashboard
+function navigateToDashboard() {
+    const selector = document.getElementById('dashboardSelector');
+    const selectedValue = selector.value;
+    
+    if (selectedValue === 'panel') {
+        window.location.href = '<?= base_url('panel') ?>';
+    } else if (selectedValue === 'dashboard-metrix') {
+        window.location.href = '<?= base_url('dashboard-metrix') ?>';
+    } else if (selectedValue === 'dashboard-eventos') {
+        window.location.href = '<?= base_url('dashboard-eventos') ?>';
+    }
+}
+
+// Establecer el valor inicial del selector basado en la URL actual
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('dashboardSelector');
+    const currentUrl = window.location.pathname;
+    
+    if (currentUrl.includes('panel') && !currentUrl.includes('dashboard')) {
+        selector.value = 'panel';
+    } else if (currentUrl.includes('dashboard-metrix')) {
+        selector.value = 'dashboard-metrix';
+    } else if (currentUrl.includes('dashboard-eventos')) {
+        selector.value = 'dashboard-eventos';
+    }
 });
 </script>

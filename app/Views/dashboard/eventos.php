@@ -100,7 +100,13 @@ include(APPPATH . 'Views/incl/head-application.php');
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                                <h4 class="mb-sm-0"><?= $titulo_pagina; ?></h4>
+                                <div class="d-flex align-items-center">
+                                    <select class="form-select" id="dashboardSelector" onchange="navigateToDashboard()" style="max-width: 200px; font-size: 14px; font-weight: 500; border: 1px solid #ddd; padding: 6px 10px;">
+                                        <option value="panel">Incidencias</option>
+                                        <option value="dashboard-metrix">Beneficiarios</option>
+                                        <option value="dashboard-eventos">Corregidora</option>
+                                    </select>
+                                </div>
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
@@ -185,7 +191,29 @@ include(APPPATH . 'Views/incl/head-application.php');
 
                     <!-- KPIs Principales -->
                     <div class="row">
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl col-md-4">
+                            <div class="card card-animate overflow-hidden">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-2">Total Ciudadanos</p>
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-0">
+                                                <span class="counter-value" id="totalCiudadanos" data-target="<?= $total_ciudadanos ?>"><?= $total_ciudadanos ?></span>
+                                            </h4>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar-sm rounded-circle" style="background-color: #10b981;">
+                                                <span class="avatar-title rounded-circle" style="background-color: #10b981;">
+                                                    <i class="ri-group-line fs-16"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl col-md-4">
                             <div class="card card-animate overflow-hidden">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
@@ -207,7 +235,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                             </div>
                         </div>
                         
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl col-md-4">
                             <div class="card card-animate overflow-hidden">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
@@ -229,58 +257,14 @@ include(APPPATH . 'Views/incl/head-application.php');
                             </div>
                         </div>
                         
-                        <!-- <div class="col-xl-2 col-md-4">
-                            <div class="card card-animate overflow-hidden">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-2">% Apoyos</p>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-0">
-                                                <span class="counter-value" id="porcentajeApoyos" data-target="<?= $porcentaje_apoyos ?>"><?= $porcentaje_apoyos ?></span>%
-                                            </h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="avatar-sm rounded-circle" style="background-color: #60a5fa;">
-                                                <span class="avatar-title rounded-circle" style="background-color: #60a5fa;">
-                                                    <i class="ri-percent-line fs-16"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        
-                        <!-- <div class="col-xl-2 col-md-4">
-                            <div class="card card-animate overflow-hidden">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-2">% Eventos</p>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-0">
-                                                <span class="counter-value" id="porcentajeEventos" data-target="<?= $porcentaje_eventos ?>"><?= $porcentaje_eventos ?></span>%
-                                            </h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="avatar-sm rounded-circle" style="background-color: #93c5fd;">
-                                                <span class="avatar-title rounded-circle" style="background-color: #93c5fd;">
-                                                    <i class="ri-pie-chart-line fs-16"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl col-md-4">
                             <div class="card card-animate overflow-hidden">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
                                             <p class="text-uppercase fw-medium text-muted text-truncate mb-2">Promedio de Apoyos</p>
                                             <h4 class="fs-22 fw-semibold ff-secondary mb-0">
-                                                <span class="counter-value" id="promedioApoyos" data-target="<?= $promedio_apoyos ?>"><?= $promedio_apoyos ?></span>
+                                                <span class="counter-value" id="promedioApoyos" data-target="<?= $promedio_apoyos ?>"><?= number_format($promedio_apoyos * 100, 1, '.', '') ?>%</span>
                                             </h4>
                                         </div>
                                         <div class="flex-shrink-0">
@@ -295,14 +279,14 @@ include(APPPATH . 'Views/incl/head-application.php');
                             </div>
                         </div>
                         
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl col-md-4">
                             <div class="card card-animate overflow-hidden">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
                                             <p class="text-uppercase fw-medium text-muted text-truncate mb-2">Promedio de Eventos</p>
                                             <h4 class="fs-22 fw-semibold ff-secondary mb-0">
-                                                <span class="counter-value" id="promedioEventos" data-target="<?= $promedio_eventos ?>"><?= $promedio_eventos ?></span>
+                                                <span class="counter-value" id="promedioEventos" data-target="<?= $promedio_eventos ?>"><?= number_format($promedio_eventos * 100, 1, '.', '') ?>%</span>
                                             </h4>
                                         </div>
                                         <div class="flex-shrink-0">
@@ -359,12 +343,13 @@ include(APPPATH . 'Views/incl/head-application.php');
                         <div class="col-md-6">
                             <div class="card chart-card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title mb-0">Top Líderes</h5>
-                                    <select class="form-select form-select-sm" id="topLideresSelector" style="width: auto;">
-                                        <option value="5">Top 5</option>
-                                        <option value="10" selected>Top 10</option>
-                                        <option value="20">Top 20</option>
-                                    </select>
+                                    <h5 class="card-title mb-0">Comparativa Líderes</h5>
+                                    <div>
+                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lideresModal">
+                                            <i class="fas fa-users me-2"></i>Comparar
+                                        </button>
+                                        <span id="selectedLideresCount" class="ms-2 text-muted">0 líderes seleccionados</span>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div style="height: 300px; position: relative;">
@@ -392,18 +377,6 @@ include(APPPATH . 'Views/incl/head-application.php');
 
                     <!-- Gráfica Principal -->
                     <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card chart-card">
-                                <div class="card-header">
-                                    <h4 class="card-title mb-0">% de Apoyos por Sector (Gráfica Polar)</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div style="height: 458px; position: relative;">
-                                        <canvas id="apoyosPorSectorChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Sección Apoyos -->
@@ -467,7 +440,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                     <h4 class="card-title mb-0">Eventos por Sector</h4>
                                 </div>
                                 <div class="card-body">
-                                    <div style="height: 300px;">
+                                    <div style="height: 500px; position: relative;">
                                         <canvas id="eventosPorSectorChart"></canvas>
                                     </div>
                                 </div>
@@ -499,8 +472,12 @@ include(APPPATH . 'Views/incl/head-application.php');
                         </div>
                         <div class="col-md-6">
                             <div class="card chart-card">
-                                <div class="card-header">
-                                    <h4 class="card-title mb-0">Top 10 Apoyos por Sección Electoral</h4>
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="card-title mb-0">Top Apoyos por Sección Electoral</h4>
+                                    <select class="form-select form-select-sm" id="topApoyosSeccionSelector" style="width: auto;">
+                                        <option value="5">Top 5</option>
+                                        <option value="10" selected>Top 10</option>
+                                    </select>
                                 </div>
                                 <div class="card-body">
                                     <div style="height: 400px; position: relative;">
@@ -512,8 +489,12 @@ include(APPPATH . 'Views/incl/head-application.php');
                         
                         <div class="col-md-6">
                             <div class="card chart-card">
-                                <div class="card-header">
-                                    <h4 class="card-title mb-0">Top 10 Eventos por Sección Electoral</h4>
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="card-title mb-0">Top Eventos por Sección Electoral</h4>
+                                    <select class="form-select form-select-sm" id="topEventosSeccionSelector" style="width: auto;">
+                                        <option value="5">Top 5</option>
+                                        <option value="10" selected>Top 10</option>
+                                    </select>
                                 </div>
                                 <div class="card-body">
                                     <div style="height: 400px; position: relative;">
@@ -524,19 +505,19 @@ include(APPPATH . 'Views/incl/head-application.php');
                         </div>
                     </div>
 
-                    <!-- Gráfica de Barras de Coordinador -->
+                    Gráfica de Barras de Coordinador
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card chart-card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h4 class="card-title mb-0">Comparación por Coordinador</h4>
-                                    <div class="d-flex align-items-center">
-                                        <label for="coordinadorSelector" class="form-label me-2 mb-0">Seleccionar Coordinadores:</label>
-                                        <select id="coordinadorSelector" class="form-select" multiple style="min-width: 250px; max-width: 300px;">
-                                            <!-- Opciones se llenarán dinámicamente -->
-                                        </select>
-                                    </div>
-                                </div>
+                        <h4 class="card-title mb-0">Comparativa Coordinadores</h4>
+                        <div class="d-flex align-items-center">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#coordinadoresModal">
+                                <i class="fas fa-users me-2"></i>Comparar
+                            </button>
+                            <span id="selectedCoordinadoresCount" class="ms-2 text-muted">0 coordinadores seleccionados</span>
+                        </div>
+                    </div>
                                 <div class="card-body">
                                     <div style="height: 400px; position: relative;">
                                         <canvas id="coordinadorChart"></canvas>
@@ -571,10 +552,15 @@ include(APPPATH . 'Views/incl/head-application.php');
         // Variables globales para los datos
         let currentFilters = {};
         let charts = {};
+        let selectedLideres = []; // Array para almacenar los líderes seleccionados
+        let lideresModal; // Variable para el modal de Bootstrap
+        let selectedCoordinadores = []; // Array para almacenar los coordinadores seleccionados
+        let coordinadoresModal; // Variable para el modal de coordinadores
 
 
         // Datos iniciales del servidor
         let initialData;
+        let originalLideresData; // Variable para almacenar datos originales de líderes sin filtros
         
         try {
             console.log('Iniciando definición de initialData');
@@ -595,6 +581,9 @@ include(APPPATH . 'Views/incl/head-application.php');
             // Datos reales para las gráficas de secciones electorales
             const top_apoyos_seccion_data = <?= str_replace(["\r\n", "\r", "\n"], '', json_encode($top_apoyos_seccion_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)) ?>;
             const top_eventos_seccion_data = <?= str_replace(["\r\n", "\r", "\n"], '', json_encode($top_eventos_seccion_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)) ?>;
+            
+            // Guardar datos originales de líderes sin filtros
+            originalLideresData = [...top_lideres_data];
             
             initialData = {
                 genero_data: genero_data,
@@ -650,7 +639,9 @@ include(APPPATH . 'Views/incl/head-application.php');
         // Función para formatear valores con separadores de miles
         function formatToThousands(value) {
             // Convertir a número si es string
-            const num = typeof value === 'string' ? parseFloat(value.replace(/[.,]/g, '')) : value;
+            const num = typeof value === 'string' ? parseFloat(value) : value;
+            // Verificar que sea un número válido
+            if (isNaN(num)) return '0';
             // Formatear con comas como separadores de miles
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
@@ -658,7 +649,14 @@ include(APPPATH . 'Views/incl/head-application.php');
         // Función específica para formatear promedios (valores decimales)
         function formatPromedio(value) {
             const num = parseFloat(value);
-            return num.toFixed(3).replace('.', ',');
+            // Formatear con 1 decimal
+            const formatted = num.toFixed(1);
+            // Separar parte entera y decimal
+            const parts = formatted.split('.');
+            // Agregar comas como separadores de miles a la parte entera
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            // Unir con punto como separador decimal para promedios
+            return parts.join('.');
         }
 
         // Función para formatear tooltips con separadores de miles
@@ -674,13 +672,19 @@ include(APPPATH . 'Views/incl/head-application.php');
         // Función para convertir valores a números enteros
         function parseToNumber(value) {
             if (typeof value === 'string') {
-                // Remover separadores de miles y convertir a número
-                return parseInt(value.replace(/[.,]/g, '')) || 0;
+                // Remover solo las comas (separadores de miles) y mantener puntos decimales
+                const cleanValue = value.replace(/,/g, '');
+                return parseFloat(cleanValue) || 0;
             }
-            return parseInt(value) || 0;
+            return parseFloat(value) || 0;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar selección por defecto de coordinadores ANTES de las gráficas
+            if (initialData.coordinador_data && initialData.coordinador_data.length > 0) {
+                selectedCoordinadores = initialData.coordinador_data.slice(0, 5).map(coord => coord.coordinador);
+            }
+            
             initializeCharts();
 
             setupEventListeners();
@@ -692,7 +696,6 @@ include(APPPATH . 'Views/incl/head-application.php');
             createTopLideresChart();
             createSectoresChart();
             createCoordinadorChart();
-            createApoyosPorSectorChart();
             createPromedioApoyosSectorChart();
             createColoniasChart();
             createEventosPorAnioChart();
@@ -735,9 +738,9 @@ include(APPPATH . 'Views/incl/head-application.php');
                                 usePointStyle: true,
                                 pointStyle: 'circle',
                                 font: {
-                                    size: 11
+                                    size: 14
                                 },
-                                boxWidth: 12,
+                                boxWidth: 15,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     return data.labels.map((label, index) => {
@@ -855,6 +858,14 @@ include(APPPATH . 'Views/incl/head-application.php');
                 charts.coordinador.data.datasets[1].data = totalApoyos;
                 charts.coordinador.data.datasets[2].data = totalEventos;
                 
+                // Actualizar colores usando la paleta azul
+                charts.coordinador.data.datasets[0].backgroundColor = greenPalette[4] + 'B3';
+                charts.coordinador.data.datasets[0].borderColor = greenPalette[4];
+                charts.coordinador.data.datasets[1].backgroundColor = greenPalette[6] + 'B3';
+                charts.coordinador.data.datasets[1].borderColor = greenPalette[6];
+                charts.coordinador.data.datasets[2].backgroundColor = greenPalette[8] + 'B3';
+                charts.coordinador.data.datasets[2].borderColor = greenPalette[8];
+                
                 // Actualizar tooltips con nuevos datos de promedio
                 charts.coordinador.options.plugins.tooltip.callbacks.afterLabel = function(context) {
                     const index = context.dataIndex;
@@ -906,7 +917,19 @@ include(APPPATH . 'Views/incl/head-application.php');
                     },
                     plugins: {
                         legend: {
-                            display: true
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                generateLabels: function(chart) {
+                                    return [{
+                                        text: ' ',
+                                        fillStyle: 'transparent',
+                                        strokeStyle: 'transparent',
+                                        lineWidth: 0
+                                    }];
+                                },
+                                padding: 20
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -943,23 +966,23 @@ include(APPPATH . 'Views/incl/head-application.php');
 
         function createTopLideresChart() {
             const ctx = document.getElementById('topLideresChart').getContext('2d');
-            const topN = parseInt(document.getElementById('topLideresSelector').value) || 10;
-            const data = initialData.top_lideres_data.slice(0, topN);
             
-            // Generar colores dinámicos para cada tipo de liderazgo usando la paleta azul
-            const colors = data.map((_, index) => {
-                return greenPalette[index % greenPalette.length];
-            });
+            // Inicializar el modal con todos los líderes
+            initializeLideresModal();
+            
+            // Seleccionar todos los líderes por defecto usando datos filtrados
+            selectedLideres = initialData.top_lideres_data.map(lider => lider.liderazgo);
+            updateSelectedLideresCount();
             
             charts.topLideres = new Chart(ctx, {
                 type: 'polarArea',
                 data: {
-                    labels: data.map(item => item.liderazgo),
+                    labels: [],
                     datasets: [{
                         label: 'Total Apoyos',
-                        data: data.map(item => item.total_apoyos),
-                        backgroundColor: colors.map(color => color.replace('60%)', '50%)')),
-                        borderColor: colors,
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
                         borderWidth: 2
                     }]
                 },
@@ -993,40 +1016,19 @@ include(APPPATH . 'Views/incl/head-application.php');
                                 font: {
                                     size: 11
                                 },
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = ((value / total) * 100).toFixed(0);
-                                        return {
-                                            text: `${label} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            strokeStyle: data.datasets[0].backgroundColor[index],
-                                            pointStyle: 'circle',
-                                            index: index
-                                        };
-                                    });
-                                }
+                                color: '#000'
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     const value = context.parsed.r;
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${context.label}: ${formatToThousands(value)} (${percentage}%)`;
-                                },
-                                afterLabel: function(context) {
-                                    const index = context.dataIndex;
-                                    const eventos = data[index].total_eventos;
-                                    return `Eventos: ${formatToThousands(eventos)}`;
+                                    return `${context.label}: ${formatToThousands(value)}`;
                                 }
                             }
                         },
                         datalabels: {
-                            color: '#fff',
+                            color: '#000',
                             font: {
                                 weight: 'bold',
                                 size: 11
@@ -1043,6 +1045,71 @@ include(APPPATH . 'Views/incl/head-application.php');
                     }
                 }
             });
+            
+            // Actualizar la gráfica con la selección inicial
+            updateComparativaLideres();
+        }
+        
+        function updateComparativaLideres() {
+            // Usar el array global selectedLideres en lugar del selector
+            // Filtrar datos según la selección
+            const filteredData = initialData.top_lideres_data.filter(item => 
+                selectedLideres.includes(item.liderazgo)
+            );
+            
+            // Calcular el total de apoyos para los porcentajes
+            const total = filteredData.reduce((sum, item) => sum + parseToNumber(item.total_apoyos), 0);
+            
+            // Generar colores dinámicos
+            const colors = filteredData.map((_, index) => {
+                return greenPalette[index % greenPalette.length];
+            });
+            
+            // Actualizar la gráfica con etiquetas que incluyen porcentajes
+            charts.topLideres.data.labels = filteredData.map(item => {
+                const percentage = total > 0 ? ((item.total_apoyos / total) * 100).toFixed(0) : 0;
+                return `${item.liderazgo} (${percentage}%)`;
+            });
+            charts.topLideres.data.datasets[0].data = filteredData.map(item => item.total_apoyos);
+            charts.topLideres.data.datasets[0].backgroundColor = colors.map(color => color.replace('60%)', '50%)'));
+            charts.topLideres.data.datasets[0].borderColor = colors;
+            
+            // Actualizar las opciones de la leyenda para mostrar porcentajes
+            charts.topLideres.options.plugins.legend.labels.generateLabels = function(chart) {
+                const chartData = chart.data;
+                return chartData.labels.map((label, index) => {
+                    const percentage = total > 0 ? ((chartData.datasets[0].data[index] / total) * 100).toFixed(0) : 0;
+                    return {
+                        text: `${filteredData[index].liderazgo} (${percentage}%)`,
+                        fillStyle: chartData.datasets[0].backgroundColor[index],
+                        strokeStyle: chartData.datasets[0].backgroundColor[index],
+                        pointStyle: 'circle',
+                        index: index
+                    };
+                });
+            };
+            
+            // Actualizar callbacks del tooltip para mostrar información detallada
+            charts.topLideres.options.plugins.tooltip.callbacks.label = function(context) {
+                const index = context.dataIndex;
+                const item = filteredData[index];
+                const percentage = total > 0 ? ((item.total_apoyos / total) * 100).toFixed(1) : 0;
+                return `${item.liderazgo}: ${formatToThousands(item.total_apoyos)} apoyos (${percentage}%)`;
+            };
+            
+            // Agregar o actualizar total como referencia
+            const chartContainer = document.getElementById('topLideresChart').parentElement;
+            let totalElement = chartContainer.querySelector('.chart-total');
+            if (!totalElement) {
+                totalElement = document.createElement('div');
+                totalElement.className = 'chart-total';
+                totalElement.style.cssText = 'position: absolute; bottom: 10px; right: 10px; background: #fff; border: 2px solid #ffd700; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px;';
+                chartContainer.style.position = 'relative';
+                chartContainer.appendChild(totalElement);
+            }
+            totalElement.textContent = `Total: ${formatToThousands(total)}`;
+            
+            charts.topLideres.update();
         }
 
         function createSectoresChart() {
@@ -1065,6 +1132,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                         borderWidth: 1
                     }]
                 },
+                plugins: [ChartDataLabels],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -1085,6 +1153,9 @@ include(APPPATH . 'Views/incl/head-application.php');
                         }
                     },
                     plugins: {
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1142,117 +1213,7 @@ include(APPPATH . 'Views/incl/head-application.php');
             }
         }
 
-        function createApoyosPorSectorChart() {
-            const ctx = document.getElementById('apoyosPorSectorChart').getContext('2d');
-            const total = initialData.apoyos_por_sector_data.reduce((sum, d) => sum + parseToNumber(d.total_apoyos), 0);
-            
-            // Generar colores dinámicamente para la gráfica polar usando la paleta azul
-            const colors = initialData.apoyos_por_sector_data.map((_, index) => {
-                return greenPalette[index % greenPalette.length];
-            });
-            
-            charts.apoyosPorSector = new Chart(ctx, {
-                type: 'polarArea',
-                data: {
-                    labels: initialData.apoyos_por_sector_data.map(item => item.sector),
-                    datasets: [{
-                        data: initialData.apoyos_por_sector_data.map(item => item.total_apoyos),
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                plugins: [ChartDataLabels],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            ticks: {
-                                display: false
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            angleLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            align: 'center',
-                            maxWidth: 500,
-                            labels: {
-                                padding: 15,
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                font: {
-                                    size: 11
-                                },
-                                boxWidth: 12,
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = ((value / total) * 100).toFixed(0);
-                                        return {
-                                            text: `${label} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            strokeStyle: data.datasets[0].backgroundColor[index],
-                                            pointStyle: 'circle',
-                                            index: index
-                                        };
-                                    });
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const index = context.dataIndex;
-                                    const item = initialData.apoyos_por_sector_data[index];
-                                    const percentage = ((item.total_apoyos / total) * 100).toFixed(1);
-                                    return `${item.sector}: ${formatToThousands(item.total_apoyos)} apoyos (${percentage}%)`;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 11
-                            },
-                            formatter: function(value, context) {
-                                return formatToThousands(value);
-                            },
-                            display: function(context) {
-                                return context.dataset.data[context.dataIndex] > 0;
-                            }
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            bottom: 50
-                        }
-                    }
-                }
-            });
-            
-            // Agregar total como referencia
-            const chartContainer = document.getElementById('apoyosPorSectorChart').parentElement;
-            let totalElement = chartContainer.querySelector('.chart-total');
-            if (!totalElement) {
-                totalElement = document.createElement('div');
-                totalElement.className = 'chart-total';
-                totalElement.style.cssText = 'position: absolute; bottom: 10px; right: 10px; background: #fff; border: 2px solid #ffd700; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px;';
-                chartContainer.style.position = 'relative';
-                chartContainer.appendChild(totalElement);
-            }
-            totalElement.textContent = `Total: ${formatToThousands(total)}`;
-        }
+
 
         function createPromedioApoyosSectorChart() {
             const ctx = document.getElementById('promedioApoyosSectorChart').getContext('2d');
@@ -1307,27 +1268,26 @@ include(APPPATH . 'Views/incl/head-application.php');
             });
         }
 
+        function updateColoniasChart() {
+            const topCount = parseInt(document.getElementById('topColoniasSelector').value);
+            const sortedData = [...initialData.colonias_data]
+                .sort((a, b) => parseToNumber(b.total_apoyos) - parseToNumber(a.total_apoyos))
+                .slice(0, topCount);
+            
+            // Generar colores diferentes para cada colonia actualizada
+            const coloniasColors = sortedData.map((_, index) => {
+                return greenPalette[index % greenPalette.length];
+            });
+            
+            charts.colonias.data.labels = sortedData.map(item => item.colonia);
+            charts.colonias.data.datasets[0].data = sortedData.map(item => parseToNumber(item.total_apoyos));
+            charts.colonias.data.datasets[0].backgroundColor = coloniasColors;
+            charts.colonias.data.datasets[0].borderColor = coloniasColors;
+            charts.colonias.update();
+        }
+
         function createColoniasChart() {
             const ctx = document.getElementById('coloniasChart').getContext('2d');
-            
-            // Función para actualizar la gráfica según el selector
-            function updateColoniasChart() {
-                const topCount = parseInt(document.getElementById('topColoniasSelector').value);
-                const sortedData = [...initialData.colonias_data]
-                    .sort((a, b) => parseToNumber(b.total_apoyos) - parseToNumber(a.total_apoyos))
-                    .slice(0, topCount);
-                
-                // Generar colores diferentes para cada colonia actualizada
-                const coloniasColors = sortedData.map((_, index) => {
-                    return greenPalette[index % greenPalette.length];
-                });
-                
-                charts.colonias.data.labels = sortedData.map(item => item.colonia);
-                charts.colonias.data.datasets[0].data = sortedData.map(item => parseToNumber(item.total_apoyos));
-                charts.colonias.data.datasets[0].backgroundColor = coloniasColors;
-                charts.colonias.data.datasets[0].borderColor = coloniasColors;
-                charts.colonias.update();
-            }
             
             // Datos iniciales (Top 10)
             const topCount = 10;
@@ -1538,6 +1498,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                 font: {
                                     size: 11
                                 },
+                                color: '#000',
                                 boxWidth: 12,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
@@ -1566,7 +1527,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                             }
                         },
                         datalabels: {
-                            color: '#fff',
+                            color: '#000',
                             font: {
                                 weight: 'bold',
                                 size: 11
@@ -1581,6 +1542,18 @@ include(APPPATH . 'Views/incl/head-application.php');
                     }
                 }
             });
+            
+            // Agregar elemento de total al contenedor de la gráfica
+            const chartContainer = ctx.canvas.parentElement;
+            let totalElement = chartContainer.querySelector('.chart-total');
+            if (!totalElement) {
+                totalElement = document.createElement('div');
+                totalElement.className = 'chart-total';
+                totalElement.style.cssText = 'position: absolute; bottom: 10px; right: 10px; background: #fff; border: 2px solid #ffd700; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px;';
+                chartContainer.style.position = 'relative';
+                chartContainer.appendChild(totalElement);
+            }
+            totalElement.textContent = `Total: ${formatToThousands(total)}`;
         }
 
         function createEventosPorLiderChart() {
@@ -1695,11 +1668,10 @@ include(APPPATH . 'Views/incl/head-application.php');
         function createCoordinadorChart() {
             const ctx = document.getElementById('coordinadorChart').getContext('2d');
             
-            // Inicializar selector de coordinadores
-            initializeCoordinadorSelector();
-            
-            // Preparar datos para la gráfica de barras
-            const filteredData = getFilteredCoordinadorData();
+            // Usar los coordinadores seleccionados globalmente o todos si no hay selección
+            const filteredData = selectedCoordinadores.length > 0 
+                ? initialData.coordinador_data.filter(item => selectedCoordinadores.includes(item.coordinador))
+                : initialData.coordinador_data.slice(0, 5); // Mostrar los primeros 5 por defecto
             const labels = filteredData.map(item => item.coordinador);
             const totalPersonas = filteredData.map(item => item.total_personas);
             const totalApoyos = filteredData.map(item => item.total_apoyos);
@@ -1714,22 +1686,22 @@ include(APPPATH . 'Views/incl/head-application.php');
                     datasets: [{
                         label: 'Total Personas',
                         data: totalPersonas,
-                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
-                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: greenPalette[4] + 'B3', // 70% opacity
+                        borderColor: greenPalette[4],
                         borderWidth: 2,
                         yAxisID: 'y'
                     }, {
                         label: 'Total Apoyos',
                         data: totalApoyos,
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: greenPalette[6] + 'B3', // 70% opacity
+                        borderColor: greenPalette[6],
                         borderWidth: 2,
                         yAxisID: 'y1'
                     }, {
                         label: 'Total Eventos',
                         data: totalEventos,
-                        backgroundColor: 'rgba(245, 158, 11, 0.7)',
-                        borderColor: 'rgba(245, 158, 11, 1)',
+                        backgroundColor: greenPalette[8] + 'B3', // 70% opacity
+                        borderColor: greenPalette[8],
                         borderWidth: 2,
                         yAxisID: 'y1'
                     }]
@@ -1831,37 +1803,117 @@ include(APPPATH . 'Views/incl/head-application.php');
         }
 
         function setupEventListeners() {
-            // Event listener para el selector de top líderes
-            document.getElementById('topLideresSelector').addEventListener('change', function() {
-                updateTopLideresChart();
-            });
+            // Event listener para el selector de líderes ya no es necesario
+            // La comparativa se actualiza con el botón "Comparar Líderes"
             
-            // Event listeners para filtros globales
-            document.getElementById('liderazgoFilter').addEventListener('change', applyFilters);
-            document.getElementById('coordinadorFilter').addEventListener('change', applyFilters);
-            document.getElementById('seccionFilter').addEventListener('change', applyFilters);
-            document.getElementById('coloniaFilter').addEventListener('change', applyFilters);
-            document.getElementById('sectorFilter').addEventListener('change', applyFilters);
-            document.getElementById('anioAltaFilter').addEventListener('change', applyFilters);
+            // Event listeners para filtros globales con actualización dinámica
+            document.getElementById('liderazgoFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
+            document.getElementById('coordinadorFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
+            document.getElementById('seccionFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
+            document.getElementById('coloniaFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
+            document.getElementById('sectorFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
+            document.getElementById('anioAltaFilter').addEventListener('change', function() {
+                updateDynamicFilters();
+                applyFilters();
+            });
         }
 
-        function updateTopLideresChart() {
-            const topN = parseInt(document.getElementById('topLideresSelector').value);
-            const data = initialData.top_lideres_data.slice(0, topN);
-            
-            // Generar colores dinámicos para cada tipo de liderazgo usando la paleta azul
-            const colors = data.map((_, index) => {
-                return greenPalette[index % greenPalette.length];
+        // Función updateTopLideresChart() removida - ahora se usa updateComparativaLideres()
+
+        function updateDynamicFilters() {
+            // Recopilar filtros actuales
+            const currentFilters = {
+                liderazgo: document.getElementById('liderazgoFilter').value,
+                coordinador: document.getElementById('coordinadorFilter').value,
+                seccion_electoral: document.getElementById('seccionFilter').value,
+                colonia: document.getElementById('coloniaFilter').value,
+                sector: document.getElementById('sectorFilter').value,
+                anio_alta: document.getElementById('anioAltaFilter').value
+            };
+
+            // Llamada AJAX para obtener opciones actualizadas
+            fetch('<?= base_url() ?>dashboard-eventos/selectors-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(currentFilters)
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateSelectorsOptions(data);
+            })
+            .catch(error => {
+                console.error('Error al actualizar filtros dinámicos:', error);
             });
-            
-            charts.topLideres.data.labels = data.map(item => item.liderazgo);
-            charts.topLideres.data.datasets[0].data = data.map(item => item.total_apoyos);
-            charts.topLideres.data.datasets[0].backgroundColor = colors;
-            charts.topLideres.data.datasets[0].borderColor = colors;
-            charts.topLideres.update();
+        }
+
+        function updateSelectorsOptions(data) {
+            // Guardar valores seleccionados actuales
+            const currentValues = {
+                liderazgo: document.getElementById('liderazgoFilter').value,
+                coordinador: document.getElementById('coordinadorFilter').value,
+                seccion_electoral: document.getElementById('seccionFilter').value,
+                colonia: document.getElementById('coloniaFilter').value,
+                sector: document.getElementById('sectorFilter').value,
+                anio_alta: document.getElementById('anioAltaFilter').value
+            };
+
+            // Actualizar cada selector
+            updateSelectorOptions('liderazgoFilter', data.liderazgos, 'liderazgo', 'Todos los Liderazgos', currentValues.liderazgo);
+            updateSelectorOptions('coordinadorFilter', data.coordinadores, 'coordinador', 'Todos los Coordinadores', currentValues.coordinador);
+            updateSelectorOptions('seccionFilter', data.secciones_electorales, 'seccion', 'Todas las Secciones', currentValues.seccion_electoral);
+            updateSelectorOptions('coloniaFilter', data.colonias, 'colonia', 'Todas las Colonias', currentValues.colonia);
+            updateSelectorOptions('sectorFilter', data.sectores, 'sector', 'Todos los Sectores', currentValues.sector);
+            updateSelectorOptions('anioAltaFilter', data.anios_alta, 'anio_alta', 'Todos los Años', currentValues.anio_alta);
+        }
+
+        function updateSelectorOptions(selectorId, options, valueField, defaultText, currentValue) {
+            const selector = document.getElementById(selectorId);
+            if (!selector) return;
+
+            // Limpiar opciones existentes
+            selector.innerHTML = '';
+
+            // Agregar opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = defaultText;
+            selector.appendChild(defaultOption);
+
+            // Agregar nuevas opciones
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option[valueField];
+                optionElement.textContent = option[valueField];
+                
+                // Mantener selección si la opción aún existe
+                if (option[valueField] === currentValue) {
+                    optionElement.selected = true;
+                }
+                
+                selector.appendChild(optionElement);
+            });
         }
 
         function applyFilters() {
+            console.log('applyFilters() ejecutándose...');
+            
             // Recopilar filtros
             currentFilters = {
                 liderazgo: document.getElementById('liderazgoFilter').value,
@@ -1871,6 +1923,8 @@ include(APPPATH . 'Views/incl/head-application.php');
                 sector: document.getElementById('sectorFilter').value,
                 anio_alta: document.getElementById('anioAltaFilter').value
             };
+            
+            console.log('Filtros aplicados:', currentFilters);
 
             // Llamada AJAX para actualizar métricas
             fetch('<?= base_url() ?>dashboard-eventos/update-metrics', {
@@ -1880,14 +1934,24 @@ include(APPPATH . 'Views/incl/head-application.php');
                 },
                 body: JSON.stringify(currentFilters)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Respuesta recibida:', response);
+                return response.json();
+            })
             .then(data => {
+                console.log('=== RESPUESTA COMPLETA DEL SERVIDOR ===');
+                console.log('Datos completos:', data);
+                console.log('=== VERIFICACIÓN DE DATOS ESPECÍFICOS ===');
+                console.log('genero_data:', data.genero_data);
+                console.log('coordinador_data:', data.coordinador_data);
+                console.log('top_lideres_data:', data.top_lideres_data);
+                console.log('sectores_treemap_data:', data.sectores_treemap_data);
+                console.log('=== INICIANDO ACTUALIZACIÓN ===');
                 updateKPIs(data);
                 updateAllCharts(data);
-
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error en applyFilters:', error);
             });
         }
 
@@ -1900,12 +1964,16 @@ include(APPPATH . 'Views/incl/head-application.php');
             document.getElementById('sectorFilter').value = '';
             document.getElementById('anioAltaFilter').value = '';
             
+            // Actualizar filtros dinámicos para mostrar todas las opciones
+            updateDynamicFilters();
+            
             currentFilters = {};
             
             // Restaurar datos iniciales
             updateKPIs({
                 total_apoyos: <?= $total_apoyos ?>,
                 total_eventos: <?= $total_eventos ?>,
+                total_ciudadanos: <?= $total_ciudadanos ?>,
                 porcentaje_apoyos: 100,
                 porcentaje_eventos: 100,
                 promedio_apoyos: <?= $promedio_apoyos ?>,
@@ -1926,22 +1994,68 @@ include(APPPATH . 'Views/incl/head-application.php');
         function updateKPIs(data) {
             document.getElementById('totalApoyos').textContent = formatToThousands(data.total_apoyos || 0);
             document.getElementById('totalEventos').textContent = formatToThousands(data.total_eventos || 0);
-            document.getElementById('porcentajeApoyos').textContent = data.porcentaje_apoyos || 0;
-            document.getElementById('porcentajeEventos').textContent = data.porcentaje_eventos || 0;
-            document.getElementById('promedioApoyos').textContent = data.promedio_apoyos || 0;
-            document.getElementById('promedioEventos').textContent = data.promedio_eventos || 0;
+            document.getElementById('totalCiudadanos').textContent = formatToThousands(data.total_ciudadanos || 0);
+            document.getElementById('promedioApoyos').textContent = (data.promedio_apoyos || 0).toFixed(1);
+            document.getElementById('promedioEventos').textContent = (data.promedio_eventos || 0).toFixed(1);
         }
 
         function updateAllCharts(data) {
+            console.log('=== INICIO updateAllCharts ===');
+            console.log('updateAllCharts() ejecutándose con datos:', data);
+            console.log('Charts disponibles:', Object.keys(charts));
+            console.log('Tipo de datos recibidos:', typeof data);
+            console.log('¿Datos están vacíos?:', Object.keys(data).length === 0);
+            
             // Actualizar gráfico de género
             if (data.genero_data && charts.genero) {
-                const total = data.genero_data.reduce((sum, item) => sum + item.total_personas, 0);
+                console.log('Actualizando gráfico de género:', data.genero_data);
+                console.log('Datos de género antes del filtro:', data.genero_data);
+                console.log('Chart de género existe:', !!charts.genero);
+                const total = data.genero_data.reduce((sum, item) => sum + parseToNumber(item.total_personas), 0);
                 charts.genero.data.labels = data.genero_data.map(item => {
                     const percentage = ((item.total_personas / total) * 100).toFixed(1);
                     return `${item.genero}: ${item.total_personas} (${percentage}%)`;
                 });
                 charts.genero.data.datasets[0].data = data.genero_data.map(item => item.total_personas);
+                
+                // Actualizar las opciones de la leyenda para usar datos filtrados
+                charts.genero.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    return chartData.labels.map((label, index) => {
+                        const percentage = ((chartData.datasets[0].data[index] / total) * 100).toFixed(0);
+                        return {
+                            text: `${data.genero_data[index].genero} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                // Actualizar callbacks del tooltip para usar datos filtrados
+                charts.genero.options.plugins.tooltip.callbacks.label = function(context) {
+                    const index = context.dataIndex;
+                    const item = data.genero_data[index];
+                    const percentage = ((item.total_personas / total) * 100).toFixed(1);
+                    return `${item.genero}: ${formatToThousands(item.total_personas)} personas (${percentage}%)`;
+                };
+                
+                charts.genero.options.plugins.tooltip.callbacks.afterLabel = function(context) {
+                    const index = context.dataIndex;
+                    const apoyos = data.genero_data[index].total_apoyos;
+                    return `Apoyos: ${formatToThousands(apoyos)}`;
+                };
+                
+                // Actualizar total en el contenedor
+                const chartContainer = document.querySelector('#generoChart').closest('.card-body');
+                const totalElement = chartContainer.querySelector('.chart-total');
+                if (totalElement) {
+                    totalElement.textContent = `Total: ${formatToThousands(total)}`;
+                }
+                
                 charts.genero.update();
+                 console.log('Gráfico de género actualizado exitosamente');
             }
             
             // Actualizar gráfico de edad
@@ -1956,21 +2070,28 @@ include(APPPATH . 'Views/incl/head-application.php');
 
             
 
-            // Actualizar gráfico de top líderes
-            if (data.top_lideres_data && charts.topLideres) {
-                const topN = parseInt(document.getElementById('topLideresSelector').value) || 10;
-                const topData = data.top_lideres_data.slice(0, topN);
+            // Actualizar datos globales de líderes (sin actualizar la gráfica)
+            if (data.top_lideres_data) {
+                console.log('Actualizando datos globales de líderes:', data.top_lideres_data);
+                // Actualizar los datos globales
+                initialData.top_lideres_data = data.top_lideres_data;
                 
-                // Generar colores dinámicos para cada tipo de liderazgo usando la paleta azul
-                const colors = topData.map((_, index) => {
-                    return greenPalette[index % greenPalette.length];
-                });
+                // Actualizar las opciones del modal con los nuevos datos
+                populateLideresCheckboxes();
                 
-                charts.topLideres.data.labels = topData.map(item => item.liderazgo);
-                charts.topLideres.data.datasets[0].data = topData.map(item => item.total_apoyos);
-                charts.topLideres.data.datasets[0].backgroundColor = colors;
-                charts.topLideres.data.datasets[0].borderColor = colors;
-                charts.topLideres.update();
+                // Actualizar selectedLideres para incluir solo los líderes disponibles en los datos filtrados
+                const availableLideres = data.top_lideres_data.map(lider => lider.liderazgo);
+                selectedLideres = availableLideres;
+                updateSelectedLideresCount();
+                
+                // Actualizar la gráfica con los nuevos líderes filtrados
+                updateComparativaLideres();
+                
+                // No actualizar automáticamente la gráfica con filtros generales
+                // La gráfica solo se actualiza cuando se usa el botón "Comparar" del modal
+                // if (selectedLideres && selectedLideres.length > 0) {
+                //     updateComparativaLideres();
+                // }
             }
             
             // Actualizar gráfica de sectores
@@ -1978,42 +2099,29 @@ include(APPPATH . 'Views/incl/head-application.php');
                  updateSectoresChart(data.sectores_treemap_data);
              }
             
-            // Actualizar gráficos de apoyos
+            // Actualizar gráfica de apoyos por sector
             if (data.apoyos_por_sector_data && charts.apoyosPorSector) {
-                const total = data.apoyos_por_sector_data.reduce((sum, item) => sum + item.total_apoyos, 0);
-                
-                // Generar colores dinámicos para la actualización
-                const colors = data.apoyos_por_sector_data.map((_, index) => {
-                    return greenPalette[index % greenPalette.length];
-                });
-                
                 charts.apoyosPorSector.data.labels = data.apoyos_por_sector_data.map(item => item.sector);
-                charts.apoyosPorSector.data.datasets[0].data = data.apoyos_por_sector_data.map(item => item.total_apoyos);
-                charts.apoyosPorSector.data.datasets[0].backgroundColor = colors;
+                charts.apoyosPorSector.data.datasets[0].data = data.apoyos_por_sector_data.map(item => parseToNumber(item.total_apoyos));
                 
-                // Actualizar leyendas con porcentajes
-                charts.apoyosPorSector.options.plugins.legend.labels.generateLabels = function(chart) {
-                    const data = chart.data;
-                    return data.labels.map((label, index) => {
-                        const percentage = ((data.datasets[0].data[index] / total) * 100).toFixed(0);
-                        return {
-                            text: `${label} (${percentage}%)`,
-                            fillStyle: data.datasets[0].backgroundColor[index],
-                            strokeStyle: data.datasets[0].backgroundColor[index],
-                            pointStyle: 'circle',
-                            index: index
-                        };
-                    });
-                };
-                
-                charts.apoyosPorSector.update();
-                
-                // Actualizar total de referencia
-                const chartContainer = document.getElementById('apoyosPorSectorChart').parentElement;
+                // Actualizar total en el contenedor
+                const total = data.apoyos_por_sector_data.reduce((sum, item) => sum + parseToNumber(item.total_apoyos), 0);
+                const chartContainer = document.querySelector('#apoyosPorSectorChart').closest('.card-body');
                 const totalElement = chartContainer.querySelector('.chart-total');
                 if (totalElement) {
                     totalElement.textContent = `Total: ${formatToThousands(total)}`;
                 }
+                
+                charts.apoyosPorSector.update();
+            }
+            
+            // Actualizar gráfica de colonias
+            if (data.colonias_data && charts.colonias) {
+                // Actualizar datos globales
+                initialData.colonias_data = data.colonias_data;
+                
+                // Actualizar gráfico con datos filtrados
+                updateColoniasChart();
             }
             
             if (data.promedio_apoyos_sector_data && charts.promedioApoyosSector) {
@@ -2032,8 +2140,52 @@ include(APPPATH . 'Views/incl/head-application.php');
             }
             
             if (data.eventos_por_sector_data && charts.eventosPorSector) {
+                const total = data.eventos_por_sector_data.reduce((sum, d) => sum + parseToNumber(d.total_eventos), 0);
+                
+                // Generar colores dinámicamente para los nuevos datos
+                const colors = data.eventos_por_sector_data.map((_, index) => {
+                    return greenPalette[index % greenPalette.length];
+                });
+                
                 charts.eventosPorSector.data.labels = data.eventos_por_sector_data.map(item => item.sector);
                 charts.eventosPorSector.data.datasets[0].data = data.eventos_por_sector_data.map(item => item.total_eventos);
+                charts.eventosPorSector.data.datasets[0].backgroundColor = colors;
+                
+                // Actualizar las funciones de callback con los nuevos datos
+                charts.eventosPorSector.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    return chartData.labels.map((label, index) => {
+                        const value = chartData.datasets[0].data[index];
+                        const percentage = ((value / total) * 100).toFixed(0);
+                        return {
+                            text: `${label} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                charts.eventosPorSector.options.plugins.tooltip.callbacks.label = function(context) {
+                    const index = context.dataIndex;
+                    const item = data.eventos_por_sector_data[index];
+                    const percentage = ((item.total_eventos / total) * 100).toFixed(1);
+                    return `${item.sector}: ${formatToThousands(item.total_eventos)} (${percentage}%)`;
+                };
+                
+                // Actualizar el elemento de total
+                const chartContainer = charts.eventosPorSector.canvas.parentElement;
+                let totalElement = chartContainer.querySelector('.chart-total');
+                if (!totalElement) {
+                    totalElement = document.createElement('div');
+                    totalElement.className = 'chart-total';
+                    totalElement.style.cssText = 'position: absolute; bottom: 10px; right: 10px; background: #fff; border: 2px solid #ffd700; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px;';
+                    chartContainer.style.position = 'relative';
+                    chartContainer.appendChild(totalElement);
+                }
+                totalElement.textContent = `Total: ${formatToThousands(total)}`;
+                
                 charts.eventosPorSector.update();
             }
             
@@ -2045,30 +2197,34 @@ include(APPPATH . 'Views/incl/head-application.php');
             
 
             
-            // Actualizar gráfica de barras de coordinador
+            // Actualizar datos globales de coordinadores
             if (data.coordinador_data) {
-                // Actualizar datos globales
+                console.log('Actualizando datos globales de coordinadores:', data.coordinador_data);
+                // Solo actualizar los datos globales, la gráfica se actualiza únicamente con el botón comparar
                 initialData.coordinador_data = data.coordinador_data;
                 
-                // Reinicializar selector con nuevos datos
-                initializeCoordinadorSelector();
-                
-                // Actualizar gráfico con datos filtrados
-                updateCoordinadorChart();
+                // Actualizar las opciones del modal con los nuevos datos
+                populateCoordinadoresCheckboxes();
             }
             
             // Actualizar gráficos de top secciones electorales
             if (data.top_apoyos_seccion_data && charts.topApoyosSeccion) {
-                charts.topApoyosSeccion.data.labels = data.top_apoyos_seccion_data.map(item => `Sección ${item.seccion}`);
-                charts.topApoyosSeccion.data.datasets[0].data = data.top_apoyos_seccion_data.map(item => parseToNumber(item.total_apoyos));
-                charts.topApoyosSeccion.update();
+                // Actualizar datos globales
+                initialData.top_apoyos_seccion_data = data.top_apoyos_seccion_data;
+                
+                // Actualizar gráfico con datos filtrados respetando el selector
+                updateTopApoyosSeccionChart();
             }
             
             if (data.top_eventos_seccion_data && charts.topEventosSeccion) {
-                charts.topEventosSeccion.data.labels = data.top_eventos_seccion_data.map(item => `Sección ${item.seccion}`);
-                charts.topEventosSeccion.data.datasets[0].data = data.top_eventos_seccion_data.map(item => parseToNumber(item.total_eventos));
-                charts.topEventosSeccion.update();
+                // Actualizar datos globales
+                initialData.top_eventos_seccion_data = data.top_eventos_seccion_data;
+                
+                // Actualizar gráfico con datos filtrados respetando el selector
+                updateTopEventosSeccionChart();
             }
+            
+            console.log('=== FIN updateAllCharts ===');
         }
 
         function createTopApoyosSeccionChart() {
@@ -2156,6 +2312,27 @@ include(APPPATH . 'Views/incl/head-application.php');
                     }
                 }
             });
+            
+            // Event listener para el selector
+            document.getElementById('topApoyosSeccionSelector').addEventListener('change', updateTopApoyosSeccionChart);
+        }
+        
+        function updateTopApoyosSeccionChart() {
+            const topCount = parseInt(document.getElementById('topApoyosSeccionSelector').value);
+            const sortedData = [...initialData.top_apoyos_seccion_data]
+                .sort((a, b) => parseToNumber(b.total_apoyos) - parseToNumber(a.total_apoyos))
+                .slice(0, topCount);
+            
+            // Generar colores diferentes para cada sección actualizada
+            const seccionColors = sortedData.map((_, index) => {
+                return greenPaletteInverted[index % greenPaletteInverted.length];
+            });
+            
+            charts.topApoyosSeccion.data.labels = sortedData.map(item => `Sección ${item.seccion}`);
+            charts.topApoyosSeccion.data.datasets[0].data = sortedData.map(item => parseToNumber(item.total_apoyos));
+            charts.topApoyosSeccion.data.datasets[0].backgroundColor = seccionColors;
+            charts.topApoyosSeccion.data.datasets[0].borderColor = seccionColors;
+            charts.topApoyosSeccion.update();
         }
 
         function createTopEventosSeccionChart() {
@@ -2243,9 +2420,358 @@ include(APPPATH . 'Views/incl/head-application.php');
                     }
                 }
             });
+            
+            // Event listener para el selector
+            document.getElementById('topEventosSeccionSelector').addEventListener('change', updateTopEventosSeccionChart);
+        }
+        
+        function updateTopEventosSeccionChart() {
+            const topCount = parseInt(document.getElementById('topEventosSeccionSelector').value);
+            const sortedData = [...initialData.top_eventos_seccion_data]
+                .sort((a, b) => parseToNumber(b.total_eventos) - parseToNumber(a.total_eventos))
+                .slice(0, topCount);
+            
+            // Generar colores diferentes para cada sección actualizada
+            const seccionColors = sortedData.map((_, index) => {
+                return greenPaletteInverted[index % greenPaletteInverted.length];
+            });
+            
+            charts.topEventosSeccion.data.labels = sortedData.map(item => `Sección ${item.seccion}`);
+            charts.topEventosSeccion.data.datasets[0].data = sortedData.map(item => parseToNumber(item.total_eventos));
+            charts.topEventosSeccion.data.datasets[0].backgroundColor = seccionColors;
+            charts.topEventosSeccion.data.datasets[0].borderColor = seccionColors;
+            charts.topEventosSeccion.update();
         }
 
+        // Función para animar contadores con decimales
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter-value');
+            
+            counters.forEach(counter => {
+                const targetStr = counter.getAttribute('data-target');
+                const target = parseFloat(targetStr);
+                const isDecimal = counter.id === 'promedioApoyos' || counter.id === 'promedioEventos';
+                const duration = 2000; // 2 segundos
+                const increment = target / (duration / 16); // 60 FPS
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    
+                    if (isDecimal) {
+                        // Para promedios, usar formatPromedio
+                        counter.textContent = formatPromedio(current);
+                    } else {
+                        // Para enteros, usar formatToThousands
+                        counter.textContent = formatToThousands(Math.floor(current));
+                    }
+                }, 16);
+            });
+        }
 
+        // Funciones para el modal de selección de líderes
+        function initializeLideresModal() {
+            lideresModal = new bootstrap.Modal(document.getElementById('lideresModal'));
+            populateLideresCheckboxes();
+        }
+
+        function populateLideresCheckboxes() {
+            const container = document.getElementById('lideresCheckboxContainer');
+            container.innerHTML = '';
+            
+            // Usar datos filtrados para mostrar solo los líderes disponibles según los filtros
+            initialData.top_lideres_data.forEach((lider, index) => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-6 col-lg-4 mb-2';
+                
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check';
+                
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.id = `lider_${index}`;
+                checkbox.value = lider.liderazgo;
+                checkbox.checked = selectedLideres.includes(lider.liderazgo);
+                
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.setAttribute('for', `lider_${index}`);
+                label.textContent = lider.liderazgo;
+                
+                checkboxDiv.appendChild(checkbox);
+                checkboxDiv.appendChild(label);
+                colDiv.appendChild(checkboxDiv);
+                container.appendChild(colDiv);
+            });
+        }
+
+        function openLideresModal() {
+            populateLideresCheckboxes();
+            lideresModal.show();
+        }
+
+        function selectAllLideres() {
+            const checkboxes = document.querySelectorAll('#lideresCheckboxContainer input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+
+        function clearAllLideres() {
+            const checkboxes = document.querySelectorAll('#lideresCheckboxContainer input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+
+        function updateSelectedLideresCount() {
+            document.getElementById('selectedLideresCount').textContent = selectedLideres.length;
+        }
+
+        function applyLideresSelection() {
+            const checkboxes = document.querySelectorAll('#lideresCheckboxContainer input[type="checkbox"]:checked');
+            selectedLideres = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            // Actualizar el contador de líderes seleccionados
+            updateSelectedLideresCount();
+            
+            // Actualizar el gráfico
+            updateComparativaLideres();
+            
+            // Cerrar el modal
+            lideresModal.hide();
+        }
+
+        // Funciones para el modal de selección de coordinadores
+        function initializeCoordinadoresModal() {
+            coordinadoresModal = new bootstrap.Modal(document.getElementById('coordinadoresModal'));
+            populateCoordinadoresCheckboxes();
+        }
+
+        function populateCoordinadoresCheckboxes() {
+            const container = document.getElementById('coordinadoresCheckboxContainer');
+            container.innerHTML = '';
+            
+            initialData.coordinador_data.forEach((coordinador, index) => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-6 col-lg-4 mb-2';
+                
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check';
+                
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.id = `coordinador_${index}`;
+                checkbox.value = coordinador.coordinador;
+                checkbox.checked = selectedCoordinadores.includes(coordinador.coordinador);
+                
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.setAttribute('for', `coordinador_${index}`);
+                label.textContent = coordinador.coordinador;
+                
+                checkboxDiv.appendChild(checkbox);
+                checkboxDiv.appendChild(label);
+                colDiv.appendChild(checkboxDiv);
+                container.appendChild(colDiv);
+            });
+        }
+
+        function openCoordinadoresModal() {
+            populateCoordinadoresCheckboxes();
+            coordinadoresModal.show();
+        }
+
+        function selectAllCoordinadores() {
+            const checkboxes = document.querySelectorAll('#coordinadoresCheckboxContainer input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+
+        function clearAllCoordinadores() {
+            const checkboxes = document.querySelectorAll('#coordinadoresCheckboxContainer input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+
+        function updateSelectedCoordinadoresCount() {
+            const count = selectedCoordinadores.length;
+            document.getElementById('selectedCoordinadoresCount').textContent = `${count} coordinadores seleccionados`;
+        }
+
+        function applyCoordinadoresSelection() {
+            const checkboxes = document.querySelectorAll('#coordinadoresCheckboxContainer input[type="checkbox"]:checked');
+            selectedCoordinadores = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            // Actualizar el contador de coordinadores seleccionados
+            updateSelectedCoordinadoresCount();
+            
+            // Actualizar el gráfico
+            updateComparativaCoordinadores();
+            
+            // Cerrar el modal
+            coordinadoresModal.hide();
+        }
+
+        function updateComparativaCoordinadores() {
+            if (charts.coordinador) {
+                // Filtrar datos según la selección global
+                const filteredData = initialData.coordinador_data.filter(item => 
+                    selectedCoordinadores.includes(item.coordinador)
+                );
+                
+                const labels = filteredData.map(item => item.coordinador);
+                const totalPersonas = filteredData.map(item => item.total_personas);
+                const totalApoyos = filteredData.map(item => item.total_apoyos);
+                const totalEventos = filteredData.map(item => item.total_eventos);
+                const promedioApoyos = filteredData.map(item => parseFloat(item.promedio_apoyos));
+                const promedioEventos = filteredData.map(item => parseFloat(item.promedio_eventos));
+                
+                // Actualizar datos del gráfico
+                charts.coordinador.data.labels = labels;
+                charts.coordinador.data.datasets[0].data = totalPersonas;
+                charts.coordinador.data.datasets[1].data = totalApoyos;
+                charts.coordinador.data.datasets[2].data = totalEventos;
+                
+                // Actualizar tooltips con nuevos datos de promedio
+                charts.coordinador.options.plugins.tooltip.callbacks.afterLabel = function(context) {
+                    const index = context.dataIndex;
+                    return [
+                        `Promedio Apoyos: ${promedioApoyos[index].toFixed(1)}`,
+                        `Promedio Eventos: ${promedioEventos[index].toFixed(1)}`
+                    ];
+                };
+                
+                charts.coordinador.update();
+            }
+        }
+
+        // Inicializar animación de contadores al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Resetear contadores a 0 antes de animar
+            document.querySelectorAll('.counter-value').forEach(counter => {
+                counter.textContent = '0';
+            });
+            
+            // Iniciar animación después de un pequeño delay
+            setTimeout(animateCounters, 500);
+            
+            // Inicializar el modal de líderes
+            initializeLideresModal();
+            
+            // Inicializar el modal de coordinadores
+            initializeCoordinadoresModal();
+            
+            // Actualizar contador de coordinadores ya seleccionados
+            updateSelectedCoordinadoresCount();
+        });
+
+    </script>
+
+    <!-- Modal para Selección de Líderes -->
+    <div class="modal fade" id="lideresModal" tabindex="-1" aria-labelledby="lideresModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="lideresModalLabel">
+                        <i class="fas fa-users me-2"></i>Seleccionar Líderes para Comparar
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="selectAllLideres()">
+                                <i class="fas fa-check-double me-1"></i>Seleccionar Todo
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllLideres()">
+                                <i class="fas fa-times me-1"></i>Limpiar Selección
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row" id="lideresCheckboxContainer">
+                        <!-- Los checkboxes se generarán dinámicamente aquí -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="applyLideresSelection()">
+                        <i class="fas fa-chart-bar me-2"></i>Aplicar Comparación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Selección de Coordinadores -->
+    <div class="modal fade" id="coordinadoresModal" tabindex="-1" aria-labelledby="coordinadoresModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="coordinadoresModalLabel">
+                        <i class="fas fa-user-tie me-2"></i>Seleccionar Coordinadores para Comparar
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="selectAllCoordinadores()">
+                                <i class="fas fa-check-double me-1"></i>Seleccionar Todo
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllCoordinadores()">
+                                <i class="fas fa-times me-1"></i>Limpiar Selección
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row" id="coordinadoresCheckboxContainer">
+                        <!-- Los checkboxes se generarán dinámicamente aquí -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="applyCoordinadoresSelection()">
+                        <i class="fas fa-chart-bar me-2"></i>Aplicar Comparación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateToDashboard() {
+            const selector = document.getElementById('dashboardSelector');
+            const selectedValue = selector.value;
+            
+            if (selectedValue === 'panel') {
+                window.location.href = '<?= base_url('panel') ?>';
+            } else if (selectedValue === 'dashboard-metrix') {
+                window.location.href = '<?= base_url('dashboard-metrix') ?>';
+            } else if (selectedValue === 'dashboard-eventos') {
+                window.location.href = '<?= base_url('dashboard-eventos') ?>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('dashboardSelector');
+            const currentUrl = window.location.pathname;
+            
+            if (currentUrl.includes('panel') && !currentUrl.includes('dashboard')) {
+                selector.value = 'panel';
+            } else if (currentUrl.includes('dashboard-metrix')) {
+                selector.value = 'dashboard-metrix';
+            } else if (currentUrl.includes('dashboard-eventos')) {
+                selector.value = 'dashboard-eventos';
+            }
+        });
     </script>
 
 </body>

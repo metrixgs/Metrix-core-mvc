@@ -100,7 +100,14 @@ include(APPPATH . 'Views/incl/head-application.php');
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                                <h4 class="mb-sm-0"><?= $titulo_pagina; ?></h4>
+                                <!-- Compact Dashboard Selector -->
+                                <div class="dashboard-selector-compact">
+                                    <select class="form-select form-select-sm" id="dashboardSelector" style="width: auto; min-width: 200px; font-size: 0.875rem;">
+                                        <option value="panel">Incidencias</option>
+                                        <option value="dashboard-metrix">Beneficiarios</option>
+                                        <option value="dashboard-eventos">Corregidora</option>
+                                    </select>
+                                </div>
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
@@ -126,7 +133,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                             <select class="form-select" id="programaSelector">
                                                 <option value="">Todos los Programas Sociales</option>
                                                 <?php foreach ($programas as $programa): ?>
-                                                    <option value="<?= $programa['GRUPO_POBLACIONAL'] ?>"><?= $programa['GRUPO_POBLACIONAL'] ?></option>
+                                                    <option value="<?= $programa['sector'] ?>"><?= $programa['sector'] ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
@@ -247,7 +254,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                             <tbody>
                                                 <?php foreach ($secciones_data as $seccion): ?>
                                                     <tr>
-                                                        <td><?= $seccion['SECCION'] ?></td>
+                                                        <td><?= $seccion['seccion'] ?></td>
                                                         <td><?= $seccion['total'] ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
@@ -286,7 +293,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                         <label for="dfsSelector" class="form-label">Seleccionar Distritos Federales:</label>
                                         <select class="form-select" id="dfsSelector" multiple>
                                             <?php foreach ($distritos_federales as $df): ?>
-                                                <option value="<?= $df['DISTRITO_FEDERAL'] ?>"><?= $df['DISTRITO_FEDERAL'] ?></option>
+                                                <option value="<?= $df['distrito_l'] ?>"><?= $df['distrito_l'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <button class="btn btn-primary mt-2" onclick="updateComparativaDFs()">Comparar DFs</button>
@@ -307,7 +314,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                         <label for="liderazgosSelector" class="form-label">Seleccionar Liderazgos:</label>
                                         <select class="form-select" id="liderazgosSelector" multiple>
                                             <?php foreach ($liderazgos as $liderazgo): ?>
-                                                <option value="<?= $liderazgo['LIDERAZGO'] ?>"><?= $liderazgo['LIDERAZGO'] ?></option>
+                                                <option value="<?= $liderazgo['liderazgo'] ?>"><?= $liderazgo['liderazgo'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <button class="btn btn-primary mt-2" onclick="updateComparativaLiderazgos()">Comparar Liderazgos</button>
@@ -330,7 +337,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                                         <label for="dlsSelector" class="form-label">Seleccionar Distritos Locales:</label>
                                         <select class="form-select" id="dlsSelector" multiple>
                                             <?php foreach ($distritos_locales as $dl): ?>
-                                                <option value="<?= $dl['DISTRITO_LOCAL'] ?>"><?= $dl['DISTRITO_LOCAL'] ?></option>
+                                                <option value="<?= $dl['distrito_l'] ?>"><?= $dl['distrito_l'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <button class="btn btn-primary mt-2" onclick="updateComparativaDLs()">Comparar DLs</button>
@@ -366,7 +373,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                         <label class="form-label">Seleccionar Secciones a Comparar:</label>
                         <select class="form-select" id="seccionesComparatorSelector" multiple>
                             <?php foreach ($secciones as $seccion): ?>
-                                <option value="<?= $seccion['SECCION'] ?>">Sección <?= $seccion['SECCION'] ?></option>
+                                <option value="<?= $seccion['seccion'] ?>">Sección <?= $seccion['seccion'] ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -673,7 +680,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                     x: parseInt(item.beneficiarios),
                     y: parseFloat(item.promedio_apoyos),
                     r: Math.sqrt(parseInt(item.total_apoyos)) / 10,
-                    label: item.DISTRITO_LOCAL
+                    label: item.distrito_l
                 }));
                 
                 dlsChart.data.datasets[0].data = bubbleData;
@@ -791,6 +798,28 @@ include(APPPATH . 'Views/incl/head-application.php');
             
             // Iniciar animación después de un pequeño delay
             setTimeout(animateCounters, 500);
+            
+            // Dashboard selector functionality
+            const dashboardSelector = document.getElementById('dashboardSelector');
+            if (dashboardSelector) {
+                // Set current dashboard based on URL
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('panel') && !currentPath.includes('dashboard')) {
+                    dashboardSelector.value = 'panel';
+                } else if (currentPath.includes('dashboard-metrix')) {
+                    dashboardSelector.value = 'dashboard-metrix';
+                } else if (currentPath.includes('dashboard-eventos')) {
+                    dashboardSelector.value = 'dashboard-eventos';
+                }
+                
+                // Handle dashboard navigation
+                dashboardSelector.addEventListener('change', function() {
+                    const selectedDashboard = this.value;
+                    if (selectedDashboard) {
+                        window.location.href = '<?= base_url() ?>' + selectedDashboard;
+                    }
+                });
+            }
         });
     </script>
 

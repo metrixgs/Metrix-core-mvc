@@ -6,25 +6,26 @@ use CodeIgniter\Model;
 
 class DemoMetrixModel extends Model
 {
-    protected $table = 'demo_metrix';
+    protected $table = 'dashboard_demo';
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'ESTADO', 'MUNICIPIO', 'DISTRITO_FEDERAL', 'DISTRITO_LOCAL', 'SECCION',
-        'GENERO', 'COLONIA', 'EDAD', 'GRUPO_POBLACIONAL', 'LIDERAZGO',
-        'LONGITUD', 'LATITUD', 'NUM_APOYOS'
+        'nombre_pila', 'apellido_paterno', 'apellido_materno', 'genero', 'liderazgo',
+        'coordinador', 'nivel_lider', 'sector', 'edad', 'colonia',
+        'distrito_l', 'seccion', 'num_apoyos', 'num_eventos', 'anio_alta',
+        'tag', 'latitud', 'longitud', 'created_at'
     ];
     protected $useTimestamps = false;
 
-    // Obtener programas sociales únicos (basado en GRUPO_POBLACIONAL)
+    // Obtener sectores únicos
     public function getProgramasSociales()
     {
-        return $this->select('GRUPO_POBLACIONAL')
+        return $this->select('sector')
                     ->distinct()
-                    ->where('GRUPO_POBLACIONAL IS NOT NULL')
-                    ->orderBy('GRUPO_POBLACIONAL')
+                    ->where('sector IS NOT NULL')
+                    ->orderBy('sector')
                     ->findAll();
     }
 
@@ -33,18 +34,18 @@ class DemoMetrixModel extends Model
     {
         $builder = $this->builder();
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
         return $builder->countAllResults();
     }
 
-    // Contador de beneficiarios únicos (por SECCION)
+    // Contador de beneficiarios únicos (por seccion)
     public function getBeneficiariosUnicos($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('SECCION');
+        $builder->select('seccion');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
         $builder->distinct();
         return $builder->countAllResults();
@@ -54,11 +55,11 @@ class DemoMetrixModel extends Model
     public function getBeneficiariosRecurrentes($programa = null)
     {
         $builder = $this->db->table($this->table);
-        $builder->select('SECCION, COUNT(*) as total');
+        $builder->select('seccion, COUNT(*) as total');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->groupBy('SECCION');
+        $builder->groupBy('seccion');
         $builder->having('total > 1');
         return $builder->countAllResults();
     }
@@ -67,12 +68,12 @@ class DemoMetrixModel extends Model
     public function getBeneficiariosPorGenero($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('GENERO, COUNT(*) as total');
+        $builder->select('genero, COUNT(*) as total');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('GENERO IS NOT NULL');
-        $builder->groupBy('GENERO');
+        $builder->where('genero IS NOT NULL');
+        $builder->groupBy('genero');
         return $builder->get()->getResultArray();
     }
 
@@ -81,91 +82,91 @@ class DemoMetrixModel extends Model
     {
         $builder = $this->db->table($this->table);
         $builder->select("CASE 
-            WHEN EDAD BETWEEN 0 AND 17 THEN 'Menores (0-17)'
-            WHEN EDAD BETWEEN 18 AND 29 THEN 'Jóvenes (18-29)'
-            WHEN EDAD BETWEEN 30 AND 59 THEN 'Adultos (30-59)'
-            WHEN EDAD >= 60 THEN 'Adultos Mayores (60+)'
+            WHEN edad BETWEEN 0 AND 17 THEN 'Menores (0-17)'
+            WHEN edad BETWEEN 18 AND 29 THEN 'Jóvenes (18-29)'
+            WHEN edad BETWEEN 30 AND 59 THEN 'Adultos (30-59)'
+            WHEN edad >= 60 THEN 'Adultos Mayores (60+)'
             ELSE 'Sin especificar'
         END as rango_edad, COUNT(*) as total");
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('EDAD IS NOT NULL');
+        $builder->where('edad IS NOT NULL');
         $builder->groupBy('rango_edad');
         return $builder->get()->getResultArray();
     }
 
-    // Top 5 municipios
+    // Top 5 colonias
     public function getTop5Municipios($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('MUNICIPIO, COUNT(*) as total');
+        $builder->select('colonia, COUNT(*) as total');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('MUNICIPIO IS NOT NULL');
-        $builder->groupBy('MUNICIPIO');
+        $builder->where('colonia IS NOT NULL');
+        $builder->groupBy('colonia');
         $builder->orderBy('total', 'DESC');
         $builder->limit(5);
         return $builder->get()->getResultArray();
     }
 
-    // Obtener DFs únicos
+    // Obtener distritos locales únicos
     public function getDistritosFederales($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('DISTRITO_FEDERAL');
+        $builder->select('distrito_l');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('DISTRITO_FEDERAL IS NOT NULL');
+        $builder->where('distrito_l IS NOT NULL');
         $builder->distinct();
-        $builder->orderBy('DISTRITO_FEDERAL');
+        $builder->orderBy('distrito_l');
         return $builder->get()->getResultArray();
     }
 
-    // Comparativa DFs
+    // Comparativa distritos locales
     public function getComparativaDFs($dfs = [], $programa = null)
     {
         if (empty($dfs)) return [];
         
         $builder = $this->builder();
-        $builder->select('DISTRITO_FEDERAL, COUNT(*) as total');
-        $builder->whereIn('DISTRITO_FEDERAL', $dfs);
+        $builder->select('distrito_l, COUNT(*) as total');
+        $builder->whereIn('distrito_l', $dfs);
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->groupBy('DISTRITO_FEDERAL');
+        $builder->groupBy('distrito_l');
         return $builder->get()->getResultArray();
     }
 
-    // Obtener DLs únicos
+    // Obtener distritos locales únicos
     public function getDistritosLocales($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('DISTRITO_LOCAL');
+        $builder->select('distrito_l');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('DISTRITO_LOCAL IS NOT NULL');
+        $builder->where('distrito_l IS NOT NULL');
         $builder->distinct();
-        $builder->orderBy('DISTRITO_LOCAL');
+        $builder->orderBy('distrito_l');
         return $builder->get()->getResultArray();
     }
 
-    // Comparativa DLs (para gráfico bubble)
+    // Comparativa distritos locales (para gráfico bubble)
     public function getComparativaDLs($dls = [], $programa = null)
     {
         if (empty($dls)) return [];
         
         $builder = $this->db->table($this->table);
-        $builder->select('DISTRITO_LOCAL, COUNT(*) as beneficiarios, AVG(NUM_APOYOS) as promedio_apoyos, SUM(NUM_APOYOS) as total_apoyos');
-        $builder->whereIn('DISTRITO_LOCAL', $dls);
+        $builder->select('distrito_l, COUNT(*) as beneficiarios, AVG(num_apoyos) as promedio_apoyos, SUM(num_apoyos) as total_apoyos');
+        $builder->whereIn('distrito_l', $dls);
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('DISTRITO_LOCAL IS NOT NULL');
-        $builder->groupBy('DISTRITO_LOCAL');
+        $builder->where('distrito_l IS NOT NULL');
+        $builder->groupBy('distrito_l');
         return $builder->get()->getResultArray();
     }
 
@@ -173,12 +174,12 @@ class DemoMetrixModel extends Model
     public function getTop15Secciones($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('SECCION, COUNT(*) as total');
+        $builder->select('seccion, COUNT(*) as total');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('SECCION IS NOT NULL');
-        $builder->groupBy('SECCION');
+        $builder->where('seccion IS NOT NULL');
+        $builder->groupBy('seccion');
         $builder->orderBy('total', 'DESC');
         $builder->limit(15);
         return $builder->get()->getResultArray();
@@ -188,13 +189,13 @@ class DemoMetrixModel extends Model
     public function getLiderazgos($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('LIDERAZGO');
+        $builder->select('liderazgo');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('LIDERAZGO IS NOT NULL');
+        $builder->where('liderazgo IS NOT NULL');
         $builder->distinct();
-        $builder->orderBy('LIDERAZGO');
+        $builder->orderBy('liderazgo');
         return $builder->get()->getResultArray();
     }
 
@@ -204,12 +205,12 @@ class DemoMetrixModel extends Model
         if (empty($liderazgos)) return [];
         
         $builder = $this->builder();
-        $builder->select('LIDERAZGO, COUNT(*) as total');
-        $builder->whereIn('LIDERAZGO', $liderazgos);
+        $builder->select('liderazgo, COUNT(*) as total');
+        $builder->whereIn('liderazgo', $liderazgos);
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->groupBy('LIDERAZGO');
+        $builder->groupBy('liderazgo');
         return $builder->get()->getResultArray();
     }
 
@@ -217,13 +218,13 @@ class DemoMetrixModel extends Model
     public function getSecciones($programa = null)
     {
         $builder = $this->builder();
-        $builder->select('SECCION');
+        $builder->select('seccion');
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->where('SECCION IS NOT NULL');
+        $builder->where('seccion IS NOT NULL');
         $builder->distinct();
-        $builder->orderBy('SECCION');
+        $builder->orderBy('seccion');
         return $builder->get()->getResultArray();
     }
 
@@ -233,12 +234,12 @@ class DemoMetrixModel extends Model
         if (empty($secciones)) return [];
         
         $builder = $this->builder();
-        $builder->select('SECCION, COUNT(*) as total');
-        $builder->whereIn('SECCION', $secciones);
+        $builder->select('seccion, COUNT(*) as total');
+        $builder->whereIn('seccion', $secciones);
         if ($programa) {
-            $builder->where('GRUPO_POBLACIONAL', $programa);
+            $builder->where('sector', $programa);
         }
-        $builder->groupBy('SECCION');
+        $builder->groupBy('seccion');
         $builder->orderBy('total', 'DESC');
         return $builder->get()->getResultArray();
     }

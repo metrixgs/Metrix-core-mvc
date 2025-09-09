@@ -14,7 +14,7 @@ class EventosModel extends Model
     protected $allowedFields = [
         'nombre_pila', 'apellido_paterno', 'apellido_materno', 'genero', 'liderazgo',
         'coordinador', 'nivel_lider', 'sector', 'edad', 'colonia',
-        'distrito_local', 'seccion', 'num_apoyos', 'num_eventos', 'anio_alta',
+        'distrito_l', 'seccion', 'num_apoyos', 'num_eventos', 'anio_alta',
         'tag', 'latitud', 'longitud', 'created_at'
     ];
     protected $useTimestamps = false;
@@ -96,6 +96,15 @@ class EventosModel extends Model
         $totalFiltrado = $this->getTotalEventos($filtros);
         $totalGeneral = $this->getTotalEventos();
         return $totalGeneral > 0 ? round(($totalFiltrado / $totalGeneral) * 100, 2) : 0;
+    }
+
+    public function getTotalCiudadanos($filtros = [])
+    {
+        $builder = $this->builder();
+        $builder->select('COUNT(*) as total');
+        $this->applyFilters($builder, $filtros);
+        $result = $builder->get()->getRowArray();
+        return $result['total'] ?? 0;
     }
 
     // Demografía
@@ -277,11 +286,11 @@ class EventosModel extends Model
     public function getDistritosLocales($filtros = [])
     {
         $builder = $this->builder();
-        $builder->select('distrito_local');
+        $builder->select('distrito_l');
         $this->applyFilters($builder, $filtros);
-        $builder->where('distrito_local IS NOT NULL');
+        $builder->where('distrito_l IS NOT NULL');
         $builder->distinct();
-        $builder->orderBy('distrito_local');
+        $builder->orderBy('distrito_l');
         return $builder->get()->getResultArray();
     }
 

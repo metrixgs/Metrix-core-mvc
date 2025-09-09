@@ -26,6 +26,7 @@ class DashboardEventos extends BaseController
         // KPIs iniciales (sin filtro)
         $data['total_apoyos'] = $this->eventosModel->getTotalApoyos();
         $data['total_eventos'] = $this->eventosModel->getTotalEventos();
+        $data['total_ciudadanos'] = $this->eventosModel->getTotalCiudadanos();
         $data['promedio_apoyos'] = $this->eventosModel->getPromedioApoyos();
         $data['promedio_eventos'] = $this->eventosModel->getPromedioEventos();
         $data['porcentaje_apoyos'] = $this->eventosModel->getPorcentajeApoyos();
@@ -77,6 +78,7 @@ class DashboardEventos extends BaseController
         $data = [
             'total_apoyos' => $this->eventosModel->getTotalApoyos($filtros),
             'total_eventos' => $this->eventosModel->getTotalEventos($filtros),
+            'total_ciudadanos' => $this->eventosModel->getTotalCiudadanos($filtros),
             'promedio_apoyos' => $this->eventosModel->getPromedioApoyos($filtros),
             'promedio_eventos' => $this->eventosModel->getPromedioEventos($filtros),
             'porcentaje_apoyos' => $this->eventosModel->getPorcentajeApoyos($filtros),
@@ -91,6 +93,7 @@ class DashboardEventos extends BaseController
             'coordinador_data' => $this->eventosModel->getCoordinadorData($filtros),
             'apoyos_por_sector_data' => $this->eventosModel->getApoyosPorSector($filtros),
             'promedio_apoyos_sector_data' => $this->eventosModel->getPromedioApoyosPorSector($filtros),
+            'colonias_data' => $this->eventosModel->getColoniasData($filtros),
             'eventos_por_anio_data' => $this->eventosModel->getEventosPorAnio($filtros),
             'eventos_por_sector_data' => $this->eventosModel->getEventosPorSector($filtros),
             'eventos_por_lider_data' => $this->eventosModel->getEventosPorLider($filtros),
@@ -107,18 +110,56 @@ class DashboardEventos extends BaseController
     // AJAX: Obtener opciones actualizadas para selectores
     public function getSelectorsData()
     {
-        $filtros = $this->request->getPost();
-        
-        $data = [
-            'liderazgos' => $this->eventosModel->getLiderazgos($filtros),
-            'coordinadores' => $this->eventosModel->getCoordinadores($filtros),
-            'secciones_electorales' => $this->eventosModel->getSeccionesElectorales($filtros),
-            'colonias' => $this->eventosModel->getColonias($filtros),
-            'sectores' => $this->eventosModel->getSectores($filtros),
-            'anios_alta' => $this->eventosModel->getAniosAlta($filtros)
-        ];
-        
-        return $this->response->setJSON($data);
+        try {
+            $filtros = $this->request->getJSON(true);
+            
+            // Si no hay filtros, usar array vacío
+            if (!$filtros) {
+                $filtros = [];
+            }
+            
+            $data = [];
+            
+            try {
+                $data['liderazgos'] = $this->eventosModel->getLiderazgos($filtros);
+            } catch (\Exception $e) {
+                $data['liderazgos'] = [];
+            }
+            
+            try {
+                $data['coordinadores'] = $this->eventosModel->getCoordinadores($filtros);
+            } catch (\Exception $e) {
+                $data['coordinadores'] = [];
+            }
+            
+            try {
+                $data['secciones_electorales'] = $this->eventosModel->getSeccionesElectorales($filtros);
+            } catch (\Exception $e) {
+                $data['secciones_electorales'] = [];
+            }
+            
+            try {
+                $data['colonias'] = $this->eventosModel->getColonias($filtros);
+            } catch (\Exception $e) {
+                $data['colonias'] = [];
+            }
+            
+            try {
+                $data['sectores'] = $this->eventosModel->getSectores($filtros);
+            } catch (\Exception $e) {
+                $data['sectores'] = [];
+            }
+            
+            try {
+                $data['anios_alta'] = $this->eventosModel->getAniosAlta($filtros);
+            } catch (\Exception $e) {
+                $data['anios_alta'] = [];
+            }
+            
+            return $this->response->setJSON($data);
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON(['error' => $e->getMessage()]);
+        }
     }
 
     // AJAX: Obtener datos para top N dinámico
