@@ -779,11 +779,23 @@ jQuery(document).ready(function($) {
       $selectElement.append('<option value="" disabled selected>Cargando ' + placeholderText.toLowerCase() + '...</option>');
       initSelect2($selectElement, 'Cargando ' + placeholderText.toLowerCase() + '...', true);
 
-      $.getJSON(apiUrl, function(data) {
+      let finalApiUrl = apiUrl;
+      if (parentId !== null && parentIdProperty !== null) {
+        if (Array.isArray(parentId) && parentId.length > 0) {
+          // Asumiendo que la API puede filtrar por múltiples IDs de padres
+          finalApiUrl += `?${parentIdProperty}=${parentId.join(',')}`;
+        } else if (!Array.isArray(parentId)) {
+          finalApiUrl += `?${parentIdProperty}=${parentId}`;
+        }
+      }
+
+      $.getJSON(finalApiUrl, function(data) {
         let processedData = preprocessGeoJson(data);
         let filteredData = processedData.features;
 
-        if (parentId !== null && parentIdProperty !== null) {
+        // El filtrado en el cliente ya no es necesario si la API filtra por parentId
+        // Sin embargo, lo mantengo como fallback si la API no filtra o si hay otros filtros
+        if (parentId !== null && parentIdProperty !== null && !finalApiUrl.includes(`?${parentIdProperty}=`)) {
           if (Array.isArray(parentId)) {
             filteredData = processedData.features.filter(f => parentId.includes(f.properties[parentIdProperty].toString()));
           } else {
@@ -918,6 +930,10 @@ jQuery(document).ready(function($) {
           case 'colonia':
             $segmentacionColoniaContainer.show();
             loadApiDataAndPopulateSelect(API_URLS.colonias, $delegacionesColoniasFiltro, 'Colonias/Localidades', 'id', 'nom_col', parentIds, 'cve_mun'); // Asumiendo cve_mun como parentIdProperty
+            // Si ya hay municipios seleccionados, forzar la actualización de colonias
+            if ($municipiosFiltro.val() && $municipiosFiltro.val().length > 0) {
+              $municipiosFiltro.trigger('change');
+            }
             break;
           case 'seccion_electoral':
             $segmentacionSeccionElectoralContainer.show();
