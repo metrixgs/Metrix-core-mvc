@@ -3,15 +3,21 @@
 namespace App\Controllers;
 
 use App\Models\DirectorioModel;
+use App\Models\TagsModel;
+use App\Models\DirectorioTagsModel;
 use App\Controllers\BaseController;
 
 class Directorio extends BaseController
 {
     protected $directorioModel;
+    protected $tagsModel;
+    protected $directorioTagsModel;
 
     public function __construct()
     {
         $this->directorioModel = new DirectorioModel();
+        $this->tagsModel = new TagsModel();
+        $this->directorioTagsModel = new DirectorioTagsModel();
         helper(['form', 'url', 'bitacora']);
     }
 
@@ -29,8 +35,12 @@ class Directorio extends BaseController
             ->select('directorio.*,
                       lider.nombre AS lider_nombre,
                       lider.primer_apellido AS lider_apellido,
-                      lider.segundo_apellido AS lider_segundo')
-            ->join('directorio AS lider', 'lider.id = directorio.id_lider', 'left');
+                      lider.segundo_apellido AS lider_segundo,
+                      GROUP_CONCAT(tags.nombre ORDER BY tags.nombre ASC SEPARATOR ", ") AS tags_asociados')
+            ->join('directorio AS lider', 'lider.id = directorio.id_lider', 'left')
+            ->join('directorio_tags', 'directorio_tags.directorio_id = directorio.id', 'left')
+            ->join('tags', 'tags.id = directorio_tags.tag_id', 'left')
+            ->groupBy('directorio.id'); // Agrupar por el ID del directorio para obtener todos los tags
 
         // Obtener el total de registros antes de aplicar la paginación
         $totalContactos = $builder->countAllResults(false);
@@ -382,33 +392,48 @@ class Directorio extends BaseController
 
        // Mapeo de columnas del CSV a campos de la base de datos
        $columnMapping = [
-           'ID_DEL' => 'id_del',
-           'NOM_DEL' => 'nom_del',
-           'CVE_LOC' => 'cve_loc',
-           'NOM_LOC' => 'nom_loc',
-           'ID_COL' => 'id_col',
-           'NOM_COL' => 'nom_col',
-           'CVE_AGEB' => 'cve_ageb',
-           'CVE_MZA' => 'cve_mza',
-           'CU_MZA' => 'cu_mza',
-           'CVE_CAT' => 'cve_cat',
-           'CALLE' => 'calle',
-           'NUM_EXT' => 'numero_exterior',
-           'NO_INT' => 'numero_interior',
-           'LETRA' => 'letra',
-           'COLONIA' => 'colonia',
-           'TIPO' => 'tipo',
-           'ZONA' => 'zona',
-           'SECTOR' => 'sector',
-           'DISTRITO_F' => 'distrito_f',
-           'DISTRITO_L' => 'distrito_l',
+           'NOMBRE(S) DE PILA' => 'nombre',
+           'APELLIDO PATERNO' => 'primer_apellido',
+           'APELLIDO MATERNO' => 'segundo_apellido',
+           'GENERO' => 'genero',
+           'LIDERAZGO' => 'nombre_liderazgo', // Mapear a nuevo campo
+           'COORDINADOR' => 'nombre_coordinador', // Mapear a nuevo campo
+           'EDAD' => 'edad', // Mapear a nuevo campo
+           'TELEFONO' => 'telefono',
+           'CURP (18 DIGITOS)' => 'curp',
+           'CLAVE DE ELECTOR (18 DIGITOS)' => 'clave_elector', // Mapear a nuevo campo
+           'FECHA DE NACIMIENTO' => 'fecha_nacimiento', // Se procesará aparte
            'SECCION' => 'seccion',
-           'CIRCUITO' => 'circuito',
-           'DISTRITO_J' => 'distrito_j',
-           'LAT' => 'latitud',
-           'LON' => 'longitud',
-           // Asegúrate de que todos los campos relevantes del CSV estén aquí
-           // y que coincidan con los 'allowedFields' en DirectorioModel.php
+           'VIGENCIA' => 'vigencia', // Mapear a nuevo campo
+           'CALLE' => 'calle',
+           'NO. EXTERIOR' => 'numero_exterior',
+           'NO. INTERIOR' => 'numero_interior',
+           'COLONIA' => 'colonia',
+           'CODIGO POSTAL' => 'codigo_postal',
+           'DELEGACION' => 'nom_del', // Asumiendo que DELEGACION del CSV es nom_del
+           'DIRECCION' => 'direccion',
+           'MUNICIPIO' => 'municipio',
+           'ESTADO' => 'estado',
+           'LATITUD' => 'latitud',
+           'LONGITUD' => 'longitud',
+           'TIPO DE SANGRE' => 'tipo_sangre', // Mapear a nuevo campo
+           // Las siguientes columnas son duplicadas o para la sección de "servicios"
+           // 'NOMBRE(S) DE PILA' => 'nombre', // Duplicado, se usa el primero
+           // 'APELLIDO PATERNO' => 'primer_apellido', // Duplicado, se usa el primero
+           // 'APELLIDO MATERNO' => 'segundo_apellido', // Duplicado, se usa el primero
+           // 'TELEFONO' => 'telefono', // Duplicado, se usa el primero
+           'SERVICIOS' => 'servicios', // Mapear a nuevo campo
+           'TARIFA' => 'tarifa', // Mapear a nuevo campo
+           'CATEGORIA' => 'categoria', // Mapear a nuevo campo
+           'DIAS' => 'dias', // Mapear a nuevo campo
+           'HORARIOS' => 'horarios', // Mapear a nuevo campo
+           'DISCAPACIDAD' => 'tipo_discapacidad', // Mapear a campo existente
+           'TIPO DE DISC' => 'tipo_discapacidad', // Duplicado, se usa el anterior
+           'DESCUENTO' => 'descuento', // Mapear a nuevo campo
+           'ESTATUS' => 'activo', // Mapear a campo existente (activo)
+           'AÑO' => 'anio', // Mapear a nuevo campo
+           'PAQUETE' => 'paquete', // Mapear a nuevo campo
+           'TAGS' => 'tags_csv', // Campo especial para procesar tags
        ];
 
        while (($row = fgetcsv($handle, 0, ',')) !== FALSE) {
@@ -425,17 +450,106 @@ class Directorio extends BaseController
                }
            }
 
+           // Procesar FECHA DE NACIMIENTO si existe
+           if (isset($rowData['FECHA DE NACIMIENTO'])) {
+               $dataToInsert['fecha_nacimiento'] = $this->excelSerialDateToDate($rowData['FECHA DE NACIMIENTO']);
+           }
+
            // Campos adicionales que no vienen en el CSV pero son requeridos o tienen valores por defecto
-           $dataToInsert['nombre'] = $rowData['NOM_DEL'] ?? 'N/A'; // O algún valor por defecto
-           $dataToInsert['primer_apellido'] = $rowData['NOM_LOC'] ?? 'N/A'; // O algún valor por defecto
-           $dataToInsert['tipo_red'] = 'CDN'; // Valor por defecto, ajustar si el CSV lo provee
+           $dataToInsert['tipo_red'] = $dataToInsert['tipo_red'] ?? 'CDN'; // Valor por defecto, ajustar si el CSV lo provee
            $dataToInsert['codigo_ciudadano'] = 'CDZ-' . uniqid(); // Generar un código único
 
-           // Validar y guardar
-           if ($this->directorioModel->insert($dataToInsert)) {
-               $insertedCount++;
+           // Asegurarse de que 'activo' sea 0 o 1
+           if (isset($rowData['ESTATUS'])) { // Usar la columna 'ESTATUS' del CSV
+               $dataToInsert['activo'] = (strtolower($rowData['ESTATUS']) === 'activo' || $rowData['ESTATUS'] === '1') ? 1 : 0;
            } else {
-               $errors[] = "Error al insertar la fila: " . implode(',', $row) . " - Errores: " . json_encode($this->directorioModel->errors());
+               $dataToInsert['activo'] = 1; // Por defecto activo
+           }
+
+           // Asegurarse de que 'descuento' sea 0 o 1
+           if (isset($rowData['DESCUENTO'])) { // Usar la columna 'DESCUENTO' del CSV
+               $dataToInsert['descuento'] = (strtolower($rowData['DESCUENTO']) === 'si' || $rowData['DESCUENTO'] === '1') ? 1 : 0;
+           } else {
+               $dataToInsert['descuento'] = 0; // Por defecto sin descuento
+           }
+
+           // Convertir tarifa a float si existe
+           if (isset($dataToInsert['tarifa'])) {
+               $dataToInsert['tarifa'] = (float) str_replace(',', '', $dataToInsert['tarifa']);
+           }
+
+           // Verificar si el ciudadano ya existe por CURP
+           $existingCitizen = null;
+           if (isset($dataToInsert['curp']) && !empty($dataToInsert['curp'])) {
+               $existingCitizen = $this->directorioModel->where('curp', $dataToInsert['curp'])->first();
+           }
+
+           $citizenId = null;
+           $operation = '';
+
+           if ($existingCitizen) {
+               // Actualizar registro existente
+               $citizenId = $existingCitizen['id'];
+               $dataToInsert['id'] = $citizenId; // Asegurar que el ID esté presente para la actualización
+               // No generar un nuevo codigo_ciudadano si ya existe
+               unset($dataToInsert['codigo_ciudadano']);
+
+               if ($this->directorioModel->update($citizenId, $dataToInsert)) {
+                   $insertedCount++;
+                   $operation = 'actualizado';
+               } else {
+                   $errors[] = "Error al actualizar la fila (CURP: {$dataToInsert['curp']}): " . implode(',', $row) . " - Errores: " . json_encode($this->directorioModel->errors());
+               }
+           } else {
+               // Insertar nuevo registro
+               // Generar un nuevo codigo_ciudadano solo para nuevas inserciones
+               $dataToInsert['codigo_ciudadano'] = 'CDZ-' . uniqid();
+               if ($this->directorioModel->insert($dataToInsert)) {
+                   $citizenId = $this->directorioModel->getInsertID();
+                   $insertedCount++;
+                   $operation = 'insertado';
+               } else {
+                   $errors[] = "Error al insertar la fila: " . implode(',', $row) . " - Errores: " . json_encode($this->directorioModel->errors());
+               }
+           }
+
+           // Si la operación fue exitosa (inserción o actualización), procesar tags
+           if ($citizenId) {
+               // Lógica para generar y asociar tags
+               $tagsToAssociate = [];
+
+               // Tags basados en EDAD
+               if (isset($dataToInsert['edad']) && is_numeric($dataToInsert['edad'])) {
+                   $edad = (int) $dataToInsert['edad'];
+                   if ($edad < 18) {
+                       $tagsToAssociate[] = 'Joven';
+                   } elseif ($edad >= 18 && $edad < 60) {
+                       $tagsToAssociate[] = 'Adulto';
+                   } else {
+                       $tagsToAssociate[] = 'Adulto Mayor';
+                   }
+               }
+
+               // Tags del CSV (columna 'TAGS')
+               if (isset($rowData['TAGS']) && !empty($rowData['TAGS'])) {
+                   $csvTags = explode(',', $rowData['TAGS']);
+                   foreach ($csvTags as $csvTag) {
+                       $tagsToAssociate[] = trim($csvTag);
+                   }
+               }
+
+               // Procesar y asociar tags
+               // Primero, eliminar tags existentes para este ciudadano si es una actualización
+               if ($operation === 'actualizado') {
+                   $this->directorioTagsModel->where('directorio_id', $citizenId)->delete();
+               }
+
+               foreach (array_unique($tagsToAssociate) as $tagName) {
+                   if (!empty($tagName)) {
+                       $tagId = $this->tagsModel->getOrCreateTag($tagName);
+                       $this->directorioTagsModel->addTagToDirectorio($citizenId, $tagId);
+                   }
+               }
            }
        }
 
@@ -448,5 +562,19 @@ class Directorio extends BaseController
        }
 
        return redirect()->to('/directorio');
+   }
+
+   // Función auxiliar para convertir número de serie de Excel a fecha Y-m-d
+   private function excelSerialDateToDate($serial): ?string
+   {
+       if (!is_numeric($serial) || $serial <= 0) {
+           return null;
+       }
+       // Excel base date is 1899-12-30 for Windows, 1904-01-01 for Mac.
+       // Assuming Windows base date for now.
+       // 25569 is the number of days between 1900-01-01 and 1970-01-01 (Unix epoch)
+       // Excel day 1 is 1900-01-01. PHP's date() starts from Unix epoch.
+       $unixTimestamp = ($serial - 25569) * 86400;
+       return date('Y-m-d', $unixTimestamp);
    }
 }

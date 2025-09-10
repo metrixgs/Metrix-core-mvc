@@ -159,6 +159,7 @@
                                 <th style="width: 150px;">Residencia</th>
                                 <th style="width: 100px;">Líder</th>
                                 <th style="width: 100px;">Enlace</th>
+                                <th style="width: 150px;">Tags</th> <!-- Nueva columna para Tags -->
                                 <th style="width: 120px; text-align: center;">Acciones</th>
                             </tr>
                         </thead>
@@ -174,7 +175,7 @@
                                     <tr>
                                         <td class="text-center fw-bold"><?= $startIndex + $i ?></td>
                                         <td class="text-center">
-                                      <?php 
+                                      <?php
     $tipo = $c['tipo_red'] ?? '—';
     switch ($tipo) {
         case 'CDN': $colorClass = 'bg-success'; break;
@@ -214,6 +215,15 @@
                                         <td>
                                             <small class="text-muted"><?= esc($c['cargo'] ?? '—') ?></small>
                                         </td>
+                                        <td>
+                                            <?php if (!empty($c['tags_asociados'])): ?>
+                                                <?php foreach (explode(', ', $c['tags_asociados']) as $tag): ?>
+                                                    <span class="badge bg-info text-white me-1 mb-1"><?= esc($tag) ?></span>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                &mdash;
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center align-items-center gap-3">
                                                
@@ -241,7 +251,7 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="10" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
+                                    <td colspan="11" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
