@@ -223,6 +223,9 @@
                                             <?php else: ?>
                                                 &mdash;
                                             <?php endif; ?>
+                                            <a href="<?= base_url('directorio/editarTags/' . $c['id']) ?>" class="btn btn-sm btn-outline-primary mt-1" title="Editar Tags">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center align-items-center gap-3">
@@ -251,7 +254,7 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="11" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
+                                    <td colspan="12" class="text-center py-5 text-muted">No hay ciudadanos registrados.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

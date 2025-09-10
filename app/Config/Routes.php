@@ -186,6 +186,9 @@ $routes->get('/directorio/editar/(:num)', 'Directorio::editar/$1');
 $routes->post('/directorio/actualizar/(:num)', 'Directorio::actualizar/$1');
 $routes->post('/directorio/importarCsv', 'Directorio::importarCsv');
 
+$routes->get('/directorio/editarTags/(:num)', 'Directorio::editarTags/$1'); // Nueva ruta para editar tags
+$routes->post('/directorio/guardarTags/(:num)', 'Directorio::guardarTags/$1'); // Nueva ruta para guardar tags
+
 $routes->post('directorio/eliminar/(:num)', 'Directorio::eliminar/$1');
 
 

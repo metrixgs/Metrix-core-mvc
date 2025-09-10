@@ -96,32 +96,32 @@ class Directorio extends BaseController
         $validation = \Config\Services::validation();
 
         $rules = [
-            'nombre'             => 'required|min_length[3]|max_length[100]',
-            'primer_apellido'    => 'permit_empty|max_length[100]',
-            'segundo_apellido'   => 'permit_empty|max_length[100]',
-            'curp'               => 'permit_empty|exact_length[18]',
+            'nombre'             => 'required|min_length|max_length',
+            'primer_apellido'    => 'permit_empty|max_length',
+            'segundo_apellido'   => 'permit_empty|max_length',
+            'curp'               => 'permit_empty|exact_length',
             'fecha_nacimiento'   => 'permit_empty|valid_date[Y-m-d]',
-            'residencia'         => 'permit_empty|max_length[255]',
-            'email'              => 'permit_empty|valid_email|max_length[150]',
-            'telefono'           => 'permit_empty|max_length[50]',
-            'direccion'          => 'permit_empty|max_length[255]',
-            'estado'             => 'permit_empty|max_length[100]',
-            'municipio'          => 'permit_empty|max_length[100]',
-            'localidad'          => 'permit_empty|max_length[100]',
-            'colonia'            => 'permit_empty|max_length[100]',
-            'calle'              => 'permit_empty|max_length[100]',
-            'numero_exterior'    => 'permit_empty|max_length[20]',
-            'numero_interior'    => 'permit_empty|max_length[20]',
-            'codigo_postal'      => 'permit_empty|max_length[10]',
-            'empresa'            => 'permit_empty|max_length[100]',
-            'cargo'              => 'permit_empty|max_length[100]',
-            'tipo_cliente'       => 'permit_empty|max_length[50]',
-            'nivel_estudios'     => 'permit_empty|max_length[100]',
-            'ocupacion'          => 'permit_empty|max_length[100]',
-            'tipo_discapacidad'  => 'permit_empty|max_length[100]',
-            'grupo_etnico'       => 'permit_empty|max_length[100]',
-            'acepta_avisos'      => 'permit_empty|in_list[0,1]',
-            'acepta_terminos'    => 'permit_empty|in_list[0,1]',
+            'residencia'         => 'permit_empty|max_length',
+            'email'              => 'permit_empty|valid_email|max_length',
+            'telefono'           => 'permit_empty|max_length',
+            'direccion'          => 'permit_empty|max_length',
+            'estado'             => 'permit_empty|max_length',
+            'municipio'          => 'permit_empty|max_length',
+            'localidad'          => 'permit_empty|max_length',
+            'colonia'            => 'permit_empty|max_length',
+            'calle'              => 'permit_empty|max_length',
+            'numero_exterior'    => 'permit_empty|max_length',
+            'numero_interior'    => 'permit_empty|max_length',
+            'codigo_postal'      => 'permit_empty|max_length',
+            'empresa'            => 'permit_empty|max_length',
+            'cargo'              => 'permit_empty|max_length',
+            'tipo_cliente'       => 'permit_empty|max_length',
+            'nivel_estudios'     => 'permit_empty|max_length',
+            'ocupacion'          => 'permit_empty|max_length',
+            'tipo_discapacidad'  => 'permit_empty|max_length',
+            'grupo_etnico'       => 'permit_empty|max_length',
+            'acepta_avisos'      => 'permit_empty|in_list',
+            'acepta_terminos'    => 'permit_empty|in_list',
             'id_lider'           => 'permit_empty|is_natural',
             'tipo_red'           => 'required|in_list[CDN,BNF,RED,EMP]',
             'latitud'            => 'permit_empty|decimal',
@@ -209,34 +209,34 @@ class Directorio extends BaseController
         $validation = \Config\Services::validation();
 
         $rules = [
-            'nombre'             => 'required|min_length[3]|max_length[100]',
-            'primer_apellido'    => 'permit_empty|max_length[100]',
-            'segundo_apellido'   => 'permit_empty|max_length[100]',
-            'curp'               => 'permit_empty|exact_length[18]',
+            'nombre'             => 'required|min_length|max_length',
+            'primer_apellido'    => 'permit_empty|max_length',
+            'segundo_apellido'   => 'permit_empty|max_length',
+            'curp'               => 'permit_empty|exact_length',
             'old_curp'           => 'permit_empty',
             'fecha_nacimiento'   => 'permit_empty|valid_date[Y-m-d]',
-            'residencia'         => 'permit_empty|max_length[255]',
-            'email'              => 'permit_empty|valid_email|max_length[150]',
-            'telefono'           => 'permit_empty|max_length[50]',
-            'direccion'          => 'permit_empty|max_length[255]',
-            'estado'             => 'permit_empty|max_length[100]',
-            'municipio'          => 'permit_empty|max_length[100]',
-            'localidad'          => 'permit_empty|max_length[100]',
-            'colonia'            => 'permit_empty|max_length[100]',
-            'calle'              => 'permit_empty|max_length[100]',
-            'numero_exterior'    => 'permit_empty|max_length[20]',
-            'numero_interior'    => 'permit_empty|max_length[20]',
-            'codigo_postal'      => 'permit_empty|max_length[10]',
-            'empresa'            => 'permit_empty|max_length[100]',
-            'cargo'              => 'permit_empty|max_length[100]',
-            'tipo_cliente'       => 'permit_empty|max_length[50]',
-            'nivel_estudios'     => 'permit_empty|max_length[100]',
-            'ocupacion'          => 'permit_empty|max_length[100]',
-            'tipo_discapacidad'  => 'permit_empty|max_length[100]',
-            'grupo_etnico'       => 'permit_empty|max_length[100]',
-            'acepta_avisos'      => 'permit_empty|in_list[0,1]',
-            'acepta_terminos'    => 'permit_empty|in_list[0,1]',
-            'activo'             => 'permit_empty|in_list[0,1]',
+            'residencia'         => 'permit_empty|max_length',
+            'email'              => 'permit_empty|valid_email|max_length',
+            'telefono'           => 'permit_empty|max_length',
+            'direccion'          => 'permit_empty|max_length',
+            'estado'             => 'permit_empty|max_length',
+            'municipio'          => 'permit_empty|max_length',
+            'localidad'          => 'permit_empty|max_length',
+            'colonia'            => 'permit_empty|max_length',
+            'calle'              => 'permit_empty|max_length',
+            'numero_exterior'    => 'permit_empty|max_length',
+            'numero_interior'    => 'permit_empty|max_length',
+            'codigo_postal'      => 'permit_empty|max_length',
+            'empresa'            => 'permit_empty|max_length',
+            'cargo'              => 'permit_empty|max_length',
+            'tipo_cliente'       => 'permit_empty|max_length',
+            'nivel_estudios'     => 'permit_empty|max_length',
+            'ocupacion'          => 'permit_empty|max_length',
+            'tipo_discapacidad'  => 'permit_empty|max_length',
+            'grupo_etnico'       => 'permit_empty|max_length',
+            'acepta_avisos'      => 'permit_empty|in_list',
+            'acepta_terminos'    => 'permit_empty|in_list',
+            'activo'             => 'permit_empty|in_list',
             'id_lider'           => 'permit_empty|is_natural',
             'tipo_red'           => 'required|in_list[CDN,BNF,RED,EMP]',
             'latitud'            => 'permit_empty|decimal',
@@ -355,6 +355,62 @@ class Directorio extends BaseController
              . view('incl/footer-application', $data)
              . view('incl/scripts-application', $data);
    }
+
+    public function editarTags($id = null)
+    {
+        $citizen = $this->directorioModel->find($id);
+
+        if (!$citizen) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('No se encontró el ciudadano con ID ' . $id);
+        }
+
+        // Obtener todos los tags disponibles
+        $allTags = $this->tagsModel->findAll();
+
+        // Obtener los tags actuales del ciudadano
+        $currentTags = $this->directorioTagsModel
+                            ->select('tags.id, tags.nombre')
+                            ->join('tags', 'tags.id = directorio_tags.tag_id')
+                            ->where('directorio_id', $id)
+                            ->findAll();
+        
+        $currentTagIds = array_column($currentTags, 'id');
+
+        $data = [
+            'citizen' => $citizen,
+            'allTags' => $allTags,
+            'currentTagIds' => $currentTagIds,
+            'titulo_pagina' => 'Directorio | Editar Tags'
+        ];
+
+        return view('incl/head-application', $data)
+             . view('incl/header-application', $data)
+             . view('incl/menu-admin', $data)
+             . view('directorio/editar_tags', $data)
+             . view('incl/footer-application', $data)
+             . view('incl/scripts-application', $data);
+    }
+
+    public function guardarTags($id = null)
+    {
+        $citizen = $this->directorioModel->find($id);
+
+        if (!$citizen) {
+            return redirect()->back()->with('error', 'Ciudadano no encontrado.');
+        }
+
+        $selectedTagIds = $this->request->getPost('tags') ?? [];
+
+        // Eliminar tags existentes para este ciudadano
+        $this->directorioTagsModel->where('directorio_id', $id)->delete();
+
+        // Asociar los nuevos tags
+        foreach ($selectedTagIds as $tagId) {
+            $this->directorioTagsModel->addTagToDirectorio($id, (int) $tagId);
+        }
+
+        return redirect()->to('/directorio')->with('mensaje', 'Tags actualizados con éxito para ' . $citizen['nombre']);
+    }
 
    public function importarCsv()
    {
