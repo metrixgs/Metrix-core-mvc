@@ -109,7 +109,7 @@
 <div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-success text-white"> <!-- Cambiado a bg-success -->
                 <h5 class="modal-title" id="importCsvModalLabel"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Importar Ciudadanos desde CSV</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -125,13 +125,13 @@
                         <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-2"></i>Formato del CSV esperado:</h6>
                         <p class="mb-0">Las columnas deben coincidir con los campos de la base de datos. El orden no importa, pero los nombres de las columnas sí.</p>
                         <ul class="mt-2 mb-0 small">
-                            <li><code>ID_DEL</code>, <code>NOM_DEL</code>, <code>CVE_LOC</code>, <code>NOM_LOC</code>, <code>ID_COL</code>, <code>NOM_COL</code>, <code>CVE_AGEB</code>, <code>CVE_MZA</code>, <code>CU_MZA</code>, <code>CVE_CAT</code>, <code>CALLE</code>, <code>NUM_EXT</code>, <code>NO_INT</code>, <code>LETRA</code>, <code>COLONIA</code>, <code>TIPO</code>, <code>ZONA</code>, <code>SECTOR</code>, <code>DISTRITO_F</code>, <code>DISTRITO_L</code>, <code>SECCION</code>, <code>CIRCUITO</code>, <code>DISTRITO_J</code>, <code>LAT</code>, <code>LON</code></li>
+                            <li><code>NOMBRE(S) DE PILA</code>, <code>APELLIDO PATERNO</code>, <code>APELLIDO MATERNO</code>, <code>GENERO</code>, <code>LIDERAZGO</code>, <code>COORDINADOR</code>, <code>EDAD</code>, <code>TELEFONO</code>, <code>CURP (18 DIGITOS)</code>, <code>CLAVE DE ELECTOR (18 DIGITOS)</code>, <code>FECHA DE NACIMIENTO</code>, <code>SECCION</code>, <code>VIGENCIA</code>, <code>CALLE</code>, <code>NO. EXTERIOR</code>, <code>NO. INTERIOR</code>, <code>COLONIA</code>, <code>CODIGO POSTAL</code>, <code>DELEGACION</code>, <code>DIRECCION</code>, <code>MUNICIPIO</code>, <code>ESTADO</code>, <code>LATITUD</code>, <code>LONGITUD</code>, <code>TIPO DE SANGRE</code>, <code>SERVICIOS</code>, <code>TARIFA</code>, <code>CATEGORIA</code>, <code>DIAS</code>, <code>HORARIOS</code>, <code>DISCAPACIDAD</code>, <code>TIPO DE DISC</code>, <code>DESCUENTO</code>, <code>ESTATUS</code>, <code>AÑO</code>, <code>PAQUETE</code>, <code>TAGS</code></li>
                         </ul>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up me-2"></i>Importar</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-cloud-arrow-up me-2"></i>Importar</button> <!-- Cambiado a btn-success -->
                 </div>
             </form>
         </div>
