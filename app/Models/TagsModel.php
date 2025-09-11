@@ -69,11 +69,12 @@ class TagsModel extends Model
      *
      * @param string $territoryType Tipo de territorio (ej. 'municipio', 'delegacion').
      * @param array $territoryIds IDs de los territorios seleccionados.
+     * @param string|null $polygonGeoJson Geometría del polígono en formato GeoJSON (cadena JSON).
      * @return array
      */
-    public function getTagsWithUserCountsByTerritory(string $territoryType, array $territoryIds): array
+    public function getTagsWithUserCountsByTerritory(string $territoryType, array $territoryIds, ?string $polygonGeoJson = null): array
     {
-        if (empty($territoryIds)) {
+        if (empty($territoryIds) && empty($polygonGeoJson)) {
             return [];
         }
 
@@ -82,18 +83,72 @@ class TagsModel extends Model
         $builder->join('directorio_tags', 'directorio_tags.tag_id = tags.id');
         $builder->join('directorio', 'directorio.id = directorio_tags.directorio_id');
         
-        // Condición dinámica para filtrar por tipo de territorio
-        if ($territoryType === 'municipio') {
-            $builder->whereIn('directorio.municipio', $territoryIds);
-        } elseif ($territoryType === 'delegacion') {
-            $builder->whereIn('directorio.id_del', $territoryIds);
+        // Filtrar por territorio si se proporcionan IDs
+        if (!empty($territoryIds)) {
+            if ($territoryType === 'municipio') {
+                $builder->whereIn('directorio.municipio', $territoryIds);
+            } elseif ($territoryType === 'delegacion') {
+                $builder->whereIn('directorio.id_del', $territoryIds);
+            }
+            // Puedes añadir más casos para otros tipos de territorio si es necesario
         }
-        // Puedes añadir más casos para otros tipos de territorio si es necesario
+
+        // Filtrar por geometría del polígono si se proporciona
+        if (!empty($polygonGeoJson)) {
+            $geojsonObject = json_decode(urldecode($polygonGeoJson), true);
+            if ($geojsonObject && isset($geojsonObject['features'][0]['geometry'])) {
+                $geometry = $geojsonObject['features'][0]['geometry'];
+                $wktPolygon = $this->_convertGeoJsonToWKT($geometry);
+                if ($wktPolygon) {
+                    $builder->where("ST_CONTAINS(ST_GeomFromText('{$wktPolygon}'), POINT(directorio.longitud, directorio.latitud))");
+                }
+            }
+        }
         
         $builder->groupBy('tags.id, tags.nombre, tags.slug');
         $builder->orderBy('tags.nombre', 'ASC');
 
         $query = $builder->get();
         return $query->getResultArray();
+    }
+
+    /**
+     * Convierte un objeto GeoJSON de tipo Polygon o MultiPolygon a formato WKT.
+     *
+     * @param array $geometry Objeto GeoJSON de geometría.
+     * @return string|null WKT del polígono o null si el formato no es soportado.
+     */
+    private function _convertGeoJsonToWKT(array $geometry): ?string
+    {
+        $type = $geometry['type'] ?? '';
+        $coordinates = $geometry['coordinates'] ?? [];
+
+        if ($type === 'Polygon' && !empty($coordinates)) {
+            $rings = [];
+            foreach ($coordinates as $ring) {
+                $points = [];
+                foreach ($ring as $coord) {
+                    $points[] = "{$coord[0]} {$coord[1]}"; // Longitud Latitud
+                }
+                $rings[] = '(' . implode(', ', $points) . ')';
+            }
+            return 'POLYGON(' . implode(', ', $rings) . ')';
+        } elseif ($type === 'MultiPolygon' && !empty($coordinates)) {
+            $polygons = [];
+            foreach ($coordinates as $polygon) {
+                $rings = [];
+                foreach ($polygon as $ring) {
+                    $points = [];
+                    foreach ($ring as $coord) {
+                        $points[] = "{$coord[0]} {$coord[1]}"; // Longitud Latitud
+                    }
+                    $rings[] = '(' . implode(', ', $points) . ')';
+                }
+                $polygons[] = '(' . implode(', ', $rings) . ')';
+            }
+            return 'MULTIPOLYGON(' . implode(', ', $polygons) . ')';
+        }
+
+        return null;
     }
 }

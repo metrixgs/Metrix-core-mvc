@@ -887,6 +887,7 @@ public function rondas($campana_id)
         try {
             $territorioType = $this->request->getGet('territorio_type');
             $territorioIds = $this->request->getGet('territorio_ids'); // Esto será una cadena CSV
+            $polygonGeoJson = $this->request->getGet('polygon_geojson'); // Nueva variable para la geometría del polígono
 
             $tagModel = new \App\Models\TagsModel();
             $formattedTags = [];
@@ -896,7 +897,7 @@ public function rondas($campana_id)
                 // Asegurarse de que los IDs sean enteros para la consulta
                 $idsArray = array_map('intval', $idsArray);
 
-                $filteredTags = $tagModel->getTagsWithUserCountsByTerritory($territorioType, $idsArray);
+                $filteredTags = $tagModel->getTagsWithUserCountsByTerritory($territorioType, $idsArray, $polygonGeoJson);
                 foreach ($filteredTags as $tagInfo) {
                     $formattedTags[] = [
                         'id'         => $tagInfo['id'],

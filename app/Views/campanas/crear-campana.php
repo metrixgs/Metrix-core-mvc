@@ -373,6 +373,7 @@ jQuery(document).ready(function($) {
     var map;
     var currentGeoJsonLayer;
     var selectedPolygons = []; // Para almacenar los polígonos seleccionados
+    var selectedPolygonGeoJson = null; // Para almacenar la geometría del polígono seleccionado
 
     if ($.fn.select2) {
       $('.select2').select2({ width: '100%' });
@@ -566,6 +567,12 @@ jQuery(document).ready(function($) {
       params.push('territorio_type=' + selectedTerritorioType);
       params.push('territorio_ids=' + selectedTerritorioIds.join(','));
     }
+
+    // Añadir la geometría del polígono si está disponible
+    if (selectedPolygonGeoJson) {
+      params.push('polygon_geojson=' + encodeURIComponent(JSON.stringify(selectedPolygonGeoJson)));
+    }
+    
     params.push('debug=1'); // Mantener el parámetro debug
 
     if (params.length > 0) {
@@ -707,6 +714,7 @@ jQuery(document).ready(function($) {
 
       if (!geoJsonData || !geoJsonData.features) {
         console.warn("No se proporcionaron datos GeoJSON válidos para filtrar.");
+        selectedPolygonGeoJson = null; // Limpiar la geometría si no hay datos
         return;
       }
 
@@ -720,8 +728,15 @@ jQuery(document).ready(function($) {
 
       if (currentGeoJsonLayer.getLayers().length > 0) {
         map.fitBounds(currentGeoJsonLayer.getBounds());
+        // Almacenar la geometría del primer polígono filtrado (o el conjunto si es multipolígono)
+        if (filteredFeatures.features.length > 0) {
+          selectedPolygonGeoJson = filteredFeatures; // Almacenar toda la FeatureCollection
+        } else {
+          selectedPolygonGeoJson = null;
+        }
       } else {
         map.setView([23.6345, -102.5528], 5);
+        selectedPolygonGeoJson = null; // Limpiar la geometría si no hay capas
       }
     }
 
