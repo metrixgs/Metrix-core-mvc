@@ -220,6 +220,11 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             </div>
                             <div class="card-body p-0">
                                 <div id="map" style="height: 300px;"></div>
+                                <?php if (!empty($campana['territorio'])): ?>
+                                    <div class="alert alert-info m-2 p-2 text-center" role="alert">
+                                        <strong>Territorio:</strong> <?= esc($campana['territorio']) ?>
+                                    </div>
+                                <?php endif; ?>
                                 <div id="mapError" class="alert alert-warning d-none m-2" role="alert">
                                     No se pudieron cargar los datos geográficos para esta campaña.
                                 </div>
