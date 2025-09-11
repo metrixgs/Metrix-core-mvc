@@ -147,10 +147,10 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                         <label class="form-label">Territorio:</label>
                                         <p class="form-control-plaintext">
                                             <?php if (!empty($campana['territorio_subtype'])): ?>
-                                                <span class="badge bg-secondary me-1"><?= esc($campana['territorio_subtype']) ?></span>
+                                                <div class="badge bg-success d-inline-block py-2 px-3 mb-1 me-1"><?= esc($campana['territorio_subtype']) ?></div>
                                             <?php endif; ?>
                                             <?php if (!empty($campana['territorio'])): ?>
-                                                <span class="badge bg-info"><?= esc($campana['territorio']) ?></span>
+                                                <div class="badge bg-success d-inline-block py-2 px-3 mb-1"><?= esc($campana['territorio']) ?></div>
                                             <?php endif; ?>
                                             <?php if (empty($campana['territorio']) && empty($campana['territorio_subtype'])): ?>
                                                 No especificado
@@ -163,7 +163,7 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                         <label class="form-label">Sectorización:</label>
                                         <p class="form-control-plaintext">
                                             <?php if (!empty($campana['sectorizacion'])): ?>
-                                                <span class="badge bg-primary"><?= esc($campana['sectorizacion']) ?></span>
+                                                <div class="badge bg-success d-inline-block py-2 px-3 mb-1"><?= esc($campana['sectorizacion']) ?></div>
                                             <?php else: ?>
                                                 No especificado
                                             <?php endif; ?>
