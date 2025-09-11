@@ -114,16 +114,10 @@
             <!-- Contenedores dinámicos para los selectores de segmentación -->
             <div id="segmentacion_colonia_container" class="mb-3" style="display: none;">
               <label class="form-label fw-semibold text-success-salvador">Colonia/Localidad</label>
-              <select class="form-select select2 border-success-salvador" id="delegaciones_colonias_filtro" name="delegaciones_colonias_filtro[]" multiple="multiple">
-                <option value="" disabled selected>Selecciona un territorio primero</option>
-              </select>
             </div>
 
             <div id="segmentacion_seccion_electoral_container" class="mb-3" style="display: none;">
               <label class="form-label fw-semibold text-success-salvador">Sección Electoral</label>
-              <select class="form-select select2 border-success-salvador" id="seccion_electoral_filtro" name="seccion_electoral_filtro[]" multiple="multiple">
-                <option value="" disabled selected>API en construcción</option>
-              </select>
             </div>
           </div>
         </div>
@@ -901,10 +895,8 @@ jQuery(document).ready(function($) {
       $segmentacionSeccionElectoralContainer.hide();
 
       // Limpiar selects de segmentación
-      $delegacionesColoniasFiltro.empty().prop('disabled', true);
-      $seccionElectoralFiltro.empty().prop('disabled', true);
-      initSelect2($delegacionesColoniasFiltro, 'Selecciona un territorio primero', true);
-      initSelect2($seccionElectoralFiltro, 'Selecciona un territorio primero', true);
+      // Los selects de segmentación ya no existen, solo se ocultan/muestran los contenedores.
+      // No es necesario interactuar con ellos directamente aquí.
 
       var selectedTerritorioType = $territorioSelector.val();
       var parentIds = [];
@@ -929,15 +921,13 @@ jQuery(document).ready(function($) {
         switch (selectedSegmentacionType) {
           case 'colonia':
             $segmentacionColoniaContainer.show();
-            loadApiDataAndPopulateSelect(API_URLS.colonias, $delegacionesColoniasFiltro, 'Colonias/Localidades', 'id', 'nom_col', parentIds, 'cve_mun'); // Asumiendo cve_mun como parentIdProperty
-            // Si ya hay municipios seleccionados, forzar la actualización de colonias
-            if ($municipiosFiltro.val() && $municipiosFiltro.val().length > 0) {
-              $municipiosFiltro.trigger('change');
-            }
+            $delegacionesColoniasFiltro.empty().append('<option value="" disabled selected>Se segmentará por colonias</option>');
+            initSelect2($delegacionesColoniasFiltro, 'Se segmentará por colonias', true);
             break;
           case 'seccion_electoral':
             $segmentacionSeccionElectoralContainer.show();
-            loadApiDataAndPopulateSelect(API_URLS.seccion_electoral, $seccionElectoralFiltro, 'Sección Electoral', 'id', 'nombre', parentIds, 'parent_id'); // Asumiendo 'nombre' y 'parent_id'
+            $seccionElectoralFiltro.empty().append('<option value="" disabled selected>Se segmentará por sección electoral</option>');
+            initSelect2($seccionElectoralFiltro, 'Se segmentará por sección electoral', true);
             break;
         }
       } else if (selectedSegmentacionType && (!parentIds || parentIds.length === 0)) {
@@ -945,31 +935,25 @@ jQuery(document).ready(function($) {
         // Mostrar mensaje de "Selecciona un territorio primero"
         if (selectedSegmentacionType === 'colonia') {
           $segmentacionColoniaContainer.show();
-          $delegacionesColoniasFiltro.empty().append('<option value="" disabled selected>Selecciona un territorio primero</option>');
-          initSelect2($delegacionesColoniasFiltro, 'Selecciona un territorio primero', true);
+          // Ya no hay un select para inicializar, solo se muestra el contenedor.
         } else if (selectedSegmentacionType === 'seccion_electoral') {
           $segmentacionSeccionElectoralContainer.show();
-          $seccionElectoralFiltro.empty().append('<option value="" disabled selected>Selecciona un territorio primero</option>');
-          initSelect2($seccionElectoralFiltro, 'Selecciona un territorio primero', true);
+          // Ya no hay un select para inicializar, solo se muestra el contenedor.
         }
       }
     });
 
-    // Manejar el cambio en los selectores de territorio para cargar segmentación
-    // Esto es crucial para que al cambiar un municipio, se actualicen las colonias si "Colonia" está seleccionada en Segmentación
+    // Manejar el cambio en los selectores de territorio para actualizar el mapa
+    // La carga de segmentación por API se ha eliminado según las nuevas instrucciones.
     $municipiosFiltro.on('change', function() {
       var selectedTerritorioType = $territorioSelector.val();
       var selectedSegmentacionType = $segmentacionSelector.val();
       var selectedMunicipioIds = $(this).val();
 
+      // Si la segmentación es por colonia, no se carga API, solo se actualiza el mensaje si es necesario
       if (selectedTerritorioType === 'municipio' && selectedSegmentacionType === 'colonia') {
-        $delegacionesColoniasFiltro.empty().prop('disabled', true);
-        initSelect2($delegacionesColoniasFiltro, 'Cargando Colonias/Localidades...', true);
-        if (selectedMunicipioIds && selectedMunicipioIds.length > 0) {
-          loadApiDataAndPopulateSelect(API_URLS.colonias, $delegacionesColoniasFiltro, 'Colonias/Localidades', 'id', 'nom_col', selectedMunicipioIds, 'cve_mun');
-        } else {
-          initSelect2($delegacionesColoniasFiltro, 'Selecciona un municipio primero', true);
-        }
+        // No hacer nada aquí, el mensaje ya se estableció en el evento change del segmentacionSelector
+        // o se establecerá si se cambia el tipo de segmentación.
       }
       // Actualizar el mapa con los municipios seleccionados
       if (allMunicipiosData) {
