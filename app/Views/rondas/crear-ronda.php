@@ -144,22 +144,32 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="territorio" class="form-label">Territorio:</label>
-                                        <select name="territorio" id="territorio" class="form-select select2">
-                                            <option value="" disabled selected hidden>Seleccione territorio</option>
-                                            <?php foreach($territorios as $terr): ?>
-                                                <option value="<?= esc($terr['id']) ?>" <?= old('territorio') == $terr['id'] ? 'selected' : '' ?>><?= esc($terr['nombre']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <label class="form-label">Territorio:</label>
+                                        <p class="form-control-plaintext">
+                                            <?php if (!empty($campana['territorio_subtype'])): ?>
+                                                <span class="badge bg-secondary me-1"><?= esc($campana['territorio_subtype']) ?></span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($campana['territorio'])): ?>
+                                                <span class="badge bg-info"><?= esc($campana['territorio']) ?></span>
+                                            <?php endif; ?>
+                                            <?php if (empty($campana['territorio']) && empty($campana['territorio_subtype'])): ?>
+                                                No especificado
+                                            <?php endif; ?>
+                                        </p>
+                                        <input type="hidden" name="territorio" value="<?= esc($campana['territorio'] ?? '') ?>">
+                                        <input type="hidden" name="nombre_territorio" value="<?= esc($campana['territorio_subtype'] ?? '') ?>">
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="sectorizacion" class="form-label">Sectorización:</label>
-                                        <select name="sectorizacion" id="sectorizacion" class="form-select select2">
-                                            <option value="" disabled selected hidden>Seleccione sectorización</option>
-                                            <?php foreach($segmentaciones as $seg): ?>
-                                                <option value="<?= esc($seg['id']) ?>" <?= old('sectorizacion') == $seg['id'] ? 'selected' : '' ?>><?= esc($seg['descripcion']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <label class="form-label">Sectorización:</label>
+                                        <p class="form-control-plaintext">
+                                            <?php if (!empty($campana['sectorizacion'])): ?>
+                                                <span class="badge bg-primary"><?= esc($campana['sectorizacion']) ?></span>
+                                            <?php else: ?>
+                                                No especificado
+                                            <?php endif; ?>
+                                        </p>
+                                        <input type="hidden" name="sectorizacion" value="<?= esc($campana['sectorizacion'] ?? '') ?>">
+                                        <input type="hidden" name="nombre_sectorizacion" value="<?= esc($campana['sectorizacion'] ?? '') ?>">
                                     </div>
                                     <div class="col-md-12 mt-3">
                                         <label class="form-label fw-semibold">
