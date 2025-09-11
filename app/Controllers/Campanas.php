@@ -356,10 +356,8 @@ public function rondas($campana_id)
     $entregables = $this->request->getPost('entregables');
     $universo = $this->request->getPost('universo');
     $universo_count = $this->request->getPost('universo_count'); // Nuevo campo
-    $territorio = $this->request->getPost('territorio');
-    $territorio_subtype = $this->request->getPost('territorio-electorales-subtype')
-        ?? $this->request->getPost('territorio-geograficos-subtype');
-    $sectorizacion = $this->request->getPost('sectorizacion');
+    $territorio_nombre = $this->request->getPost('territorio_nombre'); // Nuevo input
+    $territorio_tipo = $this->request->getPost('territorio_tipo');     // Nuevo input
     $poligono_geojson = $this->request->getPost('poligono_geojson'); // Obtener el GeoJSON del polígono
 
     $validationRules = [
@@ -374,10 +372,9 @@ public function rondas($campana_id)
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
         'universo_count' => 'permit_empty|numeric', // Nueva regla de validación
-        'territorio' => 'permit_empty|in_list[electorales,geograficos]',
-        'territorio_subtype' => 'permit_empty|string',
-        'sectorizacion' => 'permit_empty',
-        'poligono_geojson' => 'permit_empty|string', // Nueva regla de validación para el GeoJSON
+        'territorio_nombre' => 'permit_empty|string|max_length[255]', // Nueva regla para el nombre del territorio
+        'territorio_tipo' => 'permit_empty|string|max_length[255]',   // Nueva regla para el tipo de territorio
+        'poligono_geojson' => 'permit_empty|string',
     ];
 
     if (!empty($subtipo_id)) {
@@ -401,9 +398,9 @@ public function rondas($campana_id)
         'entregables' => $entregables ?? null,
         'universo' => $universo ?? null,
         'universo_count' => $universo_count ?? 0, // Asignar el nuevo campo
-        'territorio' => $territorio ?? null,
-        'territorio_subtype' => $territorio_subtype ?? null,
-        'sectorizacion' => is_array($sectorizacion) ? json_encode($sectorizacion) : $sectorizacion,
+        'territorio' => $territorio_nombre ?? null, // Asignar el nombre del territorio
+        'territorio_subtype' => $territorio_tipo ?? null, // Asignar el tipo de territorio
+        'sectorizacion' => $territorio_nombre ?? null, // Asignar el nombre del territorio a sectorizacion
         'objetivo' => $this->request->getPost('objetivo'),
         'sector_electoral' => $this->request->getPost('sector_electoral'),
         'territorio_local' => $this->request->getPost('territorio_local'),

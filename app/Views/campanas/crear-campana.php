@@ -12,6 +12,8 @@
   <?= csrf_field(); ?>
   <input type="hidden" name="estado" value="Programada">
   <input type="hidden" name="poligono_geojson" id="poligono_geojson_input">
+  <input type="hidden" name="territorio_nombre" id="territorio_nombre_input">
+  <input type="hidden" name="territorio_tipo" id="territorio_tipo_input">
 
   <div class="bg-light p-3 rounded shadow-sm">
     <div class="row g-3">
@@ -888,6 +890,8 @@ jQuery(document).ready(function($) {
     // Manejar el cambio en el selector de Territorio
     $territorioSelector.on('change', function() {
       var selectedTerritorioType = $(this).val();
+      $('#territorio_tipo_input').val(selectedTerritorioType); // Actualizar el input oculto con el tipo de territorio
+      $('#territorio_nombre_input').val(''); // Limpiar el nombre del territorio al cambiar el tipo
       hideAllTerritorioAndSegmentacionContainers();
       $segmentacionSelector.val('').trigger('change').prop('disabled', true); // Limpiar y deshabilitar segmentación
 
@@ -991,6 +995,13 @@ jQuery(document).ready(function($) {
       var selectedTerritorioType = $territorioSelector.val();
       var selectedSegmentacionType = $segmentacionSelector.val();
       var selectedMunicipioIds = $(this).val();
+      var selectedMunicipioNames = [];
+      $(this).find('option:selected').each(function() {
+        if ($(this).val() !== "") {
+          selectedMunicipioNames.push($(this).text());
+        }
+      });
+      $('#territorio_nombre_input').val(selectedMunicipioNames.join(', ')); // Actualizar el input oculto con los nombres
 
       // Si la segmentación es por colonia, no se carga API, solo se actualiza el mensaje si es necesario
       if (selectedTerritorioType === 'municipio' && selectedSegmentacionType === 'colonia') {
@@ -1009,6 +1020,13 @@ jQuery(document).ready(function($) {
     // Manejar el cambio en el selector de Delegaciones para actualizar el mapa
     $delegacionesFiltro.on('change', function() {
       var selectedDelegacionIds = $(this).val();
+      var selectedDelegacionNames = [];
+      $(this).find('option:selected').each(function() {
+        if ($(this).val() !== "") {
+          selectedDelegacionNames.push($(this).text());
+        }
+      });
+      $('#territorio_nombre_input').val(selectedDelegacionNames.join(', ')); // Actualizar el input oculto con los nombres
       if (allDelegacionesData) {
         loadAndFilterGeoJsonLayer(allDelegacionesData, selectedDelegacionIds, selectedDelegacionIds, 'id_del', 'nom_del');
       } else {
