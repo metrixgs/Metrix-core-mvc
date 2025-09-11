@@ -597,8 +597,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const geojson = JSON.parse(poligonoGeoJson);
             const geoJsonLayer = L.geoJSON(geojson, {
                 style: {
-                    color: '#8bc34a', // Color del borde del polígono
-                    fillColor: '#8bc34a', // Color de relleno del polígono
+                    color: '#ff7800', // Color del borde del polígono (naranja)
+                    fillColor: '#ff7800', // Color de relleno del polígono (naranja)
                     fillOpacity: 0.5,
                     weight: 2
                 },
