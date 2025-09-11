@@ -220,6 +220,11 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
                             </div>
                             <div class="card-body p-0">
                                 <div id="map" style="height: 300px;"></div>
+                                <?php if (!empty($campana['territorio_subtype'])): ?>
+                                    <div class="alert alert-secondary m-2 p-2 text-center" role="alert">
+                                        <strong>Tipo de Territorio:</strong> <?= esc($campana['territorio_subtype']) ?>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if (!empty($campana['territorio'])): ?>
                                     <div class="alert alert-info m-2 p-2 text-center" role="alert">
                                         <strong>Territorio:</strong> <?= esc($campana['territorio']) ?>
