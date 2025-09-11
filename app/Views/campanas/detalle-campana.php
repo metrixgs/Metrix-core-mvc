@@ -80,19 +80,6 @@
                                         <label class="form-label">Territorio:<span class="text-danger">*</span></label>
                                         <div class="d-flex flex-wrap gap-2 align-items-center">
                                             <span class="badge bg-light text-dark"><?= esc($campana['territorio'] ?? 'No especificado'); ?></span>
-                                            <?php if (!empty($campana['sectorizacion'])) {
-                                                $sectorizaciones = json_decode($campana['sectorizacion'], true);
-                                                if (is_array($sectorizaciones) && ($campana['territorio'] ?? '') === 'geograficos') {
-                                                    if (isset($sectorizaciones['level'])) {
-                                                        echo '<span class="badge bg-light text-dark">Nivel: ' . esc($sectorizaciones['level']) . '</span>';
-                                                    }
-                                                    if (isset($sectorizaciones['subtype'])) {
-                                                        echo '<span class="badge bg-light text-dark">' . esc($sectorizaciones['subtype']) . '</span>';
-                                                    }
-                                                } else {
-                                                    echo '<span class="badge bg-light text-dark">' . esc($campana['sectorizacion']) . '</span>';
-                                                }
-                                            } ?>
                                         </div>
                                     </div>
 
@@ -100,16 +87,7 @@
                                     <div class="col-md-4">
                                         <label class="form-label">Segmentación:<span class="text-danger">*</span></label>
                                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                                            <?php if (!empty($campana['sectorizacion'])) {
-                                                $sectorizaciones = json_decode($campana['sectorizacion'], true);
-                                                if (is_array($sectorizaciones) && ($campana['territorio'] ?? '') === 'geograficos' && isset($sectorizaciones['subtype'])) {
-                                                    echo '<span class="badge bg-light text-dark">' . esc($sectorizaciones['subtype']) . '</span>';
-                                                } else {
-                                                    echo '<span class="badge bg-light text-dark">' . esc($campana['sectorizacion']) . '</span>';
-                                                }
-                                            } else {
-                                                echo '<span class="badge bg-light text-dark">No especificado</span>';
-                                            } ?>
+                                            <span class="badge bg-light text-dark"><?= esc($campana['sectorizacion'] ?? 'No especificado'); ?></span>
                                         </div>
                                     </div>
 

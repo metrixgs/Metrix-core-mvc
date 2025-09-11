@@ -14,6 +14,7 @@
   <input type="hidden" name="poligono_geojson" id="poligono_geojson_input">
   <input type="hidden" name="territorio_nombre" id="territorio_nombre_input">
   <input type="hidden" name="territorio_tipo" id="territorio_tipo_input">
+  <input type="hidden" name="segmentacion_tipo" id="segmentacion_tipo_input">
 
   <div class="bg-light p-3 rounded shadow-sm">
     <div class="row g-3">
@@ -937,6 +938,8 @@ jQuery(document).ready(function($) {
     // Manejar el cambio en el selector de Segmentación
     $segmentacionSelector.on('change', function() {
       var selectedSegmentacionType = $(this).val();
+      var selectedSegmentacionText = $(this).find('option:selected').text(); // Obtener el texto de la opción seleccionada
+      $('#segmentacion_tipo_input').val(selectedSegmentacionText); // Actualizar el input oculto con el texto de la segmentación
       $segmentacionColoniaContainer.hide();
       $segmentacionSeccionElectoralContainer.hide();
 

@@ -358,6 +358,7 @@ public function rondas($campana_id)
     $universo_count = $this->request->getPost('universo_count'); // Nuevo campo
     $territorio_nombre = $this->request->getPost('territorio_nombre'); // Nuevo input
     $territorio_tipo = $this->request->getPost('territorio_tipo');     // Nuevo input
+    $segmentacion_tipo = $this->request->getPost('segmentacion_tipo'); // Nuevo input
     $poligono_geojson = $this->request->getPost('poligono_geojson'); // Obtener el GeoJSON del polígono
 
     $validationRules = [
@@ -372,8 +373,9 @@ public function rondas($campana_id)
         'entregables' => 'permit_empty|string',
         'universo' => 'permit_empty|string',
         'universo_count' => 'permit_empty|numeric', // Nueva regla de validación
-        'territorio_nombre' => 'permit_empty|string|max_length[255]', // Nueva regla para el nombre del territorio
-        'territorio_tipo' => 'permit_empty|string|max_length[255]',   // Nueva regla para el tipo de territorio
+        'territorio_nombre' => 'permit_empty|string|max_length[255]',
+        'territorio_tipo' => 'permit_empty|string|max_length[255]',
+        'segmentacion_tipo' => 'permit_empty|string|max_length[255]', // Nueva regla para el tipo de segmentación
         'poligono_geojson' => 'permit_empty|string',
     ];
 
@@ -400,7 +402,7 @@ public function rondas($campana_id)
         'universo_count' => $universo_count ?? 0, // Asignar el nuevo campo
         'territorio' => $territorio_nombre ?? null, // Asignar el nombre del territorio
         'territorio_subtype' => $territorio_tipo ?? null, // Asignar el tipo de territorio
-        'sectorizacion' => $territorio_nombre ?? null, // Asignar el nombre del territorio a sectorizacion
+        'sectorizacion' => $segmentacion_tipo ?? null, // Asignar el tipo de segmentación
         'objetivo' => $this->request->getPost('objetivo'),
         'sector_electoral' => $this->request->getPost('sector_electoral'),
         'territorio_local' => $this->request->getPost('territorio_local'),
