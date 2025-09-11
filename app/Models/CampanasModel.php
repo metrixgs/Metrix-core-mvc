@@ -17,7 +17,8 @@ class CampanasModel extends Model {
     'fecha_fin', 'estado', 'encuesta',
     'entregables', 'universo', 'universo_count', 'territorio', // Añadir 'universo_count'
     'territorio_subtype', 'sectorizacion',
-    'canal_difusion', 'objetivo', 'sector_electoral', 'territorio_local'
+    'canal_difusion', 'objetivo', 'sector_electoral', 'territorio_local',
+    'poligono_geojson' // Nuevo campo para almacenar el GeoJSON del polígono
 ];
 
 

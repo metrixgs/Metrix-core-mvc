@@ -178,6 +178,11 @@ public function detalle($campana_id)
     $campana['nombre_dependencia'] = $dependencia_brigada['nombre'] ?? 'No asignado';
     $data['campana'] = $campana;
 
+    // Si la solicitud es AJAX, devolver los datos de la campaña como JSON
+    if ($this->request->isAJAX()) {
+        return $this->response->setJSON($data['campana']);
+    }
+
     // Obtener encuestas relacionadas con esta campaña
     $data['survey_responses'] = $this->surveyResponseModel->where('id_campana', $campana_id)->findAll();
 
@@ -355,6 +360,7 @@ public function rondas($campana_id)
     $territorio_subtype = $this->request->getPost('territorio-electorales-subtype')
         ?? $this->request->getPost('territorio-geograficos-subtype');
     $sectorizacion = $this->request->getPost('sectorizacion');
+    $poligono_geojson = $this->request->getPost('poligono_geojson'); // Obtener el GeoJSON del polígono
 
     $validationRules = [
         'nombre' => 'permit_empty|max_length[100]',
@@ -371,6 +377,7 @@ public function rondas($campana_id)
         'territorio' => 'permit_empty|in_list[electorales,geograficos]',
         'territorio_subtype' => 'permit_empty|string',
         'sectorizacion' => 'permit_empty',
+        'poligono_geojson' => 'permit_empty|string', // Nueva regla de validación para el GeoJSON
     ];
 
     if (!empty($subtipo_id)) {
@@ -400,6 +407,7 @@ public function rondas($campana_id)
         'objetivo' => $this->request->getPost('objetivo'),
         'sector_electoral' => $this->request->getPost('sector_electoral'),
         'territorio_local' => $this->request->getPost('territorio_local'),
+        'poligono_geojson' => $poligono_geojson ?? null, // Asignar el GeoJSON del polígono
     ];
 
     if (!empty($subtipo_id)) {

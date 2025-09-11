@@ -589,52 +589,35 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Cargar datos de la campaña para el mapa
-    fetch('<?= base_url('campanas/detalle/' . ($campana['id'] ?? 0)); ?>', {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Error en la respuesta del servidor: ' + response.status);
-        return response.json();
-    })
-    .then(data => {
-        mapError.classList.add('d-none'); // Ocultar mensaje de error por defecto
-        if (data.map_data && data.map_data.type === 'geojson' && data.map_data.url) {
-            // Cargar el archivo GeoJSON
-            fetch(data.map_data.url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al cargar GeoJSON: ' + response.status);
-                    return response.json();
-                })
-                .then(geojson => {
-                    const geoJsonLayer = L.geoJSON(geojson, {
-                        style: {
-                            color: 'blue',
-                            fillColor: 'blue',
-                            fillOpacity: 0.5
-                        },
-                        onEachFeature: function (feature, layer) {
-                            layer.bindPopup(data.map_data.popup);
-                        }
-                    }).addTo(map);
-                    // Ajustar el mapa a los límites de la capa
-                    map.fitBounds(geoJsonLayer.getBounds());
-                })
-                .catch(error => {
-                    mapError.classList.remove('d-none');
-                    console.error('Error al cargar GeoJSON:', error);
-                });
-        } else {
+    // Obtener el GeoJSON del polígono directamente de la variable PHP
+    const poligonoGeoJson = <?= json_encode($campana['poligono_geojson'] ?? null); ?>;
+
+    if (poligonoGeoJson) {
+        try {
+            const geojson = JSON.parse(poligonoGeoJson);
+            const geoJsonLayer = L.geoJSON(geojson, {
+                style: {
+                    color: '#8bc34a', // Color del borde del polígono
+                    fillColor: '#8bc34a', // Color de relleno del polígono
+                    fillOpacity: 0.5,
+                    weight: 2
+                },
+                onEachFeature: function (feature, layer) {
+                    if (feature.properties && feature.properties.name) {
+                        layer.bindPopup(feature.properties.name);
+                    }
+                }
+            }).addTo(map);
+            map.fitBounds(geoJsonLayer.getBounds());
+            mapError.classList.add('d-none'); // Ocultar mensaje de error si se carga el mapa
+        } catch (error) {
             mapError.classList.remove('d-none');
-            console.warn('No se encontraron datos para el mapa:', data);
+            console.error('Error al parsear o cargar el GeoJSON del polígono:', error);
         }
-    })
-    .catch(error => {
+    } else {
         mapError.classList.remove('d-none');
-        console.error('Error al cargar datos del mapa:', error);
-    });
+        console.warn('No se encontraron datos de polígono para esta campaña.');
+    }
 
 });
 </script>

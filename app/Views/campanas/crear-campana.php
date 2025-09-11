@@ -11,6 +11,7 @@
 <form method="post" action="<?= base_url('campanas/crear'); ?>" id="formNuevaCampana">
   <?= csrf_field(); ?>
   <input type="hidden" name="estado" value="Programada">
+  <input type="hidden" name="poligono_geojson" id="poligono_geojson_input">
 
   <div class="bg-light p-3 rounded shadow-sm">
     <div class="row g-3">
@@ -704,6 +705,8 @@ jQuery(document).ready(function($) {
                 clickedLayer.setStyle(selectedStyle);
               }
               console.log("Elementos seleccionados en el mapa (por clic):", selectedTerritorioIds);
+              // Actualizar el input hidden con el GeoJSON del polígono seleccionado
+              $('#poligono_geojson_input').val(selectedPolygonGeoJson ? JSON.stringify(selectedPolygonGeoJson) : '');
             }
           });
           if (feature.properties && feature.properties[nameProperty]) {
@@ -738,6 +741,8 @@ jQuery(document).ready(function($) {
         map.setView([23.6345, -102.5528], 5);
         selectedPolygonGeoJson = null; // Limpiar la geometría si no hay capas
       }
+      // Actualizar el input hidden con el GeoJSON del polígono seleccionado
+      $('#poligono_geojson_input').val(selectedPolygonGeoJson ? JSON.stringify(selectedPolygonGeoJson) : '');
     }
 
     // Referencias a los nuevos selects y contenedores
