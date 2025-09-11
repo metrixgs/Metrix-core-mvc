@@ -16,7 +16,7 @@ use App\Models\SegmentacionesModel;
 use App\Models\SurveyModel;
 use App\Models\SurveyResponseModel; // Añadir este modelo
 use App\Libraries\Breadcrumb;
-use App\Models\TagModel;
+use App\Models\TagsModel;
  
  
  
@@ -50,7 +50,7 @@ class Campanas extends BaseController {
     $this->survey = new SurveyModel();
     $this->surveyResponseModel = new SurveyResponseModel(); // Instanciar el nuevo modelo
     $this->rolesModel = new \App\Models\RolesModel();  // Cargar el modelo de roles
-    $this->tagsModel = new TagModel();  // Cargar el modelo de tags
+    $this->tagsModel = new TagsModel();  // Cargar el modelo de tags
 
 
 
@@ -839,9 +839,22 @@ public function rondas($campana_id)
         $data['brigadas'] = $this->brigadas->findAll(); // Obtener todas las brigadas del BrigadasModel
 
         // Cargar tags para el modal Universo (solo tags con usuarios asociados y su conteo)
-        $data['catalogo_tags'] = $this->tagsModel->getTagsWithUserCounts();
-        // Las estadísticas ya están incluidas en catalogo_tags, pero mantenemos la variable por si la vista la usa directamente
-        $data['tag_stats'] = array_column($data['catalogo_tags'], 'user_count', 'slug');
+        // Cargar tags para el modal Universo (todos los tags con usuarios asociados y su conteo)
+        $allTags = $this->tagsModel->allOrdered();
+        $userCounts = $this->tagsModel->getUsersCountByTag();
+
+        $formattedTags = [];
+        foreach ($allTags as $tagInfo) {
+            $slug = $tagInfo['slug'];
+            $formattedTags[] = [
+                'id'         => $tagInfo['id'],
+                'tag'        => $tagInfo['tag'],
+                'slug'       => $slug,
+                'user_count' => $userCounts[$slug] ?? 0
+            ];
+        }
+        $data['catalogo_tags'] = $formattedTags;
+        $data['tag_stats'] = array_column($formattedTags, 'user_count', 'slug');
 
         // Usar función reutilizable de breadcrumb
         $data['breadcrumb'] = $this->generarBreadcrumb([
@@ -869,42 +882,57 @@ public function rondas($campana_id)
     }
     
 
-    public function tags() // Renombrado de tagsCatalog a tags
-{
-    try {
-        // Cargar el modelo
-        $tagModel = new \App\Models\TagModel();
+    public function tags()
+    {
+        try {
+            $territorioType = $this->request->getGet('territorio_type');
+            $territorioIds = $this->request->getGet('territorio_ids'); // Esto será una cadena CSV
 
-        // Obtener todos los tags con el conteo de usuarios, incluyendo aquellos con 0 usuarios
-        $allTags = $tagModel->allOrdered(); // Devuelve id, tag, slug
-        $userCounts = $tagModel->getUsersCountByTag(); // Devuelve slug => user_count
+            $tagModel = new \App\Models\TagsModel();
+            $formattedTags = [];
 
-        // Combinar la información para tener el formato esperado en el frontend
-        $formattedTags = [];
-        foreach ($allTags as $tagInfo) {
-            $slug = $tagInfo['slug'];
-            $formattedTags[] = [
-                'id'         => $tagInfo['id'],
-                'tag'        => $tagInfo['tag'],
-                'slug'       => $slug,
-                'user_count' => $userCounts[$slug] ?? 0 // Asignar el conteo o 0 si no existe
-            ];
+            if (!empty($territorioType) && !empty($territorioIds)) {
+                $idsArray = explode(',', $territorioIds);
+                // Asegurarse de que los IDs sean enteros para la consulta
+                $idsArray = array_map('intval', $idsArray);
+
+                $filteredTags = $tagModel->getTagsWithUserCountsByTerritory($territorioType, $idsArray);
+                foreach ($filteredTags as $tagInfo) {
+                    $formattedTags[] = [
+                        'id'         => $tagInfo['id'],
+                        'tag'        => $tagInfo['tag'],
+                        'slug'       => $tagInfo['slug'],
+                        'user_count' => (int) $tagInfo['user_count']
+                    ];
+                }
+            } else {
+                // Si no hay filtros de territorio, obtener todos los tags con conteo de usuarios
+                $allTags = $tagModel->allOrdered();
+                $userCounts = $tagModel->getUsersCountByTag();
+
+                foreach ($allTags as $tagInfo) {
+                    $slug = $tagInfo['slug'];
+                    $formattedTags[] = [
+                        'id'         => $tagInfo['id'],
+                        'tag'        => $tagInfo['tag'],
+                        'slug'       => $slug,
+                        'user_count' => $userCounts[$slug] ?? 0
+                    ];
+                }
+            }
+
+            return $this->response->setJSON([
+                'ok'   => true,
+                'data' => $formattedTags
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON([
+                'ok'        => false,
+                'message'   => 'Error al obtener las etiquetas',
+                'exception' => $e->getMessage()
+            ]);
         }
-
-        // Respuesta en formato JSON estándar
-        return $this->response->setJSON([
-            'ok'   => true,
-            'data' => $formattedTags
-        ]);
-    } catch (\Throwable $e) {
-        // Captura errores y responde con mensaje claro
-        return $this->response->setJSON([
-            'ok'        => false,
-            'message'   => 'Error al obtener las etiquetas',
-            'exception' => $e->getMessage()
-        ]);
     }
-}
 
 }
 

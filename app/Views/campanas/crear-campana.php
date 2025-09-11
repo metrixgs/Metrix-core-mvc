@@ -550,7 +550,29 @@ jQuery(document).ready(function($) {
     var hasOptions = $select.find('option[value]').length > 0;
     if (hasOptions) return;
 
-    $.getJSON(TAGS_URL + '?debug=1')
+    var selectedTerritorioType = $territorioSelector.val();
+    var selectedTerritorioIds = [];
+
+    if (selectedTerritorioType === 'municipio') {
+      selectedTerritorioIds = $municipiosFiltro.val();
+    } else if (selectedTerritorioType === 'delegacion') {
+      selectedTerritorioIds = $delegacionesFiltro.val();
+    }
+    // Añadir otros tipos de territorio si es necesario
+
+    var finalTagsUrl = TAGS_URL;
+    var params = [];
+    if (selectedTerritorioType && selectedTerritorioIds && selectedTerritorioIds.length > 0) {
+      params.push('territorio_type=' + selectedTerritorioType);
+      params.push('territorio_ids=' + selectedTerritorioIds.join(','));
+    }
+    params.push('debug=1'); // Mantener el parámetro debug
+
+    if (params.length > 0) {
+      finalTagsUrl += '?' + params.join('&');
+    }
+
+    $.getJSON(finalTagsUrl)
       .done(function(resp){
         if (resp && resp.ok === false) {
           showTagError('Error obteniendo tags' + (resp.exception ? (': ' + resp.exception) : '.'));
