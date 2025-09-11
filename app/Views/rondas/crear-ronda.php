@@ -411,38 +411,33 @@ $distribucion = $distribucion ?? [['nombre' => 'Juan Temporal', 'puntos' => 10]]
 
         // Cargar datos geográficos de la campaña si están disponibles
         const campanaData = <?= json_encode($campana); ?>;
+        const poligonoGeoJson = campanaData.poligono_geojson;
 
-        if (campanaData.latitud && campanaData.longitud) {
-            L.marker([campanaData.latitud, campanaData.longitud]).addTo(map)
-                .bindPopup('Ubicación de la Campaña: ' + campanaData.nombre)
-                .openPopup();
-            map.setView([campanaData.latitud, campanaData.longitud], 15); // Centrar en la ubicación de la campaña
-        } else if (campanaData.geojson_url) {
-            fetch(campanaData.geojson_url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al cargar GeoJSON: ' + response.status);
-                    return response.json();
-                })
-                .then(geojson => {
-                    const geoJsonLayer = L.geoJSON(geojson, {
-                        style: {
-                            color: 'blue',
-                            fillColor: 'blue',
-                            fillOpacity: 0.5
-                        },
-                        onEachFeature: function (feature, layer) {
-                            layer.bindPopup(feature.properties.name || 'Área de Campaña');
+        if (poligonoGeoJson) {
+            try {
+                const geojson = JSON.parse(poligonoGeoJson);
+                const geoJsonLayer = L.geoJSON(geojson, {
+                    style: {
+                        color: '#ff7800', // Color del borde del polígono (naranja)
+                        fillColor: '#ff7800', // Color de relleno del polígono (naranja)
+                        fillOpacity: 0.5,
+                        weight: 2
+                    },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.name) {
+                            layer.bindPopup(feature.properties.name);
                         }
-                    }).addTo(map);
-                    map.fitBounds(geoJsonLayer.getBounds());
-                })
-                .catch(error => {
-                    mapError.classList.remove('d-none');
-                    console.error('Error al cargar GeoJSON:', error);
-                });
+                    }
+                }).addTo(map);
+                map.fitBounds(geoJsonLayer.getBounds());
+                mapError.classList.add('d-none'); // Ocultar mensaje de error si se carga el mapa
+            } catch (error) {
+                mapError.classList.remove('d-none');
+                console.error('Error al parsear o cargar el GeoJSON del polígono:', error);
+            }
         } else {
             mapError.classList.remove('d-none');
-            console.warn('No se encontraron datos geográficos para el mapa de esta campaña.');
+            console.warn('No se encontraron datos de polígono para esta campaña.');
         }
 
         // Manejar el botón de pantalla completa
