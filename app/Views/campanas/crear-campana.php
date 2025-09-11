@@ -876,7 +876,7 @@ jQuery(document).ready(function($) {
         switch (selectedTerritorioType) {
           case 'municipio':
             $territorioMunicipioContainer.show();
-            loadApiDataAndPopulateSelect(API_URLS.municipios, $municipiosFiltro, 'Municipios', 'cve_mun', 'nom_mun'); // Cambiado 'id' a 'cve_mun'
+            loadApiDataAndPopulateSelect(API_URLS.municipios, $municipiosFiltro, 'Municipios', 'id', 'nom_mun');
             break;
           case 'delegacion':
             $territorioDelegacionContainer.show();
