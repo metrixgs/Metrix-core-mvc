@@ -99,6 +99,9 @@
                                         <label class="form-label">Universo detectado:</label>
                                         <div class="d-flex flex-wrap gap-2 align-items-center">
                                             <span class="badge bg-light text-dark"><?= esc($campana['universo'] ?? 'No especificado'); ?></span>
+                                            <?php if (isset($campana['universo_count']) && $campana['universo_count'] > 0): ?>
+                                                <span class="badge bg-primary text-white"><?= esc($campana['universo_count']); ?> personas</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
