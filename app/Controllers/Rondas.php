@@ -212,12 +212,16 @@ class Rondas extends BaseController {
     $data['tag_stats'] = array_column($data['catalogo_tags'], 'user_count', 'slug');
 
     if ($this->request->getMethod() === 'post') {
+        // Generar el nombre de la ronda como "rondaX"
+        $lastRonda = $this->rondas->orderBy('id', 'DESC')->first();
+        $nextRondaNumber = ($lastRonda['id'] ?? 0) + 1;
+        $nombreRondaGenerado = 'ronda' . $nextRondaNumber;
+
         // Recoger los datos del formulario
         $datosRonda = [
             'campana_id' => $this->request->getPost('campana_id') ?: ($campanaId ?? 1),
-            'nombre' => $this->request->getPost('nombre_ronda') ?? ($this->request->getPost('nombre_campana') ?? ''), // Usar nombre_ronda si existe, sino nombre_campana, sino cadena vacía
+            'nombre' => $nombreRondaGenerado, // Usar el nombre de ronda generado
             'coordinador' => $this->request->getPost('coordinador'),
-            // 'encargado' => $this->request->getPost('encargado'), // Eliminado según solicitud del usuario
             'coordinador_campana' => $this->request->getPost('coordinador_campana'),
             'encuesta_ronda' => $this->request->getPost('encuesta_ronda'),
             'fecha_actividad' => $this->request->getPost('fecha_actividad'),
@@ -253,7 +257,6 @@ class Rondas extends BaseController {
         $puntosOperador = $this->request->getPost('puntos_operador');
         if (!empty($puntosOperador) && is_array($puntosOperador)) {
             foreach ($puntosOperador as $operadorId => $puntos) {
-                // Asegurarse de que $puntos sea un entero
                 $puntos = (int) $puntos;
                 $this->rondaOperadorPuntosModel->insert([
                     'ronda_id' => $rondaId,
@@ -263,7 +266,64 @@ class Rondas extends BaseController {
             }
         }
 
-        return redirect()->to('/campanas/rondas/' . $datosRonda['campana_id'])->with('success', 'Ronda creada correctamente');
+        // Obtener información del coordinador para area_id y cuenta_id
+        $coordinadorInfo = $this->usuarios->find($datosRonda['coordinador']);
+        $areaIdCoordinador = $coordinadorInfo['area_id'] ?? null;
+        $cuentaIdCoordinador = $coordinadorInfo['cuenta_id'] ?? null;
+
+        // ====================================================================
+        // Lógica para inyectar puntos del universo como incidencias (tickets)
+        // ====================================================================
+        if (!empty($campana['universo'])) {
+            $tagSlugs = array_filter(array_map('trim', explode(',', $campana['universo'])));
+
+            if (!empty($tagSlugs)) {
+                $usuariosDelUniverso = $this->usuarios->getUsersByTags($tagSlugs);
+
+                foreach ($usuariosDelUniverso as $usuario) {
+                    // Preparar datos para el ticket (incidencia)
+                    $ticketData = [
+                        'cliente_id'            => $usuario['id'],
+                        'categoria_id'          => 1, // ID de categoría por defecto para "Incidencia"
+                        'usuario_id'            => $datosRonda['coordinador'],
+                        'campana_id'            => $datosRonda['campana_id'],
+                        'ronda_id'              => $nombreRondaGenerado, // Usar el nombre de ronda generado (ej. "ronda1")
+                        'tipo_id'               => 1, // Tipo de ticket por defecto (ej. Reporte)
+                        'identificador'         => 'RND-' . $rondaId . '-USR-' . $usuario['id'],
+                        'titulo'                => 'Incidencia de Ronda ' . $nombreRondaGenerado . ' para ' . $usuario['nombre'],
+                        'descripcion'           => 'Incidencia generada automáticamente para el usuario ' . $usuario['nombre'] . ' (' . $usuario['correo'] . ') en la ronda ' . $nombreRondaGenerado . '.',
+                        'prioridad'             => 'Media', // Prioridad como string
+                        'latitud'               => (string)($usuario['latitud'] ?? ''),
+                        'longitud'              => (string)($usuario['longitud'] ?? ''),
+                        'estado_p'              => 'Pendiente',
+                        'estado'                => 'Pendiente', // Coincide con el ejemplo JSON
+                        'municipio'             => $usuario['municipio'] ?? '',
+                        'colonia'               => $usuario['colonia'] ?? '',
+                        'df'                    => '', // Dejar vacío si no hay datos
+                        'dl'                    => '', // Dejar vacío si no hay datos
+                        'seccion_electoral'     => 0, // Valor por defecto si no hay datos
+                        'codigo_postal'         => $usuario['codigo_postal'] ?? '',
+                        'direccion_completa'    => $usuario['calle'] ?? '',
+                        'direccion_solicitante' => $usuario['residencia'] ?? '',
+                        'mismo_domicilio'       => 'Si',
+                        'fecha_creacion'        => date('Y-m-d H:i:s'),
+                        'fecha_cierre'          => null,
+                        'fecha_vencimiento'     => date('Y-m-d H:i:s', strtotime('+7 days')),
+                        'cuenta_id'             => $cuentaIdCoordinador, // Cuenta del coordinador
+                        'area_id'               => $areaIdCoordinador, // Área del coordinador
+                        'nombreCiudadano'       => $usuario['nombre'] ?? '',
+                        'correoCiudadano'       => $usuario['correo'] ?? '',
+                        'telefonoCiudadano'     => $usuario['telefono'] ?? '',
+                        'encuesta_contestada'   => 0,
+                        'tipo_ticket_id'        => 1, // Valor por defecto
+                        'status'                => 'Pendiente', // Coincide con el ejemplo JSON
+                    ];
+                    $ticketId = $this->tickets->crearTicket($ticketData);
+                }
+            }
+        }
+
+        return redirect()->to('/campanas/rondas/' . $datosRonda['campana_id'])->with('success', 'Ronda creada correctamente y incidencias generadas.');
     }
 
     return view('incl/head-application', $data)
@@ -509,7 +569,6 @@ class Rondas extends BaseController {
                 'descripcion' => $this->request->getPost('descripcion'),
                 'estado' => $this->request->getPost('estado')
             ];
-
             # Actualizar la segmentación
             $this->segmentaciones->actualizarSegmentacion($id, $datosSegmentacion);
 
