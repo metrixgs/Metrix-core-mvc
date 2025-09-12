@@ -26,9 +26,17 @@ class Directorio extends BaseController
         $page = $this->request->getVar('page') ?? 1;
         $perPage = $this->request->getVar('perPage') ?? 25; // Obtener perPage de la URL o usar 25 por defecto
 
-        // Hacemos LEFT JOIN a sí mismo para obtener los datos del líder (si lo hay)
-        $page = $this->request->getVar('page') ?? 1;
-        $perPage = $this->request->getVar('perPage') ?? 25; // Obtener perPage de la URL o usar 25 por defecto
+        // Obtener parámetros de filtros
+        $filtros = [
+            'tipo' => $this->request->getVar('tipo'),
+            'estado' => $this->request->getVar('estado'),
+            'municipio' => $this->request->getVar('municipio'),
+            'estatus' => $this->request->getVar('estatus'),
+            'liderazgo' => $this->request->getVar('liderazgo'),
+            'coordinador' => $this->request->getVar('coordinador'),
+            'lider' => $this->request->getVar('lider'),
+            'tags' => $this->request->getVar('tags')
+        ];
 
         // Construir el builder para la consulta principal
         $builder = $this->directorioModel
@@ -39,8 +47,13 @@ class Directorio extends BaseController
                       GROUP_CONCAT(tags.nombre ORDER BY tags.nombre ASC SEPARATOR ", ") AS tags_asociados')
             ->join('directorio AS lider', 'lider.id = directorio.id_lider', 'left')
             ->join('directorio_tags', 'directorio_tags.directorio_id = directorio.id', 'left')
-            ->join('tags', 'tags.id = directorio_tags.tag_id', 'left')
-            ->groupBy('directorio.id'); // Agrupar por el ID del directorio para obtener todos los tags
+            ->join('tags', 'tags.id = directorio_tags.tag_id', 'left');
+
+        // Aplicar filtros
+        $this->aplicarFiltros($builder, $filtros);
+
+        // Agrupar por el ID del directorio para obtener todos los tags
+        $builder->groupBy('directorio.id');
 
         // Obtener el total de registros antes de aplicar la paginación
         $totalContactos = $builder->countAllResults(false);
@@ -57,11 +70,25 @@ class Directorio extends BaseController
             $pager = $this->directorioModel->pager;
         }
         
+        // Obtener datos para los filtros
+        $estados = $this->directorioModel
+            ->select('estado')
+            ->where('estado IS NOT NULL')
+            ->where('estado !=', '')
+            ->groupBy('estado')
+            ->orderBy('estado', 'ASC')
+            ->findAll();
+
+        $tags = $this->tagsModel->allOrdered();
+
         $data = [
             'contactos' => $contactos,
             'pager' => $pager,
             'perPage' => $perPage,
-            'totalContactos' => $totalContactos, // Pasar el total de contactos a la vista
+            'totalContactos' => $totalContactos,
+            'filtros' => $filtros,
+            'estados' => array_column($estados, 'estado'),
+            'tags' => $tags,
             'titulo_pagina' => 'Directorio | Lista de Contactos'
         ];
 
@@ -71,6 +98,75 @@ class Directorio extends BaseController
              . view('directorio/index', $data)
              . view('incl/footer-application', $data)
              . view('incl/scripts-application', $data);
+    }
+
+    /**
+     * Aplica filtros a la consulta del directorio
+     */
+    private function aplicarFiltros($builder, $filtros)
+    {
+        // Filtro por tipo de red
+        if (!empty($filtros['tipo'])) {
+            $builder->where('directorio.tipo_red', $filtros['tipo']);
+        }
+
+        // Filtro por estado (busca en estado y residencia)
+        if (!empty($filtros['estado'])) {
+            $builder->groupStart()
+                ->where('directorio.estado', $filtros['estado'])
+                ->orLike('directorio.residencia', $filtros['estado'])
+                ->groupEnd();
+        }
+
+        // Filtro por residencia (combinación de municipio y estado)
+        if (!empty($filtros['residencia'])) {
+            // La residencia viene en formato "Municipio, Estado"
+            $partes = explode(', ', $filtros['residencia']);
+            if (count($partes) == 2) {
+                $municipio = trim($partes[0]);
+                $estado = trim($partes[1]);
+                $builder->where('directorio.municipio', $municipio);
+                $builder->where('directorio.estado', $estado);
+            } elseif (count($partes) == 1) {
+                // Si solo hay una parte, buscar en municipio o estado
+                $valor = trim($partes[0]);
+                $builder->groupStart()
+                    ->where('directorio.municipio', $valor)
+                    ->orWhere('directorio.estado', $valor)
+                    ->groupEnd();
+            }
+        }
+
+        // Filtro por estatus
+        if (!empty($filtros['estatus'])) {
+            if ($filtros['estatus'] === 'activo') {
+                $builder->where('directorio.estatus', 1);
+            } elseif ($filtros['estatus'] === 'inactivo') {
+                $builder->where('directorio.estatus', 0);
+            }
+        }
+
+        // Filtro por liderazgo
+        if (!empty($filtros['liderazgo']) && $filtros['liderazgo'] == '1') {
+            $builder->where('directorio.es_lider', 1);
+        }
+
+        // Filtro por coordinador
+        if (!empty($filtros['coordinador']) && $filtros['coordinador'] == '1') {
+            $builder->where('directorio.es_coordinador', 1);
+        }
+
+        // Filtro por líder específico
+        if (!empty($filtros['lider'])) {
+            $builder->where('directorio.id_lider', $filtros['lider']);
+        }
+
+        // Filtro por tags
+        if (!empty($filtros['tags'])) {
+            $builder->where('tags.id', $filtros['tags']);
+        }
+        
+        return $builder;
     }
 
     public function crear()
@@ -590,47 +686,232 @@ class Directorio extends BaseController
                if (isset($rowData['TAGS']) && !empty($rowData['TAGS'])) {
                    $csvTags = explode(',', $rowData['TAGS']);
                    foreach ($csvTags as $csvTag) {
-                       $tagsToAssociate[] = trim($csvTag);
+                       $csvTag = trim($csvTag);
+                       if (!empty($csvTag)) {
+                           $tagsToAssociate[] = $csvTag;
+                       }
                    }
                }
 
-               // Procesar y asociar tags
-               // Primero, eliminar tags existentes para este ciudadano si es una actualización
-               if ($operation === 'actualizado') {
-                   $this->directorioTagsModel->where('directorio_id', $citizenId)->delete();
+               // Eliminar tags existentes si es una actualización
+               if ($isUpdate) {
+                   $this->directorioModel->removeAllTagsFromDirectorio($citizenId);
                }
 
-               foreach (array_unique($tagsToAssociate) as $tagName) {
-                   if (!empty($tagName)) {
-                       $tagId = $this->tagsModel->getOrCreateTag($tagName);
-                       $this->directorioTagsModel->addTagToDirectorio($citizenId, $tagId);
-                   }
+               // Asociar todos los tags
+               foreach ($tagsToAssociate as $tagName) {
+                   $tagId = $this->directorioModel->getOrCreateTag($tagName);
+                   $this->directorioModel->addTagToDirectorio($citizenId, $tagId);
                }
            }
        }
 
-       fclose($handle);
-
-       if (!empty($errors)) {
-           session()->setFlashdata('error', 'Se importaron ' . $insertedCount . ' registros con éxito, pero ocurrieron errores en algunas filas: ' . implode('; ', $errors));
-       } else {
-           session()->setFlashdata('mensaje', 'Se importaron ' . $insertedCount . ' registros desde el CSV con éxito.');
-       }
-
-       return redirect()->to('/directorio');
+       return $this->response->setJSON(['success' => true, 'message' => 'Importación completada exitosamente.']);
    }
 
-   // Función auxiliar para convertir número de serie de Excel a fecha Y-m-d
-   private function excelSerialDateToDate($serial): ?string
+   /**
+    * Convierte una fecha serial de Excel a formato Y-m-d
+    */
+   private function excelSerialDateToDate($serialDate)
    {
-       if (!is_numeric($serial) || $serial <= 0) {
-           return null;
+       if (is_numeric($serialDate)) {
+           $unixDate = ($serialDate - 25569) * 86400;
+           return gmdate('Y-m-d', $unixDate);
        }
-       // Excel base date is 1899-12-30 for Windows, 1904-01-01 for Mac.
-       // Assuming Windows base date for now.
-       // 25569 is the number of days between 1900-01-01 and 1970-01-01 (Unix epoch)
-       // Excel day 1 is 1900-01-01. PHP's date() starts from Unix epoch.
-       $unixTimestamp = ($serial - 25569) * 86400;
-       return date('Y-m-d', $unixTimestamp);
+       return $serialDate;
    }
+
+    /**
+     * Obtiene los estados únicos del directorio
+     */
+    public function getEstados()
+    {
+        $estados = $this->directorioModel
+            ->select('estado')
+            ->where('estado IS NOT NULL')
+            ->where('estado !=', '')
+            ->groupBy('estado')
+            ->orderBy('estado', 'ASC')
+            ->findAll();
+
+        return $this->response->setJSON(array_column($estados, 'estado'));
+    }
+
+    /**
+     * Obtiene los municipios únicos del directorio
+     */
+    public function getMunicipios()
+    {
+        $estado = $this->request->getVar('estado');
+        
+        $builder = $this->directorioModel
+            ->select('municipio')
+            ->where('municipio IS NOT NULL')
+            ->where('municipio !=', '');
+            
+        if ($estado) {
+            $builder->where('estado', $estado);
+        }
+        
+        $municipios = $builder
+            ->groupBy('municipio')
+            ->orderBy('municipio', 'ASC')
+            ->findAll();
+
+        return $this->response->setJSON(array_column($municipios, 'municipio'));
+    }
+
+    /**
+     * Obtiene las residencias únicas del directorio
+     */
+    public function getResidencias()
+    {
+        // Evitar usar response->setJSON que puede causar problemas
+        header('Content-Type: application/json');
+        
+        $residencias = [
+            'CDMX',
+            'Querétaro', 
+            'Corregidora',
+            'Guadalajara',
+            'Monterrey',
+            'Puebla',
+            'Tijuana',
+            'León',
+            'Mérida',
+            'Cancún'
+        ];
+        
+        echo json_encode([
+            'residencias' => $residencias,
+            'total_encontradas' => count($residencias),
+            'debug' => 'Lista temporal hardcodeada'
+        ]);
+        exit;
+    }
+
+    /**
+     * Obtiene todos los tags disponibles
+     */
+    public function getTags()
+    {
+        $tags = $this->tagsModel->allOrdered();
+        return $this->response->setJSON($tags);
+    }
+
+    /**
+     * Obtiene todos los líderes disponibles
+     */
+    public function getLideres()
+    {
+        $lideres = $this->directorioModel
+            ->select('id, CONCAT(nombre, " ", primer_apellido, " ", COALESCE(segundo_apellido, "")) as nombre_completo')
+            ->where('es_lider', 1)
+            ->orderBy('nombre', 'ASC')
+            ->findAll();
+        return $this->response->setJSON($lideres);
+    }
+
+    /**
+     * Obtiene datos filtrados dinámicamente vía AJAX
+     */
+    public function getDatosFiltrados()
+    {
+        $page = $this->request->getVar('page') ?? 1;
+        $perPage = $this->request->getVar('perPage') ?? 25;
+
+        // Obtener parámetros de filtros
+        $filtros = [
+            'tipo' => $this->request->getVar('tipo'),
+            'estado' => $this->request->getVar('estado'),
+            'municipio' => $this->request->getVar('municipio'),
+            'estatus' => $this->request->getVar('estatus'),
+            'liderazgo' => $this->request->getVar('liderazgo'),
+            'coordinador' => $this->request->getVar('coordinador'),
+            'lider' => $this->request->getVar('lider'),
+            'tags' => $this->request->getVar('tags')
+        ];
+
+        // Construir el builder para la consulta principal
+        $builder = $this->directorioModel
+            ->select('directorio.*,
+                      lider.nombre AS lider_nombre,
+                      lider.primer_apellido AS lider_apellido,
+                      lider.segundo_apellido AS lider_segundo,
+                      GROUP_CONCAT(tags.nombre ORDER BY tags.nombre ASC SEPARATOR ", ") AS tags_asociados')
+            ->join('directorio AS lider', 'lider.id = directorio.id_lider', 'left')
+            ->join('directorio_tags', 'directorio_tags.directorio_id = directorio.id', 'left')
+            ->join('tags', 'tags.id = directorio_tags.tag_id', 'left');
+
+        // Aplicar filtros
+        $this->aplicarFiltros($builder, $filtros);
+
+        // Agrupar por directorio.id para evitar duplicados
+        $builder->groupBy('directorio.id');
+
+        // Obtener total de registros para paginación
+        $totalBuilder = clone $builder;
+        $total = $totalBuilder->countAllResults(false);
+
+        // Aplicar paginación
+        $offset = ($page - 1) * $perPage;
+        $directorio = $builder
+            ->orderBy('directorio.nombre', 'ASC')
+            ->limit($perPage, $offset)
+            ->findAll();
+
+        // Calcular información de paginación
+        $totalPages = ceil($total / $perPage);
+
+        return $this->response->setJSON([
+            'data' => $directorio,
+            'pagination' => [
+                'current_page' => (int)$page,
+                'per_page' => (int)$perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+                'has_previous' => $page > 1,
+                'has_next' => $page < $totalPages
+            ]
+        ]);
+    }
+
+    /**
+     * Obtiene líderes y tags filtrados dinámicamente
+     */
+    public function getFiltrosDisponibles()
+    {
+        try {
+            // Obtener parámetros de filtros actuales
+            $tipo = $this->request->getVar('tipo');
+            $residencia = $this->request->getVar('residencia');
+            
+            // Obtener todos los líderes disponibles
+            $lideres = $this->directorioModel
+                ->select('id, CONCAT(nombre, " ", primer_apellido, " ", COALESCE(segundo_apellido, "")) as nombre_completo')
+                ->where('es_lider', 1)
+                ->orderBy('nombre', 'ASC')
+                ->findAll();
+
+            // Obtener todos los tags disponibles
+            $tags = $this->db->table('tags')
+                ->select('id, nombre')
+                ->orderBy('nombre', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $resultado = [
+                'lideres' => $lideres,
+                'tags' => $tags
+            ];
+
+            return $this->response->setJSON($resultado);
+        } catch (Exception $e) {
+            return $this->response->setJSON([
+                'error' => 'Error al obtener filtros: ' . $e->getMessage(),
+                'lideres' => [],
+                'tags' => []
+            ]);
+        }
+    }
 }

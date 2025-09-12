@@ -188,6 +188,11 @@ $routes->post('/directorio/importarCsv', 'Directorio::importarCsv');
 
 $routes->get('/directorio/editarTags/(:num)', 'Directorio::editarTags/$1'); // Nueva ruta para editar tags
 $routes->post('/directorio/guardarTags/(:num)', 'Directorio::guardarTags/$1'); // Nueva ruta para guardar tags
+$routes->get('/directorio/getDatosFiltrados', 'Directorio::getDatosFiltrados'); // Ruta para filtros AJAX
+$routes->get('/directorio/getResidencias', 'Directorio::getResidencias'); // Ruta para obtener residencias
+$routes->get('/directorio/getMunicipios', 'Directorio::getMunicipios'); // Ruta para obtener municipios
+$routes->get('/directorio/getLideres', 'Directorio::getLideres'); // Ruta para obtener líderes
+$routes->get('/directorio/getFiltrosDisponibles', 'Directorio::getFiltrosDisponibles'); // Ruta para obtener filtros dinámicos
 
 $routes->post('directorio/eliminar/(:num)', 'Directorio::eliminar/$1');
 
