@@ -231,10 +231,6 @@ $routes->group('relacionados', function($routes) {
 
 });
 
-// Rutas AJAX del Dashboard
-$routes->post('dashboard/estadisticas', 'DashboardAjax::obtenerEstadisticas');
-$routes->post('dashboard/exportar', 'DashboardAjax::exportarExcel');
-
 // Ruta de prueba del dashboard
 $routes->get('test-dashboard', 'TestDashboard::index');
 
@@ -257,3 +253,12 @@ $routes->get('dashboard-eventos/debug-seccion-data', 'DashboardEventos::debugSec
 $routes->get('dashboard-eventos/debug-lideres-data', 'DashboardEventos::debugLideresData');
 $routes->get('dashboard-eventos/debug-js', 'DashboardEventos::debugJavaScript');
 
+// Rutas AJAX del Dashboard
+$routes->post('dashboard/estadisticas', 'DashboardAjax::obtenerEstadisticas');
+$routes->post('dashboard/exportar', 'DashboardAjax::exportarExcel');
+$routes->get('dashboard/getCategorias', 'DashboardAjax::getCategorias');
+$routes->post('dashboard/getComparacionCategorias', 'DashboardAjax::getComparacionCategorias');
+$routes->get('dashboard/getIncidenciasPorCategoria', 'DashboardAjax::getIncidenciasPorCategoria');
+
+// Ruta de prueba del dashboard
+$routes->get('test-dashboard', 'TestDashboard::index');

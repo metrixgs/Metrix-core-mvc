@@ -123,7 +123,7 @@
                         <h6 class="card-title mb-0">Incidencias por Prioridad</h6>
                     </div>
                     <div class="card-body py-2">
-                        <div style="height: 200px; position: relative;">
+                        <div style="height: 300px; position: relative;">
                             <canvas id="graficaPrioridad"></canvas>
                         </div>
                     </div>
@@ -164,8 +164,14 @@
             <!-- Incidencias por Categoría -->
             <div class="col-xl-6 col-lg-12 mb-3">
                 <div class="card h-100">
-                    <div class="card-header py-2">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
                         <h6 class="card-title mb-0">Incidencias por Categoría</h6>
+                        <div>
+                            <button class="btn btn-primary btn-sm" onclick="showCategoriasComparator()">
+                                <i class="fas fa-chart-bar me-1"></i>Comparar
+                            </button>
+                            <span id="selectedCategoriasCount" class="ms-2 text-muted">0 categorías seleccionadas</span>
+                        </div>
                     </div>
                     <div class="card-body py-2">
                         <div style="height: 180px; position: relative;">
@@ -221,39 +227,7 @@
             </div>
         </div>
 
-        <!-- Mapa de Calor y Comparativa Temporal -->
-        <div class="row mb-3">
-            <!-- Mapa de Calor -->
-            <div class="col-xl-8 col-lg-12 mb-3">
-                <div class="card h-100">
-                    <div class="card-header py-2">
-                        <h6 class="card-title mb-0">Mapa de Calor Geográfico</h6>
-                    </div>
-                    <div class="card-body py-2">
-                        <div id="mapaCalor" style="height: 250px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="ri-map-pin-line fs-36 text-muted mb-2"></i>
-                                <p class="text-muted mb-0 small">Mapa de calor geográfico<br>Requiere integración con servicio de mapas</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Comparativa Temporal por Categoría -->
-            <div class="col-xl-4 col-lg-12 mb-3">
-                <div class="card h-100">
-                    <div class="card-header py-2">
-                        <h6 class="card-title mb-0">Comparativa Temporal</h6>
-                    </div>
-                    <div class="card-body py-2">
-                        <div style="height: 250px; position: relative;">
-                            <canvas id="graficaComparativa"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Tabla de Incidencias Recientes -->
         <div class="row">
@@ -494,6 +468,26 @@ const colors = {
     sage: '#9caf88'       // Verde salvia
 };
 
+// Función para formatear números a miles
+function formatToThousands(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Función para mostrar total en gráficas
+function showChartTotal(chartId, total) {
+    const chartContainer = document.getElementById(chartId).parentElement;
+    let totalElement = chartContainer.querySelector('.chart-total');
+    
+    if (!totalElement) {
+        totalElement = document.createElement('div');
+        totalElement.className = 'chart-total';
+        totalElement.style.cssText = 'position: absolute; top: 10px; right: 10px; background: #fff; border: 2px solid #28a745; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px; z-index: 1000;';
+        chartContainer.style.position = 'relative';
+        chartContainer.appendChild(totalElement);
+    }
+    totalElement.textContent = `Total: ${formatToThousands(total)}`;
+}
+
 // Inicialización del dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
@@ -574,8 +568,7 @@ function cargarDatosIniciales() {
         tendencia: <?= json_encode($tendencia_mensual ?? []) ?>,
         colonias: <?= json_encode($top_colonias ?? []) ?>,
         area_responsable: <?= json_encode($area_responsable ?? []) ?>,
-        generales: <?= json_encode($estadisticas_generales ?? []) ?>,
-        comparativa: <?= json_encode($comparativa_temporal ?? []) ?>
+        generales: <?= json_encode($estadisticas_generales ?? []) ?>
     };
     
     // Actualizar dashboard con datos iniciales
@@ -588,24 +581,93 @@ function cargarDatosIniciales() {
 
 // Inicialización de gráficos
 function initializeCharts() {
-    // Gráfico de Prioridad (Donut)
+    // Gráfico de Prioridad (Polar)
     charts.prioridad = new Chart(document.getElementById('graficaPrioridad'), {
-        type: 'doughnut',
+        type: 'polarArea',
         data: {
             labels: [],
             datasets: [{
                 data: [],
                 backgroundColor: [colors.danger, colors.warning, colors.primary],
-                borderWidth: 2,
+                borderWidth: 3,
                 borderColor: '#fff'
             }]
         },
+        plugins: [ChartDataLabels],
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: false
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    angleLines: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    align: 'center',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 13,
+                            weight: '500'
+                        },
+                        boxWidth: 15,
+                        boxHeight: 15,
+                        generateLabels: function(chart) {
+                            const chartData = chart.data;
+                            if (chartData.datasets[0].data.length === 0) {
+                                return [];
+                            }
+                            const total = chartData.datasets[0].data.reduce((sum, value) => sum + value, 0);
+                            return chartData.labels.map((label, index) => {
+                                const value = chartData.datasets[0].data[index];
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return {
+                                    text: `${label}: ${value} (${percentage}%)`,
+                                    fillStyle: chartData.datasets[0].backgroundColor[index],
+                                    strokeStyle: chartData.datasets[0].backgroundColor[index],
+                                    pointStyle: 'circle',
+                                    index: index
+                                };
+                            });
+                        }
+                    }
+                },
+                datalabels: {
+                    display: true,
+                    color: function(context) {
+                        // Usar color dinámico basado en el fondo para mejor contraste
+                        const bgColor = context.dataset.backgroundColor[context.dataIndex];
+                        return bgColor === colors.warning ? '#000' : '#fff';
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 16
+                    },
+                    formatter: function(value, context) {
+                        // Mostrar valor con formato mejorado
+                        return value > 0 ? value.toString() : '';
+                    },
+                    anchor: 'center',
+                    align: 'center',
+                    textStrokeColor: function(context) {
+                        // Agregar borde al texto para mejor legibilidad
+                        const bgColor = context.dataset.backgroundColor[context.dataIndex];
+                        return bgColor === colors.warning ? '#fff' : '#000';
+                    },
+                    textStrokeWidth: 1
                 }
             }
         }
@@ -758,47 +820,7 @@ function initializeCharts() {
         }
     });
 
-    // Gráfico Comparativo Temporal (Líneas múltiples)
-    charts.comparativa = new Chart(document.getElementById('graficaComparativa'), {
-        type: 'line',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            datasets: [
-                {
-                    label: 'Hardware',
-                    data: [5, 8, 6, 10, 9, 7],
-                    borderColor: colors.primary,
-                    backgroundColor: colors.primary + '20'
-                },
-                {
-                    label: 'Software',
-                    data: [8, 12, 10, 15, 13, 11],
-                    borderColor: colors.success,
-                    backgroundColor: colors.success + '20'
-                },
-                {
-                    label: 'Red',
-                    data: [3, 5, 4, 7, 6, 5],
-                    borderColor: colors.emerald,
-                    backgroundColor: colors.emerald + '20'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
+
 }
 
 
@@ -824,122 +846,215 @@ function updateChartsWithRealData(data) {
     
     // Actualizar gráfico de prioridad
     if (data.prioridad && data.prioridad.length > 0 && charts.prioridad) {
-        const labels = data.prioridad.map(item => item.prioridad || item.nombre_prioridad || 'Sin prioridad');
-        const valores = data.prioridad.map(item => parseInt(item.total) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.prioridad.filter(item => parseInt(item.total) > 0);
         
-        console.log('Datos de prioridad - Labels:', labels, 'Valores:', valores);
-        
-        charts.prioridad.data.labels = labels;
-        charts.prioridad.data.datasets[0].data = valores;
-        charts.prioridad.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.prioridad || item.nombre_prioridad || 'Sin prioridad');
+            const valores = datosFiltrados.map(item => parseInt(item.total));
+            
+            console.log('Datos de prioridad filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.prioridad.data.labels = labels;
+            charts.prioridad.data.datasets[0].data = valores;
+            charts.prioridad.update();
+            
+            // Mostrar total en el gráfico de prioridad
+            const totalPrioridad = valores.reduce((sum, value) => sum + value, 0);
+            showChartTotal('graficaPrioridad', totalPrioridad);
+        } else {
+            // Si no hay datos relevantes, ocultar el gráfico o mostrar mensaje
+            charts.prioridad.data.labels = ['Sin datos'];
+            charts.prioridad.data.datasets[0].data = [0];
+            charts.prioridad.update();
+        }
     }
     
     // Actualizar gráfico de categorías
     if (data.categoria && data.categoria.length > 0 && charts.categoria) {
-        const labels = data.categoria.map(item => item.categoria || item.nombre_categoria || 'Sin categoría');
-        const valores = data.categoria.map(item => parseInt(item.total) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.categoria.filter(item => parseInt(item.total) > 0);
         
-        console.log('Datos de categoría - Labels:', labels, 'Valores:', valores);
-        
-        charts.categoria.data.labels = labels;
-        charts.categoria.data.datasets[0].data = valores;
-        charts.categoria.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.categoria || item.nombre_categoria || 'Sin categoría');
+            const valores = datosFiltrados.map(item => parseInt(item.total));
+            
+            console.log('Datos de categoría filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.categoria.data.labels = labels;
+            charts.categoria.data.datasets[0].data = valores;
+            charts.categoria.update();
+        } else {
+            charts.categoria.data.labels = ['Sin datos'];
+            charts.categoria.data.datasets[0].data = [0];
+            charts.categoria.update();
+        }
     }
     
     // Actualizar gráfico de tiempo por área
     if (data.tiempo_area && data.tiempo_area.length > 0 && charts.tiempoArea) {
-        const labels = data.tiempo_area.map(item => item.area || item.nombre_area || 'Sin área');
-        const valores = data.tiempo_area.map(item => parseFloat(item.tiempo_promedio) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.tiempo_area.filter(item => parseFloat(item.tiempo_promedio) > 0);
         
-        console.log('Datos de tiempo por área - Labels:', labels, 'Valores:', valores);
-        
-        charts.tiempoArea.data.labels = labels;
-        charts.tiempoArea.data.datasets[0].data = valores;
-        charts.tiempoArea.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.area || item.nombre_area || 'Sin área');
+            const valores = datosFiltrados.map(item => parseFloat(item.tiempo_promedio));
+            
+            console.log('Datos de tiempo por área filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.tiempoArea.data.labels = labels;
+            charts.tiempoArea.data.datasets[0].data = valores;
+            charts.tiempoArea.update();
+        } else {
+            charts.tiempoArea.data.labels = ['Sin datos'];
+            charts.tiempoArea.data.datasets[0].data = [0];
+            charts.tiempoArea.update();
+        }
     }
     
     // Actualizar gráfico de tendencia
     if (data.tendencia && data.tendencia.length > 0 && charts.tendencia) {
-        const labels = data.tendencia.map(item => item.mes || 'Sin fecha');
-        const valores = data.tendencia.map(item => parseInt(item.total) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.tendencia.filter(item => parseInt(item.total) > 0);
         
-        console.log('Datos de tendencia - Labels:', labels, 'Valores:', valores);
-        
-        charts.tendencia.data.labels = labels;
-        charts.tendencia.data.datasets[0].data = valores;
-        charts.tendencia.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.mes || 'Sin fecha');
+            const valores = datosFiltrados.map(item => parseInt(item.total));
+            
+            console.log('Datos de tendencia filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.tendencia.data.labels = labels;
+            charts.tendencia.data.datasets[0].data = valores;
+            charts.tendencia.update();
+        } else {
+            charts.tendencia.data.labels = ['Sin datos'];
+            charts.tendencia.data.datasets[0].data = [0];
+            charts.tendencia.update();
+        }
     }
     
     // Actualizar gráfico de colonias
     if (data.colonias && data.colonias.length > 0 && charts.colonias) {
-        const labels = data.colonias.map(item => item.colonia || 'Sin colonia');
-        const valores = data.colonias.map(item => parseInt(item.total) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.colonias.filter(item => parseInt(item.total) > 0);
         
-        console.log('Datos de colonias - Labels:', labels, 'Valores:', valores);
-        
-        charts.colonias.data.labels = labels;
-        charts.colonias.data.datasets[0].data = valores;
-        charts.colonias.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.colonia || 'Sin colonia');
+            const valores = datosFiltrados.map(item => parseInt(item.total));
+            
+            console.log('Datos de colonias filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.colonias.data.labels = labels;
+            charts.colonias.data.datasets[0].data = valores;
+            charts.colonias.update();
+        } else {
+            charts.colonias.data.labels = ['Sin datos'];
+            charts.colonias.data.datasets[0].data = [0];
+            charts.colonias.update();
+        }
     }
     
     // Actualizar gráfico de área responsable
     if (data.area_responsable && data.area_responsable.length > 0 && charts.areaResponsable) {
-        const labels = data.area_responsable.map(item => item.area || item.nombre_area || 'Sin área');
-        const valores = data.area_responsable.map(item => parseInt(item.total) || 0);
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.area_responsable.filter(item => parseInt(item.total) > 0);
         
-        console.log('Datos de área responsable - Labels:', labels, 'Valores:', valores);
-        
-        charts.areaResponsable.data.labels = labels;
-        charts.areaResponsable.data.datasets[0].data = valores;
-        charts.areaResponsable.update();
+        if (datosFiltrados.length > 0) {
+            const labels = datosFiltrados.map(item => item.area || item.nombre_area || 'Sin área');
+            const valores = datosFiltrados.map(item => parseInt(item.total));
+            
+            console.log('Datos de área responsable filtrados - Labels:', labels, 'Valores:', valores);
+            
+            charts.areaResponsable.data.labels = labels;
+            charts.areaResponsable.data.datasets[0].data = valores;
+            charts.areaResponsable.update();
+        } else {
+            charts.areaResponsable.data.labels = ['Sin datos'];
+            charts.areaResponsable.data.datasets[0].data = [0];
+            charts.areaResponsable.update();
+        }
     }
     
     // Actualizar gráfico comparativo
     if (data.comparativa && data.comparativa.length > 0 && charts.comparativa) {
         console.log('Datos de comparativa:', data.comparativa);
         
-        // Agrupar datos por categoría
-        const categorias = {};
-        data.comparativa.forEach(item => {
-            const nombreCategoria = item.categoria || item.nombre_categoria || 'Sin categoría';
-            if (!categorias[nombreCategoria]) {
-                categorias[nombreCategoria] = [];
-            }
-            categorias[nombreCategoria].push({
-                mes: item.mes || 'Sin fecha',
-                total: parseInt(item.total) || 0
-            });
-        });
+        // Filtrar datos con valores mayores a 0
+        const datosFiltrados = data.comparativa.filter(item => parseInt(item.total) > 0);
         
-        // Obtener todos los meses únicos
-        const meses = [...new Set(data.comparativa.map(item => item.mes))].sort();
-        
-        // Actualizar labels
-        charts.comparativa.data.labels = meses;
-        
-        // Actualizar datasets
-        charts.comparativa.data.datasets = [];
-        const colores = [colors.primary, colors.success, colors.accent, colors.forest, colors.info, colors.warning, colors.secondary];
-        let colorIndex = 0;
-        
-        Object.keys(categorias).forEach(categoria => {
-            const datos = meses.map(mes => {
-                const item = categorias[categoria].find(c => c.mes === mes);
-                return item ? item.total : 0;
+        if (datosFiltrados.length > 0) {
+            // Agrupar datos por categoría
+            const categorias = {};
+            datosFiltrados.forEach(item => {
+                const nombreCategoria = item.categoria || item.nombre_categoria || 'Sin categoría';
+                if (!categorias[nombreCategoria]) {
+                    categorias[nombreCategoria] = [];
+                }
+                categorias[nombreCategoria].push({
+                    mes: item.mes || 'Sin fecha',
+                    total: parseInt(item.total)
+                });
             });
             
-            charts.comparativa.data.datasets.push({
-                label: categoria,
-                data: datos,
-                borderColor: colores[colorIndex % colores.length],
-                backgroundColor: colores[colorIndex % colores.length] + '20',
-                tension: 0.4,
-                fill: false
+            // Filtrar categorías que tengan al menos un valor significativo
+            const categoriasRelevantes = {};
+            Object.keys(categorias).forEach(categoria => {
+                const totalCategoria = categorias[categoria].reduce((sum, item) => sum + item.total, 0);
+                if (totalCategoria > 0) {
+                    categoriasRelevantes[categoria] = categorias[categoria];
+                }
             });
-            colorIndex++;
-        });
-        
-        charts.comparativa.update();
+            
+            if (Object.keys(categoriasRelevantes).length > 0) {
+                // Obtener todos los meses únicos de datos filtrados
+                const meses = [...new Set(datosFiltrados.map(item => item.mes))].sort();
+                
+                // Actualizar labels
+                charts.comparativa.data.labels = meses;
+                
+                // Actualizar datasets
+                charts.comparativa.data.datasets = [];
+                const colores = [colors.primary, colors.success, colors.accent, colors.forest, colors.info, colors.warning, colors.secondary];
+                let colorIndex = 0;
+                
+                Object.keys(categoriasRelevantes).forEach(categoria => {
+                    const datos = meses.map(mes => {
+                        const item = categoriasRelevantes[categoria].find(c => c.mes === mes);
+                        return item ? item.total : 0;
+                    });
+                    
+                    charts.comparativa.data.datasets.push({
+                        label: categoria,
+                        data: datos,
+                        borderColor: colores[colorIndex % colores.length],
+                        backgroundColor: colores[colorIndex % colores.length] + '20',
+                        tension: 0.4,
+                        fill: false
+                    });
+                    colorIndex++;
+                });
+                
+                charts.comparativa.update();
+            } else {
+                charts.comparativa.data.labels = ['Sin datos'];
+                charts.comparativa.data.datasets = [{
+                    label: 'Sin datos',
+                    data: [0],
+                    borderColor: colors.secondary,
+                    backgroundColor: colors.secondary + '20'
+                }];
+                charts.comparativa.update();
+            }
+        } else {
+            charts.comparativa.data.labels = ['Sin datos'];
+            charts.comparativa.data.datasets = [{
+                label: 'Sin datos',
+                data: [0],
+                borderColor: colors.secondary,
+                backgroundColor: colors.secondary + '20'
+            }];
+            charts.comparativa.update();
+        }
     }
 }
 
@@ -1020,6 +1135,132 @@ window.addEventListener('resize', function() {
     });
 });
 
+// Variables globales para el comparador de categorías
+let categoriasComparatorChart = null;
+let categoriasData = [];
+let selectedCategorias = [];
+
+// Función para mostrar el modal de comparación de categorías
+function showCategoriasComparator() {
+    // Cargar las categorías disponibles
+    fetch('<?= base_url('dashboard/getCategorias') ?>')
+    .then(response => response.json())
+    .then(data => {
+        categoriasData = data;
+        const selector = document.getElementById('categoriasComparatorSelector');
+        selector.innerHTML = '';
+        
+        data.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.id;
+            option.textContent = categoria.nombre;
+            selector.appendChild(option);
+        });
+        
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('categoriasModal'));
+        modal.show();
+    })
+    .catch(error => {
+        console.error('Error al cargar categorías:', error);
+    });
+}
+
+// Función para actualizar la gráfica comparativa de categorías
+function updateComparativaCategorias() {
+    const selector = document.getElementById('categoriasComparatorSelector');
+    selectedCategorias = Array.from(selector.selectedOptions).map(option => ({
+        id: option.value,
+        nombre: option.textContent
+    }));
+    
+    if (selectedCategorias.length === 0) {
+        alert('Por favor selecciona al menos una categoría para comparar.');
+        return;
+    }
+    
+    // Actualizar el contador en el botón
+    document.getElementById('categoriasSelectedCount').textContent = selectedCategorias.length;
+    
+    // Obtener datos de comparación
+    const categoriaIds = selectedCategorias.map(cat => cat.id);
+    const formData = new FormData();
+    formData.append('categoriaIds', JSON.stringify(categoriaIds));
+    
+    fetch('<?= base_url('dashboard/getComparacionCategorias') ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta de comparación de categorías:', data);
+        // Crear o actualizar la gráfica comparativa
+        const ctx = document.getElementById('categoriasComparatorChart').getContext('2d');
+        
+        if (categoriasComparatorChart) {
+            categoriasComparatorChart.destroy();
+        }
+        
+        categoriasComparatorChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: data.datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparación de Categorías Seleccionadas'
+                    },
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Actualizar también la gráfica principal con las categorías seleccionadas
+        updateCategoriaChart(selectedCategorias.map(cat => cat.id));
+    })
+    .catch(error => {
+        console.error('Error al obtener datos de comparación:', error);
+    });
+}
+
+// Función para actualizar la gráfica principal con filtro de categorías
+function updateCategoriaChart(categoriaIds = null) {
+    const formData = new FormData();
+    
+    if (categoriaIds && categoriaIds.length > 0) {
+        categoriaIds.forEach(id => {
+            formData.append('categorias[]', id);
+        });
+    }
+    
+    fetch('<?= base_url('dashboard/getIncidenciasPorCategoria') ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.data) {
+            categoria.data.labels = data.data.labels;
+            categoria.data.datasets[0].data = data.data.values;
+            categoria.update();
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar gráfica de categorías:', error);
+    });
+}
+
 // Funciones para el selector de dashboard
 function navigateToDashboard() {
     const selector = document.getElementById('dashboardSelector');
@@ -1048,3 +1289,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- Modal para comparar categorías -->
+<div class="modal fade" id="categoriasModal" tabindex="-1" aria-labelledby="categoriasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoriasModalLabel">Comparar Categorías de Incidencias</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Seleccionar Categorías a Comparar:</label>
+                    <select class="form-select" id="categoriasComparatorSelector" multiple>
+                        <!-- Las opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+                <canvas id="categoriasComparatorChart" width="250" height="120"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="updateComparativaCategorias()">Comparar</button>
+            </div>
+        </div>
+    </div>
+</div>

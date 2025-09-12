@@ -1188,26 +1188,36 @@ include(APPPATH . 'Views/incl/head-application.php');
 
         function updateSectoresChart(newData) {
             if (charts.sectores) {
-                // Generar colores dinámicamente para los nuevos datos
-                const colors = newData.map((_, index) => {
-                    return greenPalette[index % greenPalette.length];
-                });
+                // Filtrar datos con valores mayores a 0
+                const datosFiltrados = newData.filter(item => parseFloat(item.total_apoyos) > 0);
                 
-                charts.sectores.data.labels = newData.map(item => item.sector);
-                charts.sectores.data.datasets[0].data = newData.map(item => item.total_apoyos);
-                charts.sectores.data.datasets[0].backgroundColor = colors;
-                charts.sectores.data.datasets[0].borderColor = colors;
-                
-                // Actualizar los datos para los tooltips
-                charts.sectores.options.plugins.tooltip.callbacks.label = function(context) {
-                    const dataIndex = context.dataIndex;
-                    const apoyos = context.parsed.y;
-                    const eventos = newData[dataIndex].total_eventos;
-                    return [
-                        `Apoyos: ${formatToThousands(apoyos)}`,
-                        `Eventos: ${eventos}`
-                    ];
-                };
+                if (datosFiltrados.length > 0) {
+                    // Generar colores dinámicamente para los nuevos datos
+                    const colors = datosFiltrados.map((_, index) => {
+                        return greenPalette[index % greenPalette.length];
+                    });
+                    
+                    charts.sectores.data.labels = datosFiltrados.map(item => item.sector);
+                    charts.sectores.data.datasets[0].data = datosFiltrados.map(item => item.total_apoyos);
+                    charts.sectores.data.datasets[0].backgroundColor = colors;
+                    charts.sectores.data.datasets[0].borderColor = colors;
+                    
+                    // Actualizar los datos para los tooltips
+                    charts.sectores.options.plugins.tooltip.callbacks.label = function(context) {
+                        const dataIndex = context.dataIndex;
+                        const apoyos = context.parsed.y;
+                        const eventos = datosFiltrados[dataIndex].total_eventos;
+                        return [
+                            `Apoyos: ${formatToThousands(apoyos)}`,
+                            `Eventos: ${eventos}`
+                        ];
+                    };
+                } else {
+                    charts.sectores.data.labels = ['Sin datos'];
+                    charts.sectores.data.datasets[0].data = [0];
+                    charts.sectores.data.datasets[0].backgroundColor = ['#cccccc'];
+                    charts.sectores.data.datasets[0].borderColor = ['#cccccc'];
+                }
                 
                 charts.sectores.update();
             }
@@ -2101,15 +2111,23 @@ include(APPPATH . 'Views/incl/head-application.php');
             
             // Actualizar gráfica de apoyos por sector
             if (data.apoyos_por_sector_data && charts.apoyosPorSector) {
-                charts.apoyosPorSector.data.labels = data.apoyos_por_sector_data.map(item => item.sector);
-                charts.apoyosPorSector.data.datasets[0].data = data.apoyos_por_sector_data.map(item => parseToNumber(item.total_apoyos));
+                // Filtrar datos con valores mayores a 0
+                const datosFiltrados = data.apoyos_por_sector_data.filter(item => parseToNumber(item.total_apoyos) > 0);
                 
-                // Actualizar total en el contenedor
-                const total = data.apoyos_por_sector_data.reduce((sum, item) => sum + parseToNumber(item.total_apoyos), 0);
-                const chartContainer = document.querySelector('#apoyosPorSectorChart').closest('.card-body');
-                const totalElement = chartContainer.querySelector('.chart-total');
-                if (totalElement) {
-                    totalElement.textContent = `Total: ${formatToThousands(total)}`;
+                if (datosFiltrados.length > 0) {
+                    charts.apoyosPorSector.data.labels = datosFiltrados.map(item => item.sector);
+                    charts.apoyosPorSector.data.datasets[0].data = datosFiltrados.map(item => parseToNumber(item.total_apoyos));
+                    
+                    // Actualizar total en el contenedor
+                    const total = datosFiltrados.reduce((sum, item) => sum + parseToNumber(item.total_apoyos), 0);
+                    const chartContainer = document.querySelector('#apoyosPorSectorChart').closest('.card-body');
+                    const totalElement = chartContainer.querySelector('.chart-total');
+                    if (totalElement) {
+                        totalElement.textContent = `Total: ${formatToThousands(total)}`;
+                    }
+                } else {
+                    charts.apoyosPorSector.data.labels = ['Sin datos'];
+                    charts.apoyosPorSector.data.datasets[0].data = [0];
                 }
                 
                 charts.apoyosPorSector.update();
@@ -2140,39 +2158,48 @@ include(APPPATH . 'Views/incl/head-application.php');
             }
             
             if (data.eventos_por_sector_data && charts.eventosPorSector) {
-                const total = data.eventos_por_sector_data.reduce((sum, d) => sum + parseToNumber(d.total_eventos), 0);
+                // Filtrar datos con valores mayores a 0
+                const datosFiltrados = data.eventos_por_sector_data.filter(item => parseToNumber(item.total_eventos) > 0);
                 
-                // Generar colores dinámicamente para los nuevos datos
-                const colors = data.eventos_por_sector_data.map((_, index) => {
-                    return greenPalette[index % greenPalette.length];
-                });
-                
-                charts.eventosPorSector.data.labels = data.eventos_por_sector_data.map(item => item.sector);
-                charts.eventosPorSector.data.datasets[0].data = data.eventos_por_sector_data.map(item => item.total_eventos);
-                charts.eventosPorSector.data.datasets[0].backgroundColor = colors;
-                
-                // Actualizar las funciones de callback con los nuevos datos
-                charts.eventosPorSector.options.plugins.legend.labels.generateLabels = function(chart) {
-                    const chartData = chart.data;
-                    return chartData.labels.map((label, index) => {
-                        const value = chartData.datasets[0].data[index];
-                        const percentage = ((value / total) * 100).toFixed(0);
-                        return {
-                            text: `${label} (${percentage}%)`,
-                            fillStyle: chartData.datasets[0].backgroundColor[index],
-                            strokeStyle: chartData.datasets[0].backgroundColor[index],
-                            pointStyle: 'circle',
-                            index: index
-                        };
+                if (datosFiltrados.length > 0) {
+                    const total = datosFiltrados.reduce((sum, d) => sum + parseToNumber(d.total_eventos), 0);
+                    
+                    // Generar colores dinámicamente para los nuevos datos
+                    const colors = datosFiltrados.map((_, index) => {
+                        return greenPalette[index % greenPalette.length];
                     });
-                };
+                    
+                    charts.eventosPorSector.data.labels = datosFiltrados.map(item => item.sector);
+                    charts.eventosPorSector.data.datasets[0].data = datosFiltrados.map(item => item.total_eventos);
+                    charts.eventosPorSector.data.datasets[0].backgroundColor = colors;
                 
-                charts.eventosPorSector.options.plugins.tooltip.callbacks.label = function(context) {
-                    const index = context.dataIndex;
-                    const item = data.eventos_por_sector_data[index];
-                    const percentage = ((item.total_eventos / total) * 100).toFixed(1);
-                    return `${item.sector}: ${formatToThousands(item.total_eventos)} (${percentage}%)`;
-                };
+                    // Actualizar las funciones de callback con los nuevos datos
+                    charts.eventosPorSector.options.plugins.legend.labels.generateLabels = function(chart) {
+                        const chartData = chart.data;
+                        return chartData.labels.map((label, index) => {
+                            const value = chartData.datasets[0].data[index];
+                            const percentage = ((value / total) * 100).toFixed(0);
+                            return {
+                                text: `${label} (${percentage}%)`,
+                                fillStyle: chartData.datasets[0].backgroundColor[index],
+                                strokeStyle: chartData.datasets[0].backgroundColor[index],
+                                pointStyle: 'circle',
+                                index: index
+                            };
+                        });
+                    };
+                    
+                    charts.eventosPorSector.options.plugins.tooltip.callbacks.label = function(context) {
+                        const index = context.dataIndex;
+                        const item = datosFiltrados[index];
+                        const percentage = ((item.total_eventos / total) * 100).toFixed(1);
+                        return `${item.sector}: ${formatToThousands(item.total_eventos)} (${percentage}%)`;
+                    };
+                } else {
+                    charts.eventosPorSector.data.labels = ['Sin datos'];
+                    charts.eventosPorSector.data.datasets[0].data = [0];
+                    charts.eventosPorSector.data.datasets[0].backgroundColor = ['#cccccc'];
+                }
                 
                 // Actualizar el elemento de total
                 const chartContainer = charts.eventosPorSector.canvas.parentElement;

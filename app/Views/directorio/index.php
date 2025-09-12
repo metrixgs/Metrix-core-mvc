@@ -251,16 +251,34 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label small text-muted fw-medium mb-1">Tags</label>
-                                    <select class="form-select form-select-sm" id="filtroTags" onchange="aplicarFiltros()">
-                                        <option value="">Todos los tags</option>
-                                        <?php if (isset($tags) && !empty($tags)): ?>
-                                            <?php foreach ($tags as $tag): ?>
-                                                <option value="<?= $tag['id'] ?>" <?= (isset($filtros['tags']) && $filtros['tags'] == $tag['id']) ? 'selected' : '' ?>>
-                                                    <?= esc($tag['tag']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </select>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100 text-start" type="button" id="filtroTagsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span id="selectedTagsText">Seleccionar tags...</span>
+                                        </button>
+                                        <div class="dropdown-menu p-3" style="min-width: 300px; max-height: 300px; overflow-y: auto;" onclick="event.stopPropagation();">
+                                            <div class="mb-2">
+                                                <input type="text" class="form-control form-control-sm" id="tagSearchInput" placeholder="Buscar tags..." autocomplete="off">
+                                            </div>
+                                            <div class="mb-2">
+                                                <button type="button" class="btn btn-link btn-sm p-0 me-2" onclick="selectAllTags()">Seleccionar todos</button>
+                                                <button type="button" class="btn btn-link btn-sm p-0" onclick="clearAllTags()">Limpiar</button>
+                                            </div>
+                                            <div id="tagsList">
+                                                <?php if (isset($tags) && !empty($tags)): ?>
+                                                    <?php foreach ($tags as $tag): ?>
+                                                        <div class="form-check tag-item" data-tag-name="<?= strtolower(esc($tag['tag'])) ?>">
+                                                            <input class="form-check-input tag-checkbox" type="checkbox" value="<?= $tag['id'] ?>" id="tag_<?= $tag['id'] ?>" onchange="updateSelectedTags()">
+                                                            <label class="form-check-label" for="tag_<?= $tag['id'] ?>">
+                                                                <?= esc($tag['tag']) ?>
+                                                            </label>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <div class="text-muted small">No hay tags disponibles</div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label small text-muted fw-medium mb-1">Acciones</label>
@@ -455,12 +473,11 @@
         
         const filtroTipoEl = document.getElementById('filtroTipo');
         const filtroResidenciaEl = document.getElementById('filtroResidencia');
-        const filtroTagsEl = document.getElementById('filtroTags');
         
         const filtroTipo = filtroTipoEl ? filtroTipoEl.value : '';
         const filtroResidencia = filtroResidenciaEl ? filtroResidenciaEl.value : '';
         const filtroLider = document.getElementById('filtroLider') ? document.getElementById('filtroLider').value : '';
-        const filtroTags = filtroTagsEl ? filtroTagsEl.value : '';
+        const filtroTags = selectedTags.length > 0 ? selectedTags.join(',') : '';
         
         // Mostrar indicador de carga
         mostrarCargando(true);
@@ -500,12 +517,13 @@
         const filtroTipo = document.getElementById('filtroTipo');
         const filtroResidencia = document.getElementById('filtroResidencia');
         const filtroLider = document.getElementById('filtroLider');
-        const filtroTags = document.getElementById('filtroTags');
         
         if (filtroTipo) filtroTipo.value = '';
         if (filtroResidencia) filtroResidencia.value = '';
         if (filtroLider) filtroLider.value = '';
-        if (filtroTags) filtroTags.value = '';
+        
+        // Limpiar tags seleccionados
+        clearAllTags();
         
         // Limpiar residencias
         if (filtroResidencia) {
@@ -561,7 +579,7 @@
                 let tagsHtml = '—';
                 if (c.tags_asociados) {
                     const tags = c.tags_asociados.split(', ');
-                    tagsHtml = tags.map(tag => `<span class="badge bg-info text-white me-1 mb-1">${tag}</span>`).join('');
+                    tagsHtml = tags.map(tag => `<span class="badge bg-success text-white me-1 mb-1">${tag}</span>`).join('');
                 }
                 
                 html += `
@@ -805,6 +823,62 @@
 
 
 
+    // Funciones para el selector múltiple de tags
+    let selectedTags = [];
+
+    function updateSelectedTags() {
+        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
+        selectedTags = Array.from(checkboxes).map(cb => cb.value);
+        
+        const selectedTagsText = document.getElementById('selectedTagsText');
+        if (selectedTagsText) {
+            if (selectedTags.length === 0) {
+                selectedTagsText.textContent = 'Seleccionar tags...';
+            } else if (selectedTags.length === 1) {
+                const tagLabel = document.querySelector(`label[for="tag_${selectedTags[0]}"]`);
+                selectedTagsText.textContent = tagLabel ? tagLabel.textContent : '1 tag seleccionado';
+            } else {
+                selectedTagsText.textContent = `${selectedTags.length} tags seleccionados`;
+            }
+        }
+        
+        // Aplicar filtros automáticamente
+        aplicarFiltros();
+    }
+
+    function selectAllTags() {
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        checkboxes.forEach(cb => {
+            if (!cb.checked) {
+                cb.checked = true;
+            }
+        });
+        updateSelectedTags();
+    }
+
+    function clearAllTags() {
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelectedTags();
+    }
+
+    function filterTags() {
+        const searchInput = document.getElementById('tagSearchInput');
+        if (!searchInput) return;
+        
+        const searchTerm = searchInput.value.toLowerCase();
+        const tagItems = document.querySelectorAll('.tag-item');
+        
+        tagItems.forEach(item => {
+            const tagName = item.getAttribute('data-tag-name');
+            if (tagName && tagName.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
     // Inicializar filtros al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
         // Obtener parámetros de la URL
@@ -813,18 +887,31 @@
         // Establecer valores de filtros desde URL
         const filtroTipo = document.getElementById('filtroTipo');
         const filtroLider = document.getElementById('filtroLider');
-        const filtroTags = document.getElementById('filtroTags');
         
         if (params.get('tipo') && filtroTipo) {
             filtroTipo.value = params.get('tipo');
         }
         
-
+        // Configurar búsqueda de tags
+        const tagSearchInput = document.getElementById('tagSearchInput');
+        if (tagSearchInput) {
+            tagSearchInput.addEventListener('input', filterTags);
+        }
         
         // Cargar líderes
         cargarLideres();
-        if (params.get('tags') && filtroTags) {
-            filtroTags.value = params.get('tags');
+        
+        // Inicializar tags seleccionados desde URL
+        const tagsParam = params.get('tags');
+        if (tagsParam) {
+            const tagIds = tagsParam.split(',');
+            tagIds.forEach(tagId => {
+                const checkbox = document.getElementById(`tag_${tagId}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+            updateSelectedTags();
         }
         
         // Mostrar indicadores de filtros activos

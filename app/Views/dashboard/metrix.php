@@ -389,6 +389,7 @@ include(APPPATH . 'Views/incl/head-application.php');
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     
     <!-- Scripts de la aplicación -->
     <?php include(APPPATH . 'Views/incl/scripts-application.php'); ?>
@@ -408,15 +409,30 @@ include(APPPATH . 'Views/incl/head-application.php');
             setupEventListeners();
         });
 
+        // Función para mostrar total en gráficas
+        function showChartTotal(chartId, total) {
+            const chartContainer = document.getElementById(chartId).parentElement;
+            let totalElement = chartContainer.querySelector('.chart-total');
+            
+            if (!totalElement) {
+                totalElement = document.createElement('div');
+                totalElement.className = 'chart-total';
+                totalElement.style.cssText = 'position: absolute; top: 10px; right: 10px; background: #fff; border: 2px solid #06D001; border-radius: 15px; padding: 5px 10px; font-weight: bold; font-size: 12px; z-index: 1000;';
+                chartContainer.style.position = 'relative';
+                chartContainer.appendChild(totalElement);
+            }
+            totalElement.textContent = `Total: ${formatToThousands(total)}`;
+        }
+
         function initializeCharts() {
             // Gráfico de Género (Pie)
             const generoCtx = document.getElementById('generoChart').getContext('2d');
             generoChart = new Chart(generoCtx, {
                 type: 'pie',
                 data: {
-                    labels: initialGeneroData.map(item => item.GENERO),
+                    labels: initialGeneroData.map(item => item.genero),
                     datasets: [{
-                        data: initialGeneroData.map(item => item.total),
+                        data: initialGeneroData.map(item => parseFloat(item.total) || 0),
                         backgroundColor: ['#059212', '#06D001', '#9BEC00', '#F3FF90'],
                         borderWidth: 2
                     }]
@@ -425,11 +441,56 @@ include(APPPATH . 'Views/incl/head-application.php');
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, index) => {
+                                        const value = data.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label}: ${percentage}%`,
+                                            fillStyle: data.datasets[0].backgroundColor[index],
+                                            strokeStyle: data.datasets[0].backgroundColor[index],
+                                            pointStyle: 'circle',
+                                            index: index
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                return value;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                },
+                                afterBody: function(context) {
+                                    const total = context[0].dataset.data.reduce((a, b) => a + b, 0);
+                                    return `Total: ${total}`;
+                                }
+                            }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
+            
+            // Mostrar total para gráfico de género
+            const generoTotal = initialGeneroData.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+            showChartTotal('generoChart', generoTotal);
 
             // Gráfico de Edad (Polar)
             const edadCtx = document.getElementById('edadChart').getContext('2d');
@@ -438,7 +499,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                 data: {
                     labels: initialEdadData.map(item => item.rango_edad),
                     datasets: [{
-                        data: initialEdadData.map(item => item.total),
+                        data: initialEdadData.map(item => parseFloat(item.total) || 0),
                         backgroundColor: ['#059212', '#06D001', '#9BEC00', '#F3FF90', '#01b810'],
                         borderWidth: 2
                     }]
@@ -447,21 +508,66 @@ include(APPPATH . 'Views/incl/head-application.php');
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, index) => {
+                                        const value = data.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[index],
+                                            strokeStyle: data.datasets[0].backgroundColor[index],
+                                            pointStyle: 'circle',
+                                            index: index
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                return value;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                },
+                                afterBody: function(context) {
+                                    const total = context[0].dataset.data.reduce((a, b) => a + b, 0);
+                                    return `Total: ${total}`;
+                                }
+                            }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
+            
+            // Mostrar total para gráfico de edad
+            const edadTotal = initialEdadData.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+            showChartTotal('edadChart', edadTotal);
 
             // Gráfico de Municipios (Barras con border radius)
             const municipiosCtx = document.getElementById('municipiosChart').getContext('2d');
             municipiosChart = new Chart(municipiosCtx, {
                 type: 'bar',
                 data: {
-                    labels: initialMunicipiosData.map(item => item.MUNICIPIO),
+                    labels: initialMunicipiosData.map(item => item.colonia),
                     datasets: [{
                         label: 'Beneficiarios',
-                        data: initialMunicipiosData.map(item => item.total),
+                        data: initialMunicipiosData.map(item => parseFloat(item.total) || 0),
                         backgroundColor: '#06D001',
                         borderColor: '#059212',
                         borderWidth: 1,
@@ -474,6 +580,31 @@ include(APPPATH . 'Views/incl/head-application.php');
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                return value;
+                            },
+                            color: '#000',
+                            anchor: 'end',
+                            align: 'top',
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${context.parsed.y} (${percentage}%)`;
+                                },
+                                afterBody: function(context) {
+                                    const total = context[0].dataset.data.reduce((a, b) => a + b, 0);
+                                    return `Total: ${total}`;
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -481,7 +612,8 @@ include(APPPATH . 'Views/incl/head-application.php');
                             beginAtZero: true
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
 
             // Inicializar gráficos vacíos para comparativas
@@ -505,10 +637,52 @@ include(APPPATH . 'Views/incl/head-application.php');
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.datasets[0].data.length === 0) return [];
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, index) => {
+                                        const value = data.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[index],
+                                            strokeStyle: data.datasets[0].backgroundColor[index],
+                                            pointStyle: 'circle',
+                                            index: index
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                return value;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                },
+                                afterBody: function(context) {
+                                    const total = context[0].dataset.data.reduce((a, b) => a + b, 0);
+                                    return `Total: ${total}`;
+                                }
+                            }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
 
             // Gráfico DLs (Bubble)
@@ -564,15 +738,56 @@ include(APPPATH . 'Views/incl/head-application.php');
                         borderWidth: 2
                     }]
                 },
+                plugins: [ChartDataLabels],
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            display: true,
+                            labels: {
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    console.log('generateLabels inicial ejecutándose');
+                                    const chartData = chart.data;
+                                    if (chartData.datasets[0].data.length === 0) {
+                                        console.log('No hay datos, retornando array vacío');
+                                        return [];
+                                    }
+                                    const total = chartData.datasets[0].data.reduce((sum, value) => sum + value, 0);
+                                    console.log('Total en generateLabels inicial:', total);
+                                    return chartData.labels.map((label, index) => {
+                                        const value = chartData.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        console.log(`Label inicial: ${label}: ${value} (${percentage}%)`);
+                                        return {
+                                            text: `${label}: ${value} (${percentage}%)`,
+                                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                                            pointStyle: 'circle',
+                                            index: index
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: 'white',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            formatter: function(value, context) {
+                                return value;
+                            },
+                            anchor: 'center',
+                            align: 'center'
                         }
                     }
                 }
             });
+            console.log('Gráfico liderazgosChart inicializado:', liderazgosChart);
         }
 
         function setupEventListeners() {
@@ -593,10 +808,10 @@ include(APPPATH . 'Views/incl/head-application.php');
             })
             .then(response => response.json())
             .then(data => {
-                // Actualizar contadores
-                document.getElementById('totalBeneficiarios').textContent = data.total_beneficiarios;
-                document.getElementById('beneficiariosUnicos').textContent = data.beneficiarios_unicos;
-                document.getElementById('beneficiariosRecurrentes').textContent = data.beneficiarios_recurrentes;
+                // Actualizar contadores con formato de miles
+                document.getElementById('totalBeneficiarios').textContent = formatToThousands(data.total_beneficiarios);
+                document.getElementById('beneficiariosUnicos').textContent = formatToThousands(data.beneficiarios_unicos);
+                document.getElementById('beneficiariosRecurrentes').textContent = formatToThousands(data.beneficiarios_recurrentes);
 
                 // Actualizar gráficos
                 updateGeneroChart(data.genero_data);
@@ -608,20 +823,88 @@ include(APPPATH . 'Views/incl/head-application.php');
         }
 
         function updateGeneroChart(data) {
-            generoChart.data.labels = data.map(item => item.GENERO);
-            generoChart.data.datasets[0].data = data.map(item => item.total);
-            generoChart.update();
+            // Filtrar datos con valores mayores a 0
+            const datosFiltrados = data.filter(item => parseFloat(item.total) > 0);
+            
+            if (datosFiltrados.length > 0) {
+                generoChart.data.labels = datosFiltrados.map(item => item.genero);
+                generoChart.data.datasets[0].data = datosFiltrados.map(item => parseFloat(item.total));
+                
+                // Actualizar leyenda con porcentajes
+                const total = datosFiltrados.reduce((sum, item) => sum + parseFloat(item.total), 0);
+                generoChart.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    return chartData.labels.map((label, index) => {
+                        const value = chartData.datasets[0].data[index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return {
+                            text: `${label} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                generoChart.update();
+                
+                // Actualizar total visible
+                showChartTotal('generoChart', total);
+            } else {
+                generoChart.data.labels = ['Sin datos'];
+                generoChart.data.datasets[0].data = [0];
+                generoChart.update();
+            }
         }
 
         function updateEdadChart(data) {
-            edadChart.data.labels = data.map(item => item.rango_edad);
-            edadChart.data.datasets[0].data = data.map(item => item.total);
-            edadChart.update();
+            // Filtrar datos con valores mayores a 0
+            const datosFiltrados = data.filter(item => parseFloat(item.total) > 0);
+            
+            if (datosFiltrados.length > 0) {
+                edadChart.data.labels = datosFiltrados.map(item => item.rango_edad);
+                edadChart.data.datasets[0].data = datosFiltrados.map(item => parseFloat(item.total));
+                
+                // Actualizar leyenda con porcentajes
+                const total = datosFiltrados.reduce((sum, item) => sum + parseFloat(item.total), 0);
+                edadChart.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    return chartData.labels.map((label, index) => {
+                        const value = chartData.datasets[0].data[index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return {
+                            text: `${label} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                edadChart.update();
+                
+                // Actualizar total visible
+                showChartTotal('edadChart', total);
+            } else {
+                edadChart.data.labels = ['Sin datos'];
+                edadChart.data.datasets[0].data = [0];
+                edadChart.update();
+            }
         }
 
         function updateMunicipiosChart(data) {
-            municipiosChart.data.labels = data.map(item => item.MUNICIPIO);
-            municipiosChart.data.datasets[0].data = data.map(item => item.total);
+            // Filtrar datos con valores mayores a 0
+            const datosFiltrados = data.filter(item => parseFloat(item.total) > 0);
+            
+            if (datosFiltrados.length > 0) {
+                municipiosChart.data.labels = datosFiltrados.map(item => item.colonia);
+                municipiosChart.data.datasets[0].data = datosFiltrados.map(item => parseFloat(item.total));
+            } else {
+                municipiosChart.data.labels = ['Sin datos'];
+                municipiosChart.data.datasets[0].data = [0];
+            }
             municipiosChart.update();
         }
 
@@ -630,8 +913,8 @@ include(APPPATH . 'Views/incl/head-application.php');
             tbody.innerHTML = '';
             data.forEach(seccion => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = seccion.SECCION;
-                row.insertCell(1).textContent = seccion.total;
+                row.insertCell(0).textContent = seccion.seccion;
+                row.insertCell(1).textContent = formatToThousands(seccion.total);
             });
         }
 
@@ -652,9 +935,42 @@ include(APPPATH . 'Views/incl/head-application.php');
             })
             .then(response => response.json())
             .then(data => {
-                dfsChart.data.labels = data.map(item => `DF ${item.DISTRITO_FEDERAL}`);
-                dfsChart.data.datasets[0].data = data.map(item => item.total);
-                dfsChart.update();
+                // Filtrar datos con valores mayores a 0
+                const datosFiltrados = data.filter(item => parseFloat(item.total) > 0);
+                
+                if (datosFiltrados.length > 0) {
+                    dfsChart.data.labels = datosFiltrados.map(item => item.distrito_l);
+                    dfsChart.data.datasets[0].data = datosFiltrados.map(item => parseFloat(item.total));
+                    
+                    // Asignar colores específicos a cada distrito
+                    const colors = ['#059212', '#06D001', '#9BEC00', '#F3FF90', '#01b810', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107'];
+                    dfsChart.data.datasets[0].backgroundColor = datosFiltrados.map((item, index) => colors[index % colors.length]);
+                    
+                    // Actualizar leyenda con nombres de distritos y colores
+                    const total = datosFiltrados.reduce((sum, item) => sum + parseFloat(item.total), 0);
+                dfsChart.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    if (chartData.datasets[0].data.length === 0) return [];
+                    return chartData.labels.map((label, index) => {
+                        const value = chartData.datasets[0].data[index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return {
+                            text: `${label}: ${value} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                    dfsChart.update();
+                } else {
+                    dfsChart.data.labels = ['Sin datos'];
+                    dfsChart.data.datasets[0].data = [0];
+                    dfsChart.data.datasets[0].backgroundColor = ['#cccccc'];
+                    dfsChart.update();
+                }
             })
             .catch(error => console.error('Error:', error));
         }
@@ -706,9 +1022,68 @@ include(APPPATH . 'Views/incl/head-application.php');
             })
             .then(response => response.json())
             .then(data => {
-                liderazgosChart.data.labels = data.map(item => item.LIDERAZGO);
-                liderazgosChart.data.datasets[0].data = data.map(item => item.total);
-                liderazgosChart.update();
+                // Filtrar datos con valores mayores a 0
+                const datosFiltrados = data.filter(item => parseFloat(item.total) > 0);
+                
+                if (datosFiltrados.length > 0) {
+                    liderazgosChart.data.labels = datosFiltrados.map(item => item.liderazgo);
+                    liderazgosChart.data.datasets[0].data = datosFiltrados.map(item => parseFloat(item.total));
+                    
+                    // Asignar colores específicos a cada liderazgo
+                    const colors = ['#059212', '#06D001', '#9BEC00', '#F3FF90', '#01b810', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107'];
+                    liderazgosChart.data.datasets[0].backgroundColor = datosFiltrados.map((item, index) => colors[index % colors.length]);
+                    
+                    // Actualizar leyenda con valores fijos y porcentajes
+                    const total = datosFiltrados.reduce((sum, item) => sum + parseFloat(item.total), 0);
+                liderazgosChart.options.plugins.legend.labels.generateLabels = function(chart) {
+                    const chartData = chart.data;
+                    return chartData.labels.map((label, index) => {
+                        const value = chartData.datasets[0].data[index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return {
+                            text: `${label}: ${value} (${percentage}%)`,
+                            fillStyle: chartData.datasets[0].backgroundColor[index],
+                            strokeStyle: chartData.datasets[0].backgroundColor[index],
+                            pointStyle: 'circle',
+                            index: index
+                        };
+                    });
+                };
+                
+                // Configurar tooltips para mostrar valores fijos
+                liderazgosChart.options.plugins.tooltip = {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                };
+                
+                // Configurar etiquetas de datos dentro de la gráfica
+                liderazgosChart.options.plugins.datalabels = {
+                    display: true,
+                    color: 'white',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    },
+                    formatter: function(value, context) {
+                        return value;
+                    },
+                    anchor: 'center',
+                    align: 'center'
+                };
+                
+                    liderazgosChart.update();
+                } else {
+                    liderazgosChart.data.labels = ['Sin datos'];
+                    liderazgosChart.data.datasets[0].data = [0];
+                    liderazgosChart.data.datasets[0].backgroundColor = ['#cccccc'];
+                    liderazgosChart.update();
+                }
             })
             .catch(error => console.error('Error:', error));
         }
@@ -738,8 +1113,22 @@ include(APPPATH . 'Views/incl/head-application.php');
                             y: {
                                 beginAtZero: true
                             }
+                        },
+                        plugins: {
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                formatter: function(value) {
+                                    return value;
+                                },
+                                color: '#000',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
             }
         }
@@ -761,11 +1150,21 @@ include(APPPATH . 'Views/incl/head-application.php');
             })
             .then(response => response.json())
             .then(data => {
-                seccionesComparatorChart.data.labels = data.map(item => `Sección ${item.SECCION}`);
-                seccionesComparatorChart.data.datasets[0].data = data.map(item => item.total);
+                seccionesComparatorChart.data.labels = data.map(item => `Sección ${item.seccion}`);
+                seccionesComparatorChart.data.datasets[0].data = data.map(item => parseFloat(item.total) || 0);
                 seccionesComparatorChart.update();
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        // Función para formatear valores con separadores de miles
+        function formatToThousands(value) {
+            // Convertir a número si es string
+            const num = typeof value === 'string' ? parseFloat(value) : value;
+            // Verificar que sea un número válido
+            if (isNaN(num)) return '0';
+            // Formatear con comas como separadores de miles
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
         // Función para animar contadores
@@ -784,7 +1183,7 @@ include(APPPATH . 'Views/incl/head-application.php');
                         current = target;
                         clearInterval(timer);
                     }
-                    counter.textContent = Math.floor(current).toLocaleString();
+                    counter.textContent = formatToThousands(Math.floor(current));
                 }, 16);
             });
         }

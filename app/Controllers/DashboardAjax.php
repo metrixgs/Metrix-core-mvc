@@ -197,4 +197,137 @@ class DashboardAjax extends BaseController {
             'fin' => $fin->format('Y-m-d')
         ];
     }
+
+    public function getCategorias() {
+        // Verificar que sea una petición AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        try {
+            $categoriasModel = new \App\Models\CategoriasModel();
+            $categorias = $categoriasModel->obtenerCategorias();
+            
+            return $this->response->setJSON($categorias);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['error' => 'Error al obtener categorías: ' . $e->getMessage()]);
+        }
+    }
+
+    public function getComparacionCategorias() {
+        // Verificar que sea una petición AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        try {
+            $categoriaIds = $this->request->getPost('categoriaIds') ?? [];
+            
+            // Decodificar el JSON si es necesario
+            if (is_string($categoriaIds)) {
+                $categoriaIds = json_decode($categoriaIds, true);
+            }
+            
+            log_message('debug', 'getComparacionCategorias - categoriaIds recibidos: ' . print_r($categoriaIds, true));
+            
+            if (empty($categoriaIds)) {
+                return $this->response->setJSON(['error' => 'No se proporcionaron categorías']);
+            }
+            
+            // Verificar que categoriaIds sea un array
+            if (!is_array($categoriaIds)) {
+                $categoriaIds = [$categoriaIds];
+            }
+
+            $fecha_inicio = $this->request->getPost('fecha_inicio');
+            $fecha_fin = $this->request->getPost('fecha_fin');
+            $periodo = $this->request->getPost('periodo');
+
+            // Calcular fechas según el período si no se proporcionan fechas específicas
+            if (!$fecha_inicio || !$fecha_fin) {
+                $fechas = $this->calcularFechasPorPeriodo($periodo ?: 'mes');
+                $fecha_inicio = $fechas['inicio'];
+                $fecha_fin = $fechas['fin'];
+            }
+
+            // Obtener datos de comparación
+            $datos = $this->tickets->obtenerComparacionCategorias($categoriaIds, $fecha_inicio, $fecha_fin);
+            
+            return $this->response->setJSON($datos);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['error' => 'Error al obtener comparación: ' . $e->getMessage()]);
+        }
+    }
+
+    public function verificarDatos() {
+        // Verificar que sea una petición AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        try {
+            // Verificar si hay datos en la tabla de tickets
+            $totalTickets = $this->tickets->countAll();
+            
+            // Obtener información de la estructura de la tabla
+            $db = \Config\Database::connect();
+            $fields = $db->getFieldData('tbl_tickets');
+            
+            $estructura = [];
+            foreach ($fields as $field) {
+                $estructura[] = [
+                    'name' => $field->name,
+                    'type' => $field->type,
+                    'max_length' => $field->max_length,
+                    'nullable' => $field->nullable
+                ];
+            }
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'total_tickets' => $totalTickets,
+                'estructura_tabla' => $estructura
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'error' => 'Error al verificar datos: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getIncidenciasPorCategoria() {
+        // Verificar que sea una petición AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        try {
+            $categoriaIds = $this->request->getPost('categorias');
+            $fecha_inicio = $this->request->getPost('fecha_inicio');
+            $fecha_fin = $this->request->getPost('fecha_fin');
+            $periodo = $this->request->getPost('periodo');
+
+            // Calcular fechas según el período si no se proporcionan fechas específicas
+            if (!$fecha_inicio || !$fecha_fin) {
+                $fechas = $this->calcularFechasPorPeriodo($periodo ?: 'mes');
+                $fecha_inicio = $fechas['inicio'];
+                $fecha_fin = $fechas['fin'];
+            }
+
+            // Convertir categoriaIds a array si viene como string
+            $categoriaIdsArray = null;
+            if ($categoriaIds) {
+                $categoriaIdsArray = explode(',', $categoriaIds);
+            }
+
+            // Obtener datos filtrados por categorías
+            $datos = $this->tickets->obtenerTicketsPorCategoriaFiltrado($fecha_inicio, $fecha_fin, $categoriaIdsArray);
+            
+            return $this->response->setJSON($datos);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['error' => 'Error al obtener incidencias: ' . $e->getMessage()]);
+        }
+    }
 }

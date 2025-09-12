@@ -161,9 +161,29 @@ class Directorio extends BaseController
             $builder->where('directorio.id_lider', $filtros['lider']);
         }
 
-        // Filtro por tags
+        // Filtro por tags (múltiples) - Operación AND: debe tener TODOS los tags seleccionados
         if (!empty($filtros['tags'])) {
-            $builder->where('tags.id', $filtros['tags']);
+            $tagIds = explode(',', $filtros['tags']);
+            $tagIds = array_map('trim', $tagIds);
+            $tagIds = array_filter($tagIds, 'is_numeric');
+            
+            if (!empty($tagIds)) {
+                // Para múltiples tags, usar subconsulta para asegurar que tenga TODOS los tags
+                if (count($tagIds) > 1) {
+                    $builder->where(
+                        "directorio.id IN (
+                            SELECT dt.directorio_id 
+                            FROM directorio_tags dt 
+                            WHERE dt.tag_id IN (" . implode(',', $tagIds) . ")
+                            GROUP BY dt.directorio_id 
+                            HAVING COUNT(DISTINCT dt.tag_id) = " . count($tagIds) . "
+                        )"
+                    );
+                } else {
+                    // Para un solo tag, usar la lógica original
+                    $builder->whereIn('tags.id', $tagIds);
+                }
+            }
         }
         
         return $builder;
@@ -667,6 +687,9 @@ class Directorio extends BaseController
 
            // Si la operación fue exitosa (inserción o actualización), procesar tags
            if ($citizenId) {
+               // Determinar si es una actualización basándose en si el ciudadano ya existía
+               $isUpdate = ($existingCitizen !== null);
+               
                // Lógica para generar y asociar tags
                $tagsToAssociate = [];
 

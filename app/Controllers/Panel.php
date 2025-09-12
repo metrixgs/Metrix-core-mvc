@@ -80,7 +80,6 @@ class Panel extends BaseController {
             $data['top_colonias'] = $this->tickets->obtenerTop10Colonias();
             $data['area_responsable'] = $this->tickets->obtenerTicketsPorAreaResponsable();
             $data['estadisticas_generales'] = $this->tickets->obtenerEstadisticasGenerales();
-            $data['comparativa_temporal'] = $this->tickets->obtenerComparativaTemporalPorCategoria();
         } catch (\Exception $e) {
             # En caso de error, usar datos vacíos
             $data['estadisticas_prioridad'] = [];
@@ -90,7 +89,6 @@ class Panel extends BaseController {
             $data['top_colonias'] = [];
             $data['area_responsable'] = [];
             $data['estadisticas_generales'] = [];
-            $data['comparativa_temporal'] = [];
         }
         
         # Obtenemos todas las notificaciones por usuario...

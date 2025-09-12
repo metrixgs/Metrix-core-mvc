@@ -15,9 +15,7 @@ class TicketsModel extends Model {
         'cliente_id', 'categoria_id', 'usuario_id', 'campana_id', 'identificador', 'titulo', 'descripcion',
         'prioridad', 'latitud', 'longitud', 'estado_p', 'estado', 'municipio', 'colonia', 'df', 'dl',
         'seccion_electoral', 'codigo_postal', 'direccion_completa', 'direccion_solicitante', 'mismo_domicilio',
-        'fecha_creacion', 'fecha_cierre', 'fecha_vencimiento',
-        'ronda_id', 'tipo_id', 'cuenta_id', 'area_id', 'nombreCiudadano', 'correoCiudadano', 'telefonoCiudadano',
-        'encuesta_contestada', 'tipo_ticket_id', 'status'
+        'fecha_creacion', 'fecha_cierre', 'fecha_vencimiento'
     ];
 
  public function obtenerTickets() {
@@ -199,6 +197,37 @@ class TicketsModel extends Model {
         return $query->findAll();
     }
 
+    public function obtenerTicketsPorCategoriaFiltrado($fecha_inicio = null, $fecha_fin = null, $categoriaIds = null) {
+        $query = $this->select('tbl_categorias.nombre as categoria, COUNT(*) as total')
+                      ->join('tbl_categorias', 'tbl_tickets.categoria_id = tbl_categorias.id_categoria', 'left')
+                      ->groupBy('tbl_categorias.nombre');
+        
+        if ($fecha_inicio && $fecha_fin) {
+            $query->where('tbl_tickets.fecha_creacion >=', $fecha_inicio)
+                  ->where('tbl_tickets.fecha_creacion <=', $fecha_fin);
+        }
+        
+        if ($categoriaIds && is_array($categoriaIds)) {
+            $query->whereIn('tbl_categorias.id_categoria', $categoriaIds);
+        }
+        
+        $result = $query->findAll();
+        
+        // Formatear datos para Chart.js
+        $labels = [];
+        $values = [];
+        
+        foreach ($result as $row) {
+            $labels[] = $row['categoria'];
+            $values[] = (int)$row['total'];
+        }
+        
+        return [
+            'labels' => $labels,
+            'values' => $values
+        ];
+    }
+
     public function obtenerTiempoPromedioPorArea($fecha_inicio = null, $fecha_fin = null) {
         $query = $this->select('tbl_areas.nombre as area, 
                                AVG(TIMESTAMPDIFF(HOUR, tbl_tickets.fecha_creacion, 
@@ -294,6 +323,72 @@ class TicketsModel extends Model {
         }
         
         return $query->findAll();
+    }
+
+    public function obtenerComparacionCategorias($categoriaIds, $fecha_inicio = null, $fecha_fin = null) {
+        $categoriasModel = new \App\Models\CategoriasModel();
+        $categorias = $categoriasModel->whereIn('id_categoria', $categoriaIds)->findAll();
+        
+        $datasets = [];
+        $labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        $colors = [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 205, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)',
+            'rgba(199, 199, 199, 0.8)',
+            'rgba(83, 102, 255, 0.8)'
+        ];
+        
+        foreach ($categorias as $index => $categoria) {
+            // Primero verificar si hay tickets para esta categoría
+            $totalTickets = $this->where('categoria_id', $categoria['id_categoria'])->countAllResults(false);
+            
+            if ($totalTickets > 0) {
+                $query = $this->select('MONTH(fecha_creacion) as mes, COUNT(*) as total')
+                              ->where('categoria_id', $categoria['id_categoria'])
+                              ->groupBy('MONTH(fecha_creacion)')
+                              ->orderBy('mes', 'ASC');
+                
+                if ($fecha_inicio && $fecha_fin) {
+                    $query->where('fecha_creacion >=', $fecha_inicio)
+                          ->where('fecha_creacion <=', $fecha_fin);
+                } else {
+                    // Si no hay fechas específicas, usar el año actual
+                    $query->where('YEAR(fecha_creacion)', date('Y'));
+                }
+                
+                $resultados = $query->findAll();
+                
+                // Inicializar datos con ceros para todos los meses
+                $data = array_fill(0, 12, 0);
+                
+                // Llenar con los datos reales
+                foreach ($resultados as $resultado) {
+                    $data[$resultado['mes'] - 1] = (int)$resultado['total'];
+                }
+            } else {
+                // Si no hay tickets, llenar con ceros
+                $data = array_fill(0, 12, 0);
+            }
+            
+            $datasets[] = [
+                'label' => $categoria['nombre'],
+                'data' => $data,
+                'backgroundColor' => $colors[$index % count($colors)],
+                'borderColor' => str_replace('0.8', '1', $colors[$index % count($colors)]),
+                'borderWidth' => 1
+            ];
+        }
+        
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets
+        ];
     }
 
 }
