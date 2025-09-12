@@ -315,7 +315,7 @@ class Rondas extends BaseController {
                         'correoCiudadano'       => $usuario['correo'] ?? '',
                         'telefonoCiudadano'     => $usuario['telefono'] ?? '',
                         'encuesta_contestada'   => 0,
-                        'tipo_ticket_id'        => 1, // Valor por defecto
+                        'tipo_ticket_id'        => 2, // Valor por defecto
                         'status'                => 'Pendiente', // Coincide con el ejemplo JSON
                     ];
                     $ticketId = $this->tickets->crearTicket($ticketData);
